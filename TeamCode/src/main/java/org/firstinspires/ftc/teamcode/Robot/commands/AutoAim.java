@@ -27,11 +27,10 @@ public class AutoAim extends CommandBase {
             double basePower = 0.5;
             double distanceAdjust = 0.02 * ty;
             double areaAdjust = -0.3 * (ta - 0.1);
+            final double MAX_VELOCITY = 6000;
 
-            double finalPower = basePower + distanceAdjust + areaAdjust;
-            finalPower = Math.max(0.0, Math.min(1.0, finalPower));
-
-            shooter.setPower(finalPower);
+            double shooterVelocity = MAX_VELOCITY * Math.max(0.0, Math.min(1.0, basePower + distanceAdjust + areaAdjust));
+            shooter.setVelocity(shooterVelocity);
         } else {
             shooter.stop();
         }
