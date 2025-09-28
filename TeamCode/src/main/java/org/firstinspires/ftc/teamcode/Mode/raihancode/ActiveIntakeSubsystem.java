@@ -1,17 +1,19 @@
-package org.firstinspires.ftc.teamcode.Mode.juniorsubsystemteleop;
+package org.firstinspires.ftc.teamcode.Mode.raihancode;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-public class IntakeSubsystem extends SubsystemBase {
+public class ActiveIntakeSubsystem extends SubsystemBase{
+
     DcMotorEx intake;
 
-    public IntakeSubsystem(HardwareMap hMap) {}
+    public  ActiveIntakeSubsystem(HardwareMap hMap){}
 
-    public double getVelocity() {
+    public double getVelocity(){
         return intake.getVelocity();
     }
 }
+
 
 
