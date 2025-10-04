@@ -7,22 +7,25 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 @TeleOp(name = "ButtonMotorControl", group = "TeleOp")
 public class ButtonMotorControl extends LinearOpMode {
 
-    private DcMotor m1;
+    private DcMotor intakeMotor;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        m1 = hardwareMap.get(DcMotor.class, "m1");
-        m1.setDirection(DcMotor.Direction.FORWARD);
+        intakeMotor = hardwareMap.get(DcMotor.class, "m1");
+        intakeMotor.setDirection(DcMotor.Direction.FORWARD);
+        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         waitForStart();
 
         while (opModeIsActive()) {
-            if (gamepad1.a) {
-                m1.setPower(1.0);
+            if (gamepad1.right_bumper) {
+                intakeMotor.setPower(1.0);
+            } else if (gamepad1.left_bumper){
+                intakeMotor.setPower(-1.0);
             } else {
-                m1.setPower(0);
+                intakeMotor.setPower(0);
             }
 
-            telemetry.addData("Motor Power", m1.getPower());
+            telemetry.addData("Intake Motor Power", intakeMotor.getPower());
             telemetry.update();
         }
     }
