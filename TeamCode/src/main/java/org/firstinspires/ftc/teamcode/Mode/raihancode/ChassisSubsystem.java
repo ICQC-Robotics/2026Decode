@@ -6,10 +6,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class ChassisSubsystem extends SubsystemBase {
     // Four drive motors
-    private final DcMotor frontLeft;
-    private final DcMotor frontRight;
-    private final DcMotor backLeft;
-    private final DcMotor backRight;
+    private final DcMotor frontLeft = null;
+    private final DcMotor frontRight= null;
+    private final DcMotor backLeft= null;
+    private final DcMotor backRight= null;
 
     public ChassisSubsystem(HardwareMap hardwareMap) {
 
