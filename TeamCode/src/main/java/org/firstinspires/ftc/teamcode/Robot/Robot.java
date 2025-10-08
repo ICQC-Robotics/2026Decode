@@ -20,7 +20,11 @@ public class Robot {
     public Shooter shooter;
     public Vision vision;
 
-    public Robot(HardwareMap h, GamepadEx g1, GamepadEx g2) {
+    boolean isBlue;
+
+    public Robot(HardwareMap h, GamepadEx g1, GamepadEx g2, boolean isBlueAlliance) {
+        isBlue = isBlueAlliance;
+
         drive = new Drive(
                 g1,
                 h.get(GoBildaPinpointDriver.class, "pp"),
@@ -38,6 +42,7 @@ public class Robot {
         shooter = new Shooter(
                 h.get(DcMotorEx.class, "rightShooter"), DcMotorSimple.Direction.FORWARD,
                 h.get(DcMotorEx.class, "leftShooter"), DcMotorSimple.Direction.FORWARD,
+                h.get(Servo.class, "cover"),
                 new PIDFCoefficients(0.0, 0.0, 0.0, 0.0)
         );
 
@@ -53,6 +58,6 @@ public class Robot {
     }
 
     public Command AutoAim() {
-        return new AutoAim(vision, shooter);
+        return new AutoAim(vision, shooter, drive, isBlue);
     }
 }

@@ -4,16 +4,19 @@ import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
 
 public class Shooter extends SubsystemBase {
     private final DcMotorEx rightShooter, leftShooter;
+    private final Servo cover;
 
     public Shooter(DcMotorEx rightShooter, DcMotorSimple.Direction rightDir,
                    DcMotorEx leftShooter, DcMotorSimple.Direction leftDir,
-                   PIDFCoefficients pidf) {
+                   Servo cover, PIDFCoefficients pidf) {
 
         this.rightShooter = rightShooter;
         this.leftShooter = leftShooter;
+        this.cover = cover;
 
         this.rightShooter.setDirection(rightDir);
         this.leftShooter.setDirection(leftDir);
