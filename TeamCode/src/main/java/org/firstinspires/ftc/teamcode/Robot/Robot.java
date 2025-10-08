@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Robot;
 
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.arcrobotics.ftclib.command.button.GamepadButton;
@@ -22,6 +23,7 @@ public class Robot {
     public Robot(HardwareMap h, GamepadEx g1, GamepadEx g2) {
         drive = new Drive(
                 g1,
+                h.get(GoBildaPinpointDriver.class, "pp"),
                 h.get(DcMotorEx.class, "fR"), DcMotorSimple.Direction.FORWARD,
                 h.get(DcMotorEx.class, "fL"), DcMotorSimple.Direction.FORWARD,
                 h.get(DcMotorEx.class, "bR"), DcMotorSimple.Direction.FORWARD,

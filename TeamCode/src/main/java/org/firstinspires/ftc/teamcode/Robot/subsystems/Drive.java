@@ -2,20 +2,26 @@ package org.firstinspires.ftc.teamcode.Robot.subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import org.firstinspires.ftc.teamcode.RR.PinpointLocalizer;
 
 public class Drive extends SubsystemBase {
     DcMotorEx fR;
     DcMotorEx fL;
     DcMotorEx bR;
     DcMotorEx bL;
+    GoBildaPinpointDriver pinpoint;
 
-    public Drive(GamepadEx g, DcMotorEx fR, DcMotorSimple.Direction fRD,
+    public Drive(GamepadEx g, GoBildaPinpointDriver pinpoint,
+                 DcMotorEx fR, DcMotorSimple.Direction fRD,
                  DcMotorEx fL, DcMotorSimple.Direction fLD,
                  DcMotorEx bR, DcMotorSimple.Direction bRD,
                  DcMotorEx bL, DcMotorSimple.Direction bLD) {
+
         this.fR = fR;
         this.fL = fL;
         this.bR = bR;
@@ -59,5 +65,10 @@ public class Drive extends SubsystemBase {
         fL.setPower(fLPower);
         bR.setPower(bRPower);
         bL.setPower(bLPower);
+    }
+
+    @Override
+    public void periodic() {
+        pinpoint.update();
     }
 }
