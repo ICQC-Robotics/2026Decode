@@ -7,6 +7,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.RR.PinpointLocalizer;
 
 public class Drive extends SubsystemBase {
@@ -38,6 +42,7 @@ public class Drive extends SubsystemBase {
         bL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         movement(g);
+        pinpoint.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0));
     }
 
     public void movement(GamepadEx g) {
@@ -65,6 +70,34 @@ public class Drive extends SubsystemBase {
         fL.setPower(fLPower);
         bR.setPower(bRPower);
         bL.setPower(bLPower);
+    }
+
+    public DcMotorEx getFr() {
+        return fR;
+    }
+
+    public DcMotorEx getFl() {
+        return fL;
+    }
+
+    public DcMotorEx getBr() {
+        return bR;
+    }
+
+    public DcMotorEx getBl() {
+        return bL;
+    }
+
+    public double getX() {
+        return pinpoint.getPosX(DistanceUnit.INCH);
+    }
+
+    public double getY() {
+        return pinpoint.getPosY(DistanceUnit.INCH);
+    }
+
+    public double getHeading() {
+        return pinpoint.getHeading(AngleUnit.DEGREES);
     }
 
     @Override
