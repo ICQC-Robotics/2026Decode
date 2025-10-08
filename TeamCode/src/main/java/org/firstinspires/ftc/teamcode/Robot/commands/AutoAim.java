@@ -21,19 +21,26 @@ public class AutoAim extends CommandBase {
     @Override
     public void execute() {
         if (vision.hasTarget()) {
-            double ty = vision.getTy();
-            double ta = vision.getTa();
-
-            double basePower = 0.5;
-            double distanceAdjust = 0.02 * ty;
-            double areaAdjust = -0.3 * (ta - 0.1);
-            final double MAX_VELOCITY = 6000;
-
-            double shooterVelocity = MAX_VELOCITY * Math.max(0.0, Math.min(1.0, basePower + distanceAdjust + areaAdjust));
-            shooter.setVelocity(shooterVelocity);
+            double dy = vision.getTy();
+            double x = getDistance(dy);
+            double v = getVelocity(x);
+            shooter.setVelocity(v);
         } else {
-            shooter.stop();
+            shooter.setVelocity(0);
         }
     }
 
+    private double getDistance(double dy) {
+        double limelightHeight = 0.3;
+        double targetHeight = 2.0;
+        double limelightAngle = Math.toRadians(30);
+        double angleToTarget = limelightAngle + Math.toRadians(dy);
+        return (targetHeight - limelightHeight) / Math.tan(angleToTarget);
+    }
+
+    private double getVelocity(double x) {
+        double m = 1000;
+        double b = 2000;
+        return m * x + b;
+    }
 }
