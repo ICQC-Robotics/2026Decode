@@ -29,18 +29,6 @@ public class Vision extends SubsystemBase {
         return lastResult != null && lastResult.isValid();
     }
 
-    public double getTx() {
-        return hasTarget() ? lastResult.getTx() : 0.0;
-    }
-
-    public double getTy() {
-        return hasTarget() ? lastResult.getTy() : 0.0;
-    }
-
-    public double getTa() {
-        return hasTarget() ? lastResult.getTa() : 0.0;
-    }
-
     public Pose3D getBotPose() {
         return hasTarget() ? lastResult.getBotpose_MT2() : null;
     }

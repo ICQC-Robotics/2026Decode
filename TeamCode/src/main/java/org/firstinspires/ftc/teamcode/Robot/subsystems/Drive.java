@@ -1,26 +1,23 @@
 package org.firstinspires.ftc.teamcode.Robot.subsystems;
 
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.ftc.Actions;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.RR.PinpointLocalizer;
+import org.firstinspires.ftc.teamcode.RR.MecanumDrive;
 
 public class Drive extends SubsystemBase {
-    DcMotorEx fR;
-    DcMotorEx fL;
-    DcMotorEx bR;
-    DcMotorEx bL;
-    GoBildaPinpointDriver pinpoint;
+    public final MecanumDrive mD;
+    private Pose2d p = new Pose2d(0, 0, 0);
+    private final DcMotorEx fR, fL, bR, bL;
+    private final GoBildaPinpointDriver pinpoint;
 
-    public Drive(GamepadEx g, GoBildaPinpointDriver pinpoint,
+    public Drive(HardwareMap h, GamepadEx g, GoBildaPinpointDriver pinpoint,
                  DcMotorEx fR, DcMotorSimple.Direction fRD,
                  DcMotorEx fL, DcMotorSimple.Direction fLD,
                  DcMotorEx bR, DcMotorSimple.Direction bRD,
@@ -30,19 +27,21 @@ public class Drive extends SubsystemBase {
         this.fL = fL;
         this.bR = bR;
         this.bL = bL;
+        this.pinpoint = pinpoint;
 
         fR.setDirection(fRD);
         fL.setDirection(fLD);
         bR.setDirection(bRD);
         bL.setDirection(bLD);
 
-        fR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        fL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        bR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        bL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        fR.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        fL.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        bR.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        bL.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+
+        mD = new MecanumDrive(h, p);
 
         movement(g);
-        pinpoint.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0));
     }
 
     public void movement(GamepadEx g) {
@@ -57,48 +56,24 @@ public class Drive extends SubsystemBase {
 
         double max = Math.max(1.0,
                 Math.max(Math.abs(fRPower),
-                Math.max(Math.abs(fLPower),
-                Math.max(Math.abs(bRPower), Math.abs(bLPower)))
-        ));
+                        Math.max(Math.abs(fLPower),
+                                Math.max(Math.abs(bRPower), Math.abs(bLPower)))));
 
-        fRPower /= max;
-        fLPower /= max;
-        bRPower /= max;
-        bLPower /= max;
-
-        fR.setPower(fRPower);
-        fL.setPower(fLPower);
-        bR.setPower(bRPower);
-        bL.setPower(bLPower);
+        fR.setPower(fRPower / max);
+        fL.setPower(fLPower / max);
+        bR.setPower(bRPower / max);
+        bL.setPower(bLPower / max);
     }
 
-    public DcMotorEx getFr() {
-        return fR;
+    public MecanumDrive getMecanumDrive() {
+        return mD;
     }
 
-    public DcMotorEx getFl() {
-        return fL;
-    }
 
-    public DcMotorEx getBr() {
-        return bR;
-    }
-
-    public DcMotorEx getBl() {
-        return bL;
-    }
-
-    public double getX() {
-        return pinpoint.getPosX(DistanceUnit.INCH);
-    }
-
-    public double getY() {
-        return pinpoint.getPosY(DistanceUnit.INCH);
-    }
-
-    public double getHeading() {
-        return pinpoint.getHeading(AngleUnit.DEGREES);
-    }
+    public DcMotorEx getFr() { return fR; }
+    public DcMotorEx getFl() { return fL; }
+    public DcMotorEx getBr() { return bR; }
+    public DcMotorEx getBl() { return bL; }
 
     @Override
     public void periodic() {
