@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.Mode;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
@@ -11,7 +10,7 @@ import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.SetBlueAlliance;
 import org.firstinspires.ftc.teamcode.Robot.commands.SetRedAlliance;
 
-public class SoloBlue extends OpMode {
+public class Solo extends OpMode {
     GamepadEx g = new GamepadEx(gamepad1);
     Robot negabot = new Robot(hardwareMap, g, null, true);
 

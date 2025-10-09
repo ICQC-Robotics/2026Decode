@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.SetBlueAlliance;
 import org.firstinspires.ftc.teamcode.Robot.commands.SetRedAlliance;
 
-public class DuoBlue extends OpMode {
+public class Duo extends OpMode {
     GamepadEx g1 = new GamepadEx(gamepad1);
     GamepadEx g2 = new GamepadEx(gamepad2);
     Robot negabot = new Robot(hardwareMap, g1, g2, true);
