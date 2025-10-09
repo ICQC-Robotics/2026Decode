@@ -33,7 +33,7 @@ public class Shooter extends SubsystemBase {
         );
     }
 
-    public void setMagazineCover(int pos) {
+    public void setMagazineCover(double pos) {
         cover.setPosition(pos);
     }
 

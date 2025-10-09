@@ -19,6 +19,7 @@ public class Robot {
     public Intake intake;
     public Shooter shooter;
     public Vision vision;
+    public Wait wait;
 
     boolean isBlue;
 
@@ -47,6 +48,8 @@ public class Robot {
         );
 
         vision = new Vision(h);
+
+        wait = new Wait();
     }
 
     public void Action(GamepadEx g, GamepadKeys.Button b, Command Press, Command Release) {
@@ -57,7 +60,11 @@ public class Robot {
         }
     }
 
-    public Command AutoAim() {
-        return new AutoAim(vision, shooter, drive, isBlue);
+    public void setAlliance(boolean blue) {
+        isBlue = blue;
+    }
+
+    public Command Shoot() {
+        return new AutoAim(vision, shooter, drive, wait, isBlue);
     }
 }
