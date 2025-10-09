@@ -53,8 +53,8 @@ public class AutoAim extends SequentialCommandGroup {
                     double botX = vision.getBotX();
                     double botY = vision.getBotY();
 
-                    double tagX = (targetTagId == 20) ? 0 : 144;
-                    double tagY = (targetTagId == 20) ? 144 : 0;
+                    double tagX = (targetTagId == 20) ? 0 : 3.6576;
+                    double tagY = (targetTagId == 20) ? 3.6576 : 0;
 
                     double dx = tagX - botX;
                     double dy = tagY - botY;
