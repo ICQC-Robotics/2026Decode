@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Robot;
 
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -64,7 +65,7 @@ public class Robot {
         isBlue = blue;
     }
 
-    public Command Shoot() {
-        return new AutoAim(vision, shooter, drive, wait, isBlue);
+    public boolean isBlueAlliance() {
+        return isBlue;
     }
 }

@@ -14,11 +14,11 @@ public class Intake extends SubsystemBase {
         this.intakeServo = intakeServo;
     }
 
-    public void set(int pos) {
+    public void set(double pos) {
         intakeServo.setPosition(pos);
     }
 
-    public void intake(int speed) {
+    public void setSpeed(int speed) {
         intake.setPower(speed);
     }
 }

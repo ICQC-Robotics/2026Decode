@@ -6,24 +6,56 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
+import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
+import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.SetBlueAlliance;
 import org.firstinspires.ftc.teamcode.Robot.commands.SetRedAlliance;
 
 public class SoloBlue extends OpMode {
-    GamepadEx g1 = new GamepadEx(gamepad1);
-    Robot negabot = new Robot(hardwareMap, g1, null, true);
+    GamepadEx g = new GamepadEx(gamepad1);
+    Robot negabot = new Robot(hardwareMap, g, null, true);
 
     @Override
     public void init() {
-        negabot.Action(g1,
+        negabot.Action(g,
                 GamepadKeys.Button.X,
                 new SetBlueAlliance(negabot),
-                null);
+                null
+        );
 
-        negabot.Action(g1,
+        negabot.Action(g,
                 GamepadKeys.Button.B,
                 new SetRedAlliance(negabot),
                 null
+        );
+
+        negabot.Action(g,
+                       GamepadKeys.Button.DPAD_DOWN,
+                       new AutoIntake(negabot.intake).accept(),
+                       null
+        );
+
+        negabot.Action(g,
+                GamepadKeys.Button.DPAD_UP,
+                new AutoIntake(negabot.intake).reject(),
+                null
+        );
+
+        negabot.Action(g,
+                GamepadKeys.Button.DPAD_LEFT,
+                new AutoIntake(negabot.intake).finish(),
+                null
+        );
+
+        negabot.Action(g,
+                       GamepadKeys.Button.A,
+                       new AutoAim(negabot.vision,
+                                   negabot.shooter,
+                                   negabot.drive,
+                                   negabot.wait,
+                                   negabot.isBlueAlliance()
+                       ),
+                       null
         );
     }
 
