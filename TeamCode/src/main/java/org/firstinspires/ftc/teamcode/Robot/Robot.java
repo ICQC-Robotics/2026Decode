@@ -26,7 +26,7 @@ public class Robot {
         isBlue = isBlueAlliance;
 
         drive = new Drive(
-                g1,
+                h, g1,
                 h.get(GoBildaPinpointDriver.class, "pp"),
                 h.get(DcMotorEx.class, "fR"), DcMotorSimple.Direction.FORWARD,
                 h.get(DcMotorEx.class, "fL"), DcMotorSimple.Direction.FORWARD,

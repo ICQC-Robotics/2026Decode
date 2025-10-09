@@ -33,6 +33,10 @@ public class Shooter extends SubsystemBase {
         );
     }
 
+    public void setMagazineCover(int pos) {
+        cover.setPosition(pos);
+    }
+
     public void setVelocity(double v) {
         this.rightShooter.setVelocity(v);
         this.leftShooter.setVelocity(v);
