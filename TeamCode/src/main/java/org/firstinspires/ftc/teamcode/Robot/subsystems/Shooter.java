@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Shooter extends SubsystemBase {
     private final DcMotorEx rightShooter, leftShooter;
     private final Servo cover;
-    private PIDFCoefficients pidf;
+    private final PIDFCoefficients pidf;
 
     public Shooter(DcMotorEx rightShooter, DcMotorSimple.Direction rightDir,
                    DcMotorEx leftShooter, DcMotorSimple.Direction leftDir,

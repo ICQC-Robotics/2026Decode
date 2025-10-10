@@ -5,6 +5,8 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
+import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
+import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.SetBlueAlliance;
 import org.firstinspires.ftc.teamcode.Robot.commands.SetRedAlliance;
 
@@ -15,6 +17,8 @@ public class Duo extends OpMode {
 
     @Override
     public void init() {
+        negabot.drive.movement(g1);
+
         negabot.Action(g1,
                 GamepadKeys.Button.X,
                 new SetBlueAlliance(negabot),
@@ -23,6 +27,35 @@ public class Duo extends OpMode {
         negabot.Action(g1,
                 GamepadKeys.Button.B,
                 new SetRedAlliance(negabot),
+                null
+        );
+
+        negabot.Action(g2,
+                GamepadKeys.Button.DPAD_DOWN,
+                new AutoIntake(negabot.intake).accept(),
+                null
+        );
+
+        negabot.Action(g2,
+                GamepadKeys.Button.DPAD_UP,
+                new AutoIntake(negabot.intake).reject(),
+                null
+        );
+
+        negabot.Action(g2,
+                GamepadKeys.Button.DPAD_LEFT,
+                new AutoIntake(negabot.intake).finish(),
+                null
+        );
+
+        negabot.Action(g2,
+                GamepadKeys.Button.A,
+                new AutoAim(negabot.vision,
+                        negabot.shooter,
+                        negabot.drive,
+                        negabot.wait,
+                        negabot.isBlueAlliance()
+                ),
                 null
         );
     }

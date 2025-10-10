@@ -16,6 +16,8 @@ public class Solo extends OpMode {
 
     @Override
     public void init() {
+        negabot.drive.movement(g);
+
         negabot.Action(g,
                 GamepadKeys.Button.X,
                 new SetBlueAlliance(negabot),

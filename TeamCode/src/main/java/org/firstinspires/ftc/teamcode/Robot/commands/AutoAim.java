@@ -27,11 +27,7 @@ public class AutoAim extends SequentialCommandGroup {
         }
     }
 
-    private final Vision vision;
-    private final Shooter shooter;
-    private final Drive drive;
     private final MecanumDrive mD;
-    private final Wait wait;
 
     private static final double MAX_VELOCITY = 2400;
     private static final double MIN_VELOCITY = 1800;
@@ -40,10 +36,6 @@ public class AutoAim extends SequentialCommandGroup {
     private final ElapsedTime timer = new ElapsedTime();
 
     public AutoAim(Vision vision, Shooter shooter, Drive drive, Wait wait, boolean isBlueAlliance) {
-        this.vision = vision;
-        this.shooter = shooter;
-        this.drive = drive;
-        this.wait = wait;
         mD = drive.getMecanumDrive();
         targetTagId = isBlueAlliance ? 20 : 24;
 
@@ -77,8 +69,8 @@ public class AutoAim extends SequentialCommandGroup {
                     double botX = vision.getBotX();
                     double botY = vision.getBotY();
 
-                    double tagX = (targetTagId == 20) ? 0 : 144;
-                    double tagY = (targetTagId == 20) ? 144 : 0;
+                    double tagX = (targetTagId == 20) ? 0 : 3.6576;
+                    double tagY = (targetTagId == 20) ? 3.6576 : 0;
 
                     double dx = tagX - botX;
                     double dy = tagY - botY;
