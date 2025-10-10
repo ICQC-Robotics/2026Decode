@@ -14,9 +14,8 @@ public class Drive extends SubsystemBase {
     public final MecanumDrive mD;
     private Pose2d p = new Pose2d(0, 0, 0);
     private final DcMotorEx fR, fL, bR, bL;
-    private final GoBildaPinpointDriver pinpoint;
 
-    public Drive(HardwareMap h, GamepadEx g, GoBildaPinpointDriver pinpoint,
+    public Drive(HardwareMap h, GamepadEx g,
                  DcMotorEx fR, DcMotorSimple.Direction fRD,
                  DcMotorEx fL, DcMotorSimple.Direction fLD,
                  DcMotorEx bR, DcMotorSimple.Direction bRD,
@@ -26,7 +25,6 @@ public class Drive extends SubsystemBase {
         this.fL = fL;
         this.bR = bR;
         this.bL = bL;
-        this.pinpoint = pinpoint;
 
         fR.setDirection(fRD);
         fL.setDirection(fLD);
@@ -75,6 +73,6 @@ public class Drive extends SubsystemBase {
 
     @Override
     public void periodic() {
-        pinpoint.update();
+        mD.localizer.update();
     }
 }

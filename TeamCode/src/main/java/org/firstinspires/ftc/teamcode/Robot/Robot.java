@@ -29,7 +29,6 @@ public class Robot {
 
         drive = new Drive(
                 h, g1,
-                h.get(GoBildaPinpointDriver.class, "pp"),
                 h.get(DcMotorEx.class, "fR"), DcMotorSimple.Direction.FORWARD,
                 h.get(DcMotorEx.class, "fL"), DcMotorSimple.Direction.FORWARD,
                 h.get(DcMotorEx.class, "bR"), DcMotorSimple.Direction.FORWARD,
