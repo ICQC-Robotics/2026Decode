@@ -41,6 +41,6 @@ public class AutoBlue extends OpMode {
 
     @Override
     public void loop() {
-
+        CommandScheduler.getInstance().run();
     }
 }
