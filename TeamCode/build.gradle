@@ -19,7 +19,17 @@ android {
     namespace = 'org.firstinspires.ftc.teamcode'
 
     packagingOptions {
+        jniLibs {
+            pickFirsts += ['**/*.so']
+        }
         jniLibs.useLegacyPackaging true
+    }
+    sourceSets {
+        main {
+            java {
+                srcDirs 'src\\main\\java', 'TeamCode\\java\\org.firstinspires.ftc.teamcode\\mode', 'src\\main\\java\\2'
+            }
+        }
     }
 }
 

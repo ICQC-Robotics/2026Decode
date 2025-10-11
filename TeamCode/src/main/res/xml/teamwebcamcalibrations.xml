@@ -60,7 +60,7 @@
             size="640 480"
             focalLength="678.154f, 678.17f"
             principalPoint="318.135f, 228.374f"
-            distortionCoefficients="0.154576f, -1.19143f, 0f, 0f, 2.06105f, 0f, 0f, 0f"
+            distortionCoefficients="0.154576f, -1.19143f, 0f, 0f, juniorsubsytemteleop.06105f, 0f, 0f, 0f"
             />
     </Camera> -->
 
@@ -72,7 +72,7 @@
             size="640 480"
             focalLength="678.154f, 678.17f"
             principalPoint="318.135f, 228.374f"
-            distortionCoefficients="0.154576f, -1.19143f, 0f, 0f, 2.06105f, 0f, 0f, 0f"
+            distortionCoefficients="0.154576f, -1.19143f, 0f, 0f, juniorsubsytemteleop.06105f, 0f, 0f, 0f"
             />
     </Camera> -->
 
