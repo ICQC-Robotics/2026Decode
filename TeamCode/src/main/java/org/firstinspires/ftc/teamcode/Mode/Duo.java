@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Mode;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
@@ -10,13 +11,15 @@ import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.SetBlueAlliance;
 import org.firstinspires.ftc.teamcode.Robot.commands.SetRedAlliance;
 
+@TeleOp(group=".")
 public class Duo extends OpMode {
     GamepadEx g1 = new GamepadEx(gamepad1);
     GamepadEx g2 = new GamepadEx(gamepad2);
-    Robot negabot = new Robot(hardwareMap, g1, g2, true);
+    Robot negabot;
 
     @Override
     public void init() {
+        negabot = new Robot(hardwareMap, g1, g2, true);
         negabot.drive.movement(g1);
 
         negabot.Action(g1,

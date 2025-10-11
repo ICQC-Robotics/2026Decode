@@ -4,18 +4,23 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.RR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 
+@Autonomous(group=".")
 public class AutoBlue extends OpMode {
-    Robot negabot = new Robot(hardwareMap, null, null, true);
-    MecanumDrive mD = negabot.drive.mD;
+    Robot negabot;
+    MecanumDrive mD;
 
     @Override
     public void init() {
+        negabot = new Robot(hardwareMap, null, null, true);
+        mD = negabot.drive.mD;
+
         CommandScheduler.getInstance().schedule(
             new InstantCommand(() ->
                 Actions.runBlocking(
