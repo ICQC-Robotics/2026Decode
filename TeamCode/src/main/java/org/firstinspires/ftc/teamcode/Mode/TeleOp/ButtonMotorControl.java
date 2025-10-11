@@ -16,7 +16,7 @@ public class ButtonMotorControl extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            if (gamepad1.a) {
+            if (gamepad1.right_bumper) {
                 m1.setPower(1.0);
             } else {
                 m1.setPower(0);
