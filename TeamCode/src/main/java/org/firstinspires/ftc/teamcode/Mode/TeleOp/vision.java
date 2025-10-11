@@ -20,7 +20,7 @@ public class vision extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        // --- Build the AprilTag processor ---
+        //  Build the AprilTag processor
         AprilTagProcessor tagProcessor = new AprilTagProcessor.Builder()
                 .setDrawAxes(true)
                 .setDrawCubeProjection(true)
@@ -28,7 +28,7 @@ public class vision extends LinearOpMode {
                 .setDrawTagOutline(true)
                 .build();
 
-        // --- Build the Vision Portal ---
+        // Build the Vision Portal
         VisionPortal visionPortal = new VisionPortal.Builder()
                 .addProcessor(tagProcessor)
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam lebron"))
