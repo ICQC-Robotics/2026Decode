@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Mode;
 
+import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -12,13 +13,13 @@ import org.firstinspires.ftc.teamcode.Robot.commands.SetBlueAlliance;
 import org.firstinspires.ftc.teamcode.Robot.commands.SetRedAlliance;
 
 @TeleOp(group=".")
-public class Duo extends OpMode {
+public class Duo extends CommandOpMode {
     GamepadEx g1 = new GamepadEx(gamepad1);
     GamepadEx g2 = new GamepadEx(gamepad2);
     Robot negabot;
 
     @Override
-    public void init() {
+    public void initialize() {
         negabot = new Robot(hardwareMap, g1, g2, true);
         negabot.drive.movement(g1);
 
@@ -61,10 +62,5 @@ public class Duo extends OpMode {
                 ),
                 null
         );
-    }
-
-    @Override
-    public void loop() {
-
     }
 }

@@ -18,6 +18,6 @@ public class Wait extends SubsystemBase {
     }
 
     public double elapesd(){
-        return t.milliseconds();
+        return t.seconds();
     }
 }

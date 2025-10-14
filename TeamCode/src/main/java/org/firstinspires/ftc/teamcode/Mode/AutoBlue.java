@@ -2,8 +2,10 @@ package org.firstinspires.ftc.teamcode.Mode;
 
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
+import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
@@ -21,7 +23,7 @@ public class AutoBlue extends OpMode {
         negabot = new Robot(hardwareMap, null, null, true);
         mD = negabot.drive.mD;
 
-        CommandScheduler.getInstance().schedule(
+        Command AutoBlue = new SequentialCommandGroup(
             new InstantCommand(() ->
                 Actions.runBlocking(
                     mD.actionBuilder(mD.localizer.getPose())
@@ -37,10 +39,12 @@ public class AutoBlue extends OpMode {
                     negabot.isBlueAlliance()
             )
         );
+
+        negabot.schedule(AutoBlue);
     }
 
     @Override
     public void loop() {
-        CommandScheduler.getInstance().run();
+        negabot.run();
     }
 }

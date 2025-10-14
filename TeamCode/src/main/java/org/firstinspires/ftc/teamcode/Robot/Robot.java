@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Robot;
 
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
@@ -58,6 +59,14 @@ public class Robot {
         } else {
             new GamepadButton(g, b).whenPressed(Press).whenReleased(Release);
         }
+    }
+
+    public void schedule(Command command) {
+        CommandScheduler.getInstance().schedule(command);
+    }
+
+    public void run() {
+        CommandScheduler.getInstance().run();
     }
 
     public void setAlliance(boolean blue) {

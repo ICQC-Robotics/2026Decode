@@ -39,7 +39,7 @@ public class AutoAim extends SequentialCommandGroup {
         mD = drive.getMecanumDrive();
         targetTagId = isBlueAlliance ? 20 : 24;
 
-        CommandScheduler.getInstance().schedule(
+        addCommands(
                 new InstantCommand(() -> {
                     if (!vision.hasTarget()) return;
                     double botX = vision.getBotX();
@@ -63,7 +63,7 @@ public class AutoAim extends SequentialCommandGroup {
                         shooter.setMagazineCover(Positions.OPEN_COVER.getPos())
                 ),
 
-                new WaitCommand(wait, 300),
+                new WaitCommand(wait, 3),
 
                 new InstantCommand(() -> {
                     double botX = vision.getBotX();
@@ -82,7 +82,7 @@ public class AutoAim extends SequentialCommandGroup {
                     shooter.setVelocity(velocity);
                 }),
 
-                new WaitCommand(wait, 1000),
+                new WaitCommand(wait, 5),
 
                 new InstantCommand(() ->
                         shooter.setMagazineCover(Positions.CLOSED_COVER.getPos())
