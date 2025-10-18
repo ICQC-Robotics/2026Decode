@@ -19,6 +19,7 @@ public class ButtonMotorControl extends LinearOpMode {
         while (opModeIsActive()) {
             if (gamepad1.right_bumper) {
                 intakeMotor.setPower(1.0);
+                intakeMotor.setPower(1.0);
             } else if (gamepad1.left_bumper){
                 intakeMotor.setPower(-1.0);
             } else {
