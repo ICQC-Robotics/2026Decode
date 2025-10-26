@@ -40,7 +40,7 @@ public class Drive extends SubsystemBase {
     }
 
     public void movement(GamepadEx g) {
-        double drive = -g.getLeftY();
+        double drive = g.getLeftY();
         double strafe = g.getLeftX();
         double turn = g.getRightX();
 
