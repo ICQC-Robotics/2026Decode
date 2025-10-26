@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
+import org.firstinspires.ftc.teamcode.Robot.commands.DriveCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.SetBlueAlliance;
 import org.firstinspires.ftc.teamcode.Robot.commands.SetRedAlliance;
 
@@ -23,7 +24,8 @@ public class Duo extends CommandOpMode {
         g1 = new GamepadEx(gamepad1);
         g2 = new GamepadEx(gamepad2);
         negabot = new Robot(hardwareMap, g1, g2, true);
-        negabot.drive.movement(g1);
+
+        negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g1));
 
         negabot.Action(g1,
                 GamepadKeys.Button.X,
