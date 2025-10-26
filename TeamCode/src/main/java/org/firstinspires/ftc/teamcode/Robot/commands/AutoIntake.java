@@ -7,8 +7,8 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 
 public class AutoIntake extends CommandBase {
     enum Positions {
-        LOWER_INTAKE(1),
-        UPPER_INTAKE(0);
+        LOWER_INTAKE(.4),
+        UPPER_INTAKE(.7);
 
         private final double pos;
 
@@ -44,8 +44,8 @@ public class AutoIntake extends CommandBase {
 
     public Command finish() {
         return new InstantCommand(() -> {
-            intake.setSpeed(0);
-            intake.set(Positions.UPPER_INTAKE.getPos());
+            intake.setSpeed(0.5);
+            intake.set(Positions.LOWER_INTAKE.getPos());
         });
     }
 }

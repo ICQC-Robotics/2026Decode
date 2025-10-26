@@ -18,7 +18,7 @@ public class Intake extends SubsystemBase {
         intakeServo.setPosition(pos);
     }
 
-    public void setSpeed(int speed) {
+    public void setSpeed(double speed) {
         intake.setPower(speed);
     }
 }
