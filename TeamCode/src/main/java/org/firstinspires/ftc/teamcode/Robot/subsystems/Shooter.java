@@ -27,7 +27,6 @@ public class Shooter extends SubsystemBase {
         this.rightShooter.setVelocityPIDFCoefficients(pidf.p, pidf.i, pidf.d, pidf.f);
     }
 
-
     public void setPIDF(double p, double i, double d, double f) {
         this.pidf.p = p;
         this.pidf.i = i;
