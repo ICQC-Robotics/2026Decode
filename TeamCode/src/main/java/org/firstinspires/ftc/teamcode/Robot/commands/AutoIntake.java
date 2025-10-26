@@ -22,13 +22,8 @@ public class AutoIntake extends CommandBase {
         }
     }
 
-
-
-    Intake intake;
-
-    Shooter shooter;
-
-
+    private Intake intake;
+    private Shooter shooter;
 
     public AutoIntake(Intake intake, Shooter shooter) {
         this.intake = intake;

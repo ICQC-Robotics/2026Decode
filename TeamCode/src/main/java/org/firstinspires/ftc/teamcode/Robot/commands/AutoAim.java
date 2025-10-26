@@ -43,14 +43,14 @@ public class AutoAim extends SequentialCommandGroup {
 
         addCommands(
                 new ParallelCommandGroup(
-                        intake(intake),
+                        intake(intake, shooter),
                         shoot(vision, shooter, wait)
                 )
         );
     }
 
-    private Command intake(Intake intake) {
-        return new AutoIntake(intake).accept();
+    private Command intake(Intake intake, Shooter shooter) {
+        return new AutoIntake(intake, shooter).accept();
     }
 
     private SequentialCommandGroup shoot(Vision vision, Shooter shooter, Wait wait) {
