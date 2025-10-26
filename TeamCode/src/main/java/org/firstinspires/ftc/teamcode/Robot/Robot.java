@@ -36,15 +36,18 @@ public class Robot {
                 h.get(DcMotorEx.class, "bL"), DcMotorSimple.Direction.FORWARD
         );
 
+        //m5 = intake
+        //m6 = shooter
+
         intake = new Intake(
-                h.get(DcMotorEx.class, "intake"),
-                h.get(Servo.class, "intakeServo")
+                h.get(DcMotorEx.class, "5"),
+                h.get(Servo.class, "intake")
         );
 
         shooter = new Shooter(
-                h.get(DcMotorEx.class, "rightShooter"), DcMotorSimple.Direction.FORWARD,
+                h.get(DcMotorEx.class, "6"), DcMotorSimple.Direction.FORWARD,
                 h.get(DcMotorEx.class, "leftShooter"), DcMotorSimple.Direction.FORWARD,
-                h.get(Servo.class, "cover"),
+                h.get(Servo.class, "shooter"),
                 new PIDFCoefficients(0.0, 0.0, 0.0, 0.0)
         );
 
