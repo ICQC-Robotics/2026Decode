@@ -23,11 +23,7 @@ public class Solo extends CommandOpMode {
         g = new GamepadEx(gamepad1);
         negabot = new Robot(hardwareMap, g, null, true);
 
-        negabot.drive.setDefaultCommand(
-                new InstantCommand(() ->
-                        negabot.drive.movement(g)
-                )
-        );
+        negabot.drive.movement(g);
 
         negabot.Action(g,
                 GamepadKeys.Button.X,
@@ -70,5 +66,7 @@ public class Solo extends CommandOpMode {
                        null
         );
     }
+
+
 }
 

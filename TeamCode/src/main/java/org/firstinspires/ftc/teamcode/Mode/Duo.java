@@ -14,12 +14,14 @@ import org.firstinspires.ftc.teamcode.Robot.commands.SetRedAlliance;
 
 @TeleOp(group=".")
 public class Duo extends CommandOpMode {
-    GamepadEx g1 = new GamepadEx(gamepad1);
-    GamepadEx g2 = new GamepadEx(gamepad2);
+    GamepadEx g1;
+    GamepadEx g2;
     Robot negabot;
 
     @Override
     public void initialize() {
+        g1 = new GamepadEx(gamepad1);
+        g2 = new GamepadEx(gamepad2);
         negabot = new Robot(hardwareMap, g1, g2, true);
         negabot.drive.movement(g1);
 
