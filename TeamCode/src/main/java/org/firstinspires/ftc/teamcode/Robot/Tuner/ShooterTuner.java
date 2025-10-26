@@ -10,10 +10,10 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 @Configurable
 @TeleOp(name = "Shooter Tuner")
 public class ShooterTuner extends OpMode {
-    public static double kP;
-    public static double kI;
-    public static double kD;
-    public static double kF;
+    public static double kP = 0.005;
+    public static double kI = 0.0;
+    public static double kD = 0.0;
+    public static double kF = 0.1;
 
     public static double targetRPM = 3000;
 
@@ -21,10 +21,6 @@ public class ShooterTuner extends OpMode {
 
     @Override
     public void init() {
-        kP = .005;
-        kI = 0;
-        kD = 0;
-        kF = .1;
         negabot = new Robot(hardwareMap, new GamepadEx(gamepad1), new GamepadEx(gamepad2), true);
         negabot.shooter.setPIDF(kP, kI, kD, kF);
     }
