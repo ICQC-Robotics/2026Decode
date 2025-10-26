@@ -31,9 +31,9 @@ public class Robot {
         drive = new Drive(
                 h, g1,
                 h.get(DcMotorEx.class, "fR"), DcMotorSimple.Direction.FORWARD,
-                h.get(DcMotorEx.class, "fL"), DcMotorSimple.Direction.FORWARD,
+                h.get(DcMotorEx.class, "fL"), DcMotorSimple.Direction.REVERSE,
                 h.get(DcMotorEx.class, "bR"), DcMotorSimple.Direction.FORWARD,
-                h.get(DcMotorEx.class, "bL"), DcMotorSimple.Direction.FORWARD
+                h.get(DcMotorEx.class, "bL"), DcMotorSimple.Direction.REVERSE
         );
 
         //m5 = intake
