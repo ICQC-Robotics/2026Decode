@@ -12,7 +12,7 @@ public class Shooter extends SubsystemBase {
     private final PIDFCoefficients pidf;
 
     public Shooter(DcMotorEx rightShooter, DcMotorSimple.Direction rightDir,
-                   DcMotorEx leftShooter, DcMotorSimple.Direction leftDir,
+                   DcMotorSimple.Direction leftDir,
                    Servo cover, PIDFCoefficients pidf) {
 
         this.rightShooter = rightShooter;
