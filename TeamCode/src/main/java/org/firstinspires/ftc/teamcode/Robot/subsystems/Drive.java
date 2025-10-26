@@ -14,7 +14,6 @@ public class Drive extends SubsystemBase {
     public final MecanumDrive mD;
     private Pose2d p = new Pose2d(0, 0, 0);
     private final DcMotorEx fR, fL, bR, bL;
-    private GamepadEx g1;
 
     public Drive(HardwareMap h, GamepadEx g1,
                  DcMotorEx fR, DcMotorSimple.Direction fRD,
@@ -38,7 +37,6 @@ public class Drive extends SubsystemBase {
         bL.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
         mD = new MecanumDrive(h, p);
-        this.g1 = g1;
     }
 
     public void movement(GamepadEx g) {
@@ -74,6 +72,5 @@ public class Drive extends SubsystemBase {
     @Override
     public void periodic() {
         mD.localizer.update();
-        movement(g1);
     }
 }
