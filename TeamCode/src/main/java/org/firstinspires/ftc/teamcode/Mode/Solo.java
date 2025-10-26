@@ -41,19 +41,13 @@ public class Solo extends CommandOpMode {
         negabot.Action(g,
                        GamepadKeys.Button.DPAD_DOWN,
                        new AutoIntake(negabot.intake).accept(),
-                       null
+                       new AutoIntake(negabot.intake).finish()
         );
 
         negabot.Action(g,
                 GamepadKeys.Button.DPAD_UP,
                 new AutoIntake(negabot.intake).reject(),
-                null
-        );
-
-        negabot.Action(g,
-                GamepadKeys.Button.DPAD_LEFT,
-                new AutoIntake(negabot.intake).finish(),
-                null
+                new AutoIntake(negabot.intake).finish()
         );
 
         negabot.Action(g,
