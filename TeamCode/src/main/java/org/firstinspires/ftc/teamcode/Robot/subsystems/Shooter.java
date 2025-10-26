@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class Shooter extends SubsystemBase {
-    private final DcMotorEx rightShooter, leftShooter;
+    private DcMotorEx rightShooter, leftShooter;
     private final Servo cover;
     private final PIDFCoefficients pidf;
 
@@ -16,23 +16,24 @@ public class Shooter extends SubsystemBase {
                    Servo cover, PIDFCoefficients pidf) {
 
         this.rightShooter = rightShooter;
-        this.leftShooter = leftShooter;
+        //this.leftShooter = leftShooter;
         this.cover = cover;
         this.pidf = pidf;
 
         this.rightShooter.setDirection(rightDir);
-        this.leftShooter.setDirection(leftDir);
+        //this.leftShooter.setDirection(leftDir);
 
         this.rightShooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-        this.leftShooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        //this.leftShooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
         this.rightShooter.setVelocityPIDFCoefficients(
                 pidf.p, pidf.i, pidf.d, pidf.f
         );
 
-        this.leftShooter.setVelocityPIDFCoefficients(
-                pidf.p, pidf.i, pidf.d, pidf.f
-        );
+        /*this.leftShooter.setVelocityPIDFCoefficients(
+        *        pidf.p, pidf.i, pidf.d, pidf.f
+        *);
+         */
     }
 
     public void setPIDF(double p, double i, double d, double f) {
@@ -48,7 +49,7 @@ public class Shooter extends SubsystemBase {
 
     public void setVelocity(double v) {
         this.rightShooter.setVelocity(v);
-        this.leftShooter.setVelocity(v);
+        //this.leftShooter.setVelocity(v);
     }
 
     public double getVelocity() {
