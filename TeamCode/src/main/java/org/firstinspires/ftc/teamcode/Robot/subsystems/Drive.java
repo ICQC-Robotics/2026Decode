@@ -31,10 +31,10 @@ public class Drive extends SubsystemBase {
         bR.setDirection(bRD);
         bL.setDirection(bLD);
 
-        fR.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-        fL.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-        bR.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-        bL.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        fR.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        fL.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        bR.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        bL.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
         mD = new MecanumDrive(h, p);
     }

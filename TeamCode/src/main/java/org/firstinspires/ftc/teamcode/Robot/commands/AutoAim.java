@@ -1,13 +1,17 @@
 package org.firstinspires.ftc.teamcode.Robot.commands;
 
 import com.acmerobotics.roadrunner.ftc.Actions;
+import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.RR.MecanumDrive;
+import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
+import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Vision;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
@@ -26,20 +30,31 @@ public class AutoAim extends SequentialCommandGroup {
             return pos;
         }
     }
-
     private final MecanumDrive mD;
 
     private static final double MAX_VELOCITY = 2400;
     private static final double MIN_VELOCITY = 1800;
 
     private final int targetTagId;
-    private final ElapsedTime timer = new ElapsedTime();
 
-    public AutoAim(Vision vision, Shooter shooter, Drive drive, Wait wait, boolean isBlueAlliance) {
+    public AutoAim(Vision vision, Shooter shooter, Intake intake, Drive drive, Wait wait, boolean isBlueAlliance) {
         mD = drive.getMecanumDrive();
         targetTagId = isBlueAlliance ? 20 : 24;
 
         addCommands(
+                new ParallelCommandGroup(
+                        intake(intake),
+                        shoot(vision, shooter, wait)
+                )
+        );
+    }
+
+    private Command intake(Intake intake) {
+        return new AutoIntake(intake).accept();
+    }
+
+    private SequentialCommandGroup shoot(Vision vision, Shooter shooter, Wait wait) {
+        return new SequentialCommandGroup(
                 new InstantCommand(() -> {
                     if (!vision.hasTarget()) return;
                     double botX = vision.getBotX();

@@ -19,12 +19,10 @@ public class Shooter extends SubsystemBase {
         this.pidf = pidf;
 
         this.rightShooter.setDirection(rightDir);
-        this.rightShooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-
+        this.rightShooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         this.rightShooter.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        this.rightShooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
-        this.rightShooter.setVelocityPIDFCoefficients(pidf.p, pidf.i, pidf.d, pidf.f);
+        this.setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
     }
 
     public void setPIDF(double p, double i, double d, double f) {
@@ -41,7 +39,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public void setVelocity(double rpm) {
-        double ticksPerRev = 28;
+        double ticksPerRev = rightShooter.getMotorType().getTicksPerRev();
         double ticksPerSec = (rpm / 60.0) * ticksPerRev;
         rightShooter.setVelocity(ticksPerSec);
     }
