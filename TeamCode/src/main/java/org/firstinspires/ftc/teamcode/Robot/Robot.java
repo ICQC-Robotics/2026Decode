@@ -41,7 +41,8 @@ public class Robot {
 
         intake = new Intake(
                 h.get(DcMotorEx.class, "5"),
-                h.get(Servo.class, "intake")
+                h.get(Servo.class, "intake"),
+                DcMotorSimple.Direction.FORWARD
         );
 
         shooter = new Shooter(

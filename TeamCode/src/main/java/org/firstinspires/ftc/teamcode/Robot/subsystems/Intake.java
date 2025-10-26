@@ -9,9 +9,10 @@ public class Intake extends SubsystemBase {
     DcMotorEx intake;
     Servo intakeServo;
 
-    public Intake(DcMotorEx intake, Servo intakeServo) {
+    public Intake(DcMotorEx intake, Servo intakeServo, DcMotorSimple.Direction dir) {
         this.intake = intake;
         this.intakeServo = intakeServo;
+        intake.setDirection(dir);
     }
 
     public void set(double pos) {
