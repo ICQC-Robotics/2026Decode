@@ -44,7 +44,7 @@ public class AutoIntake extends CommandBase {
 
     public Command finish() {
         return new InstantCommand(() -> {
-            intake.setSpeed(0.5);
+            intake.setSpeed(-0.5);
             intake.set(Positions.LOWER_INTAKE.getPos());
         });
     }
