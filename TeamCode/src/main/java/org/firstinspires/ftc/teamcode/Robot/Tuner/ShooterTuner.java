@@ -23,7 +23,6 @@ public class ShooterTuner extends OpMode {
     public void init() {
         negabot = new Robot(hardwareMap, new GamepadEx(gamepad1), new GamepadEx(gamepad2), true);
         negabot.shooter.setPIDF(kP, kI, kD, kF);
-        negabot.shooter.setVelocity(targetRPM);
     }
 
     @Override
