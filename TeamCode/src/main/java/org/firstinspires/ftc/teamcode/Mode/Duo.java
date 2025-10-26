@@ -40,19 +40,19 @@ public class Duo extends CommandOpMode {
 
         negabot.Action(g2,
                 GamepadKeys.Button.DPAD_DOWN,
-                new AutoIntake(negabot.intake).accept(),
+                new AutoIntake(negabot.intake, negabot.shooter).accept(),
                 null
         );
 
         negabot.Action(g2,
                 GamepadKeys.Button.DPAD_UP,
-                new AutoIntake(negabot.intake).reject(),
+                new AutoIntake(negabot.intake, negabot.shooter).reject(),
                 null
         );
 
         negabot.Action(g2,
                 GamepadKeys.Button.DPAD_LEFT,
-                new AutoIntake(negabot.intake).finish(),
+                new AutoIntake(negabot.intake, negabot.shooter).finish(),
                 null
         );
 

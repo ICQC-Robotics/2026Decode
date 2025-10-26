@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 public class Shooter extends SubsystemBase {
     private DcMotorEx rightShooter, leftShooter;
-    private final Servo cover;
+    public final Servo cover;
     private PIDFCoefficients pidf;
 
     public Shooter(DcMotorEx rightShooter, DcMotorSimple.Direction rightDir,
@@ -46,7 +46,18 @@ public class Shooter extends SubsystemBase {
         rightShooter.setVelocity(ticksPerSec);
     }
 
+    /**
+     * Get current velocity in rpm
+     * @return
+     */
     public double getVelocity() {
-        return this.rightShooter.getVelocity();
+
+        double velocityInTPS = this.rightShooter.getVelocity(); // velocity in ticks per second
+        double ticksPerRev = 28;
+
+        double rpm = (velocityInTPS * 60.0) / ticksPerRev;
+
+
+        return rpm;
     }
 }

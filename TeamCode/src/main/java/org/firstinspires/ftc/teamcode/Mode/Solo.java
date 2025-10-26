@@ -26,6 +26,7 @@ public class Solo extends CommandOpMode {
 
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g));
 
+
         negabot.Action(g,
                 GamepadKeys.Button.X,
                 new SetBlueAlliance(negabot),
@@ -38,16 +39,17 @@ public class Solo extends CommandOpMode {
                 null
         );
 
+
         negabot.Action(g,
                        GamepadKeys.Button.RIGHT_BUMPER,
-                       new AutoIntake(negabot.intake).accept(),
-                       new AutoIntake(negabot.intake).finish()
+                       new AutoIntake(negabot.intake, negabot.shooter).accept(),
+                       new AutoIntake(negabot.intake, negabot.shooter).finish()
         );
 
         negabot.Action(g,
                 GamepadKeys.Button.LEFT_BUMPER,
-                new AutoIntake(negabot.intake).reject(),
-                new AutoIntake(negabot.intake).finish()
+                new AutoIntake(negabot.intake, negabot.shooter).reject(),
+                new AutoIntake(negabot.intake, negabot.shooter).finish()
         );
 
         negabot.Action(g,

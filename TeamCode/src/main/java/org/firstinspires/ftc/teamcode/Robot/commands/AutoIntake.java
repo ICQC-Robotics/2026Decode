@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Robot.commands;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandBase;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.Robot.subsystems.Shooter;
 import com.arcrobotics.ftclib.command.InstantCommand;
 
 public class AutoIntake extends CommandBase {
@@ -21,16 +22,31 @@ public class AutoIntake extends CommandBase {
         }
     }
 
+
+
     Intake intake;
 
-    public AutoIntake(Intake intake) {
+    Shooter shooter;
+
+
+
+    public AutoIntake(Intake intake, Shooter shooter) {
         this.intake = intake;
+        this.shooter = shooter;
         addRequirements(intake);
+    }
+
+    public Command raiseIntake() {
+        return new InstantCommand(() -> {
+            intake.set(Positions.LOWER_INTAKE.getPos());
+
+        });
     }
 
     public Command accept() {
         return new InstantCommand(() -> {
             intake.set(Positions.LOWER_INTAKE.getPos());
+            shooter.cover.setPosition(0.25);
             intake.setSpeed(-1);
         });
     }
