@@ -30,7 +30,7 @@ public class Vision extends SubsystemBase {
     }
 
     public Pose3D getBotPose() {
-        return hasTarget() ? lastResult.getBotpose_MT2() : null;
+        return hasTarget() ? lastResult.getBotpose() : null;
     }
 
     public Pose2d getBotPose2d() {
