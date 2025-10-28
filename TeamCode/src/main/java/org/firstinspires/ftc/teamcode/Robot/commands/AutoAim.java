@@ -56,8 +56,7 @@ public class AutoAim extends SequentialCommandGroup {
                     if (!vision.hasTarget()) return;
                     double botX = vision.getBotX();
                     double botY = vision.getBotY();
-
-                    double heading = mD.localizer.getPose().heading.toDouble() + Math.atan2(botY, botX);
+                    double heading = Math.atan2(botY, botX);
 
                     Actions.runBlocking(
                             mD.actionBuilder(mD.localizer.getPose())
