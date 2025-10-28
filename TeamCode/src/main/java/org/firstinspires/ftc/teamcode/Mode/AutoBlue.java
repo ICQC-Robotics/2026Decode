@@ -34,6 +34,7 @@ public class AutoBlue extends OpMode {
 
             new AutoAim(negabot.vision,
                     negabot.shooter,
+                    negabot.intake,
                     negabot.drive,
                     negabot.wait,
                     negabot.isBlueAlliance()

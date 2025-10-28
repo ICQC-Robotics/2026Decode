@@ -60,6 +60,7 @@ public class Duo extends CommandOpMode {
                 GamepadKeys.Button.A,
                 new AutoAim(negabot.vision,
                         negabot.shooter,
+                        negabot.intake,
                         negabot.drive,
                         negabot.wait,
                         negabot.isBlueAlliance()
