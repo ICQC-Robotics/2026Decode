@@ -58,6 +58,10 @@ public class AutoAim extends SequentialCommandGroup {
                     double dx = vision.getBotX();
                     double heading = Math.atan2(dy, dx);
 
+                    if (heading < 0) {
+                        heading += 2 * Math.PI;
+                    }
+
                     Actions.runBlocking(
                             mD.actionBuilder(mD.localizer.getPose())
                                     .turnTo(heading)
