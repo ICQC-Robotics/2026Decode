@@ -60,7 +60,7 @@ public class AutoAim extends SequentialCommandGroup {
 
                     Actions.runBlocking(
                             mD.actionBuilder(mD.localizer.getPose())
-                                    .turnTo(heading - Math.toRadians(mD.localizer.getPose().heading.toDouble()))
+                                    .turnTo(-heading)
                                     .build()
                     );
                 }),
