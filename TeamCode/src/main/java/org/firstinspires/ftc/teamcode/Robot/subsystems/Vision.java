@@ -55,7 +55,7 @@ public class Vision extends SubsystemBase {
 
     public double getBotHeading() {
         Pose3D pose = getBotPose();
-        return pose != null ? Math.toDegrees(pose.getOrientation().getYaw()) : 0.0;
+        return pose != null ? Math.toRadians(pose.getOrientation().getYaw()) : 0.0;
     }
 
     public void setPipeline(int index) {
