@@ -54,16 +54,24 @@ public class AutoAim extends SequentialCommandGroup {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> {
                     if (!vision.hasTarget()) return;
-                    double botX = vision.getBotX();
-                    double botY = vision.getBotY();
-                    double heading = mD.localizer.getPose().heading.toDouble() + Math.atan2(-botY, botX);
+
+                    double tagX = vision.getBotX();
+                    double tagY = vision.getBotY();
+
+                    double relativeAngle = Math.atan2(tagY, tagX);
+                    double currentHeading = mD.localizer.getPose().heading.toDouble();
+
+                    double desiredHeading = currentHeading + relativeAngle;
+
+                    desiredHeading = Math.atan2(Math.sin(desiredHeading), Math.cos(desiredHeading));
 
                     Actions.runBlocking(
                             mD.actionBuilder(mD.localizer.getPose())
-                                    .turnTo(heading)
+                                    .turnTo(desiredHeading)
                                     .build()
                     );
                 }),
+
 
                 new InstantCommand(() ->
                         shooter.setMagazineCover(Positions.OPEN_COVER.getPos())
