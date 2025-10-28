@@ -70,7 +70,7 @@ public class AutoAim extends SequentialCommandGroup {
                         return;
                     }
 
-                    double dx = tagX - botX;
+                    double dx = tagX + botX;
                     double dy = tagY - botY;
 
                     double desiredHeading = Math.atan2(dy, dx);
