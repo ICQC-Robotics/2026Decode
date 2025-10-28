@@ -55,29 +55,9 @@ public class AutoAim extends SequentialCommandGroup {
                 new InstantCommand(() -> {
                     if (!vision.hasTarget()) return;
 
-                    double botX = mD.localizer.getPose().position.x;
-                    double botY = mD.localizer.getPose().position.y;
-
-                    double tagX, tagY;
-
-                    if (targetTagId == 20) {
-                        tagX = 0.0;
-                        tagY = 3.6576;
-                    } else if (targetTagId == 24) {
-                        tagX = 3.6576;
-                        tagY = 0.0;
-                    } else {
-                        return;
-                    }
-
-                    double dx = - tagX + botX;
-                    double dy = tagY - botY;
-
-                    double desiredHeading = Math.atan2(dy, dx);
-
                     Actions.runBlocking(
                             mD.actionBuilder(mD.localizer.getPose())
-                                    .turnTo(desiredHeading)
+                                    .turnTo(vision.getBotHeading())
                                     .build()
                     );
                 }),
