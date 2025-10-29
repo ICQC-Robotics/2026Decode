@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Robot.Tuner;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -8,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 
 @Configurable
+@Config
 @TeleOp(name = "Shooter Tuner")
 public class ShooterTuner extends OpMode {
     public static double kP = 0.005;
