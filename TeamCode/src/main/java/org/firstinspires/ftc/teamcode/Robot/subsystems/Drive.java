@@ -69,6 +69,20 @@ public class Drive extends SubsystemBase {
     public DcMotorEx getBr() { return bR; }
     public DcMotorEx getBl() { return bL; }
 
+    public void turnInPlace(double turnPower) {
+        fL.setPower(turnPower);
+        bL.setPower(turnPower);
+        fR.setPower(-turnPower);
+        bR.setPower(-turnPower);
+    }
+
+    public void stop() {
+        fL.setPower(0);
+        bL.setPower(0);
+        fR.setPower(0);
+        bR.setPower(0);
+    }
+
     @Override
     public void periodic() {
         mD.localizer.update();

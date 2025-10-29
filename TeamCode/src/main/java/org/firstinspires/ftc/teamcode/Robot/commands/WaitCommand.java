@@ -21,7 +21,7 @@ public class WaitCommand extends CommandBase {
     }
     @Override
     public boolean isFinished(){
-        return arm.elapesd() > pos;
+        return arm.elapsed() > pos;
     }
 
 }

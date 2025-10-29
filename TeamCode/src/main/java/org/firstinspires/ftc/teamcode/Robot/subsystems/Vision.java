@@ -80,4 +80,11 @@ public class Vision extends SubsystemBase {
         limelight.stop();
         limelight.start();
     }
+
+    public double getTx() {
+        if (lastResult == null) return Double.NaN;
+        if (!lastResult.isValid()) return Double.NaN;
+        return lastResult.getTx();
+    }
+
 }

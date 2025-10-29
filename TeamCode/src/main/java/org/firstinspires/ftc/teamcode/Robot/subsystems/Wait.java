@@ -17,7 +17,7 @@ public class Wait extends SubsystemBase {
         t.reset();
     }
 
-    public double elapesd(){
+    public double elapsed(){
         return t.seconds();
     }
 }
