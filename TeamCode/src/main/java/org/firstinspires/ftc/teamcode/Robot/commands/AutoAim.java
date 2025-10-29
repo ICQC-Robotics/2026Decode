@@ -33,9 +33,9 @@ public class AutoAim extends SequentialCommandGroup {
                    Drive drive,
                    Wait wait,
                    boolean isBlueAlliance) {
-
         targetTagId = isBlueAlliance ? 20 : 24;
 
+        if(!vision.hasTarget()) return;
         addCommands(
                 new ParallelCommandGroup(
                         new AutoIntake(intake, shooter).accept(),
