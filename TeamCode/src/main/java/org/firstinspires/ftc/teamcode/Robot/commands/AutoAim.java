@@ -1,15 +1,10 @@
 package org.firstinspires.ftc.teamcode.Robot.commands;
 
-import com.acmerobotics.roadrunner.ftc.Actions;
-import com.arcrobotics.ftclib.command.Command;
-import com.arcrobotics.ftclib.command.CommandScheduler;
+import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.RR.MecanumDrive;
-import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Shooter;
@@ -17,60 +12,100 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Vision;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
 
 public class AutoAim extends SequentialCommandGroup {
+
     enum Positions {
         OPEN_COVER(0),
         CLOSED_COVER(1);
-
         private final double pos;
         Positions(double pos) {
             this.pos = pos;
         }
-
         public double getPos() {
             return pos;
         }
     }
-    private final MecanumDrive mD;
 
     private final int targetTagId;
 
-    public AutoAim(Vision vision, Shooter shooter, Intake intake, Drive drive, Wait wait, boolean isBlueAlliance) {
-        mD = drive.getMecanumDrive();
+    public AutoAim(Vision vision,
+                   Shooter shooter,
+                   Intake intake,
+                   Drive drive,
+                   Wait wait,
+                   boolean isBlueAlliance) {
+
         targetTagId = isBlueAlliance ? 20 : 24;
 
         addCommands(
                 new ParallelCommandGroup(
-                        intake(intake, shooter),
-                        shoot(vision, shooter, wait)
+                        new AutoIntake(intake, shooter).accept(),
+                        shoot(vision, shooter, drive, wait)
                 )
         );
     }
 
-    private Command intake(Intake intake, Shooter shooter) {
-        return new AutoIntake(intake, shooter).accept();
-    }
-
-    private SequentialCommandGroup shoot(Vision vision, Shooter shooter, Wait wait) {
+    private SequentialCommandGroup shoot(Vision vision, Shooter shooter, Drive drive, Wait wait) {
         return new SequentialCommandGroup(
-                new InstantCommand(() -> {
-                    if (!vision.hasTarget()) return;
-                    double dy = vision.getBotY();
-                    double dx = vision.getBotX();
-                    double heading = Math.atan2(dy, dx);
 
-                    Actions.runBlocking(
-                            mD.actionBuilder(mD.localizer.getPose())
-                                    .turnTo(heading)
-                                    .build()
-                    );
-                }),
+                new CommandBase() {
+                    private final double kP = 0, MIN_TURN_POWER = 0, MAX_TURN_POWER = 0, TX_TOLERANCE_DEG = 0;
+                    {addRequirements(drive);}
 
+                    @Override
+                    public void initialize() {
+                        drive.stop();
+                    }
+
+                    @Override
+                    public void execute() {
+                        double tx = vision.getTx();
+                        if (Double.isNaN(tx)) {
+                            drive.stop();
+                            return;
+                        }
+
+                        double turnPower = kP * tx;
+
+                        if (Math.abs(turnPower) < MIN_TURN_POWER)
+                            turnPower = Math.signum(turnPower) * MIN_TURN_POWER;
+
+                        if (turnPower > MAX_TURN_POWER) turnPower = MAX_TURN_POWER;
+                        if (turnPower < -MAX_TURN_POWER) turnPower = -MAX_TURN_POWER;
+
+                        if (Math.abs(tx) <= TX_TOLERANCE_DEG)
+                            drive.stop();
+                        else
+                            drive.turnInPlace(turnPower);
+                    }
+
+                    @Override
+                    public boolean isFinished() {
+                        double tx = vision.getTx();
+                        if (Double.isNaN(tx)) return true;
+                        return Math.abs(tx) <= TX_TOLERANCE_DEG;
+                    }
+
+                    public void end(boolean interrupted) {
+                        drive.stop();
+                    }
+
+                },
+
+                new CommandBase() {
+                    @Override
+                    public void initialize() {
+                        wait.start();
+                    }
+
+                    @Override
+                    public boolean isFinished() {
+                        return wait.elapsed() >= 1;
+                    }
+                },
 
                 new InstantCommand(() ->
                         shooter.setMagazineCover(Positions.OPEN_COVER.getPos())
                 ),
-
-                new WaitCommand(wait, 5),
 
                 new InstantCommand(() ->
                         shooter.setMagazineCover(Positions.CLOSED_COVER.getPos())
