@@ -48,7 +48,7 @@ public class AutoAim extends SequentialCommandGroup {
         return new SequentialCommandGroup(
 
                 new CommandBase() {
-                    private final double kP = 0, MIN_TURN_POWER = 0, MAX_TURN_POWER = 0, TX_TOLERANCE_DEG = 0;
+                    private final double kP = 0.02, MIN_TURN_POWER = 0.05, MAX_TURN_POWER = 0.4, TX_TOLERANCE_DEG = 1.0;
                     {addRequirements(drive);}
 
                     @Override
