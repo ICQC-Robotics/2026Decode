@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.RR.MecanumDrive;
 
 public class Vision extends SubsystemBase {
@@ -34,9 +36,11 @@ public class Vision extends SubsystemBase {
     }
 
     public Pose3D getBotPose() {
+        if(lastResult == null) return null;
+
         limelight.updateRobotOrientation(Math.toRadians(mD.localizer.getPose().heading.toDouble()));
-        lastResult.getBotpose().getPosition().toUnit(DistanceUnit.INCH);
-        return hasTarget() ? lastResult.getBotpose_MT2() : null;
+        Pose3D pose = lastResult.getBotpose_MT2();
+        return new Pose3D(pose.getPosition().toUnit(DistanceUnit.INCH), pose.getOrientation());
     }
 
     public Pose2d getBotPose2d() {
