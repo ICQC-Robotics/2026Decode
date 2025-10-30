@@ -117,7 +117,7 @@ public class AutoAim extends SequentialCommandGroup {
                 double minV = 2300;
                 double maxV = 1900;
 
-                double velocity = minV + (maxV - minV) * (distance - 30) / (70 - 30);
+                double velocity = minV + ((maxV - minV) * (distance - 30)) / (70 - 30);
                 shooter.setVelocity(velocity);
             }),
 
