@@ -45,7 +45,6 @@ public class AutoAim extends SequentialCommandGroup {
 
     private SequentialCommandGroup shoot(Vision vision, Shooter shooter, Drive drive, Wait wait) {
         return new SequentialCommandGroup(
-
                 new CommandBase() {
                     private final double kP = 0.02, MIN_TURN_POWER = 0.05, MAX_TURN_POWER = 0.4, TX_TOLERANCE_DEG = 1.0;
                     {addRequirements(drive);}
@@ -105,6 +104,15 @@ public class AutoAim extends SequentialCommandGroup {
                 new InstantCommand(() ->
                         shooter.setMagazineCover(Positions.OPEN_COVER.getPos())
                 ),
+
+                new InstantCommand(() -> {
+                    double distance = Math.hypot(vision.getBotX(), vision.getBotY());
+                    double minV = 2300;
+                    double maxV = 1900;
+
+                    double velocity = minV + (maxV - minV) * (distance - 30) / (70 - 30);
+                    shooter.setVelocity(velocity);
+                }),
 
                 new InstantCommand(() ->
                         shooter.setMagazineCover(Positions.CLOSED_COVER.getPos())

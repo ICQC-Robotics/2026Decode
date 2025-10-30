@@ -57,13 +57,9 @@ public class Shooter extends SubsystemBase {
     }
 
     public double getVelocity() {
-
         double velocityInTPS = this.rightShooter.getVelocity();
-        double ticksPerRev = 28;
+        double ticksPerRev = this.rightShooter.getMotorType().getTicksPerRev();
 
-        double rpm = (velocityInTPS * 60.0) / ticksPerRev;
-
-
-        return rpm;
+        return (velocityInTPS * 60.0) / ticksPerRev;
     }
 }
