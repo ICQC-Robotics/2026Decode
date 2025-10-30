@@ -46,7 +46,7 @@ public class Robot {
                 h.get(DcMotorEx.class, "6"), DcMotorSimple.Direction.FORWARD,
                 h.get(DcMotorEx.class, "7"), DcMotorSimple.Direction.FORWARD,
                 h.get(Servo.class, "shooter"),
-                new PIDFCoefficients(1000.0, 0.0, 0.1, 90.0)
+                new PIDFCoefficients(0.005, 0.0, 0, 0.75)
         );
 
         vision = new Vision(h,
