@@ -12,15 +12,21 @@ public class Shooter extends SubsystemBase {
     private PIDFCoefficients pidf;
 
     public Shooter(DcMotorEx rightShooter, DcMotorSimple.Direction rightDir,
+                   DcMotorEx leftShooter, DcMotorSimple.Direction leftDir,
                    Servo cover, PIDFCoefficients pidf) {
 
         this.rightShooter = rightShooter;
+        this.leftShooter = leftShooter;
         this.cover = cover;
         this.pidf = pidf;
 
         this.rightShooter.setDirection(rightDir);
         this.rightShooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         this.rightShooter.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+
+        this.leftShooter.setDirection(rightDir);
+        this.leftShooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        this.leftShooter.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         this.setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
     }
@@ -32,6 +38,7 @@ public class Shooter extends SubsystemBase {
         this.pidf.f = f;
 
         this.rightShooter.setVelocityPIDFCoefficients(p, i, d, f);
+        this.leftShooter.setVelocityPIDFCoefficients(p, i, d, f);
     }
 
     public void setMagazineCover(double pos) {
@@ -41,16 +48,17 @@ public class Shooter extends SubsystemBase {
     public void setVelocity(double rpm) {
         double ticksPerRev = rightShooter.getMotorType().getTicksPerRev();
         double ticksPerSec = (rpm / 60.0) * ticksPerRev;
+
+        double ticksPerRev2 = leftShooter.getMotorType().getTicksPerRev();
+        double ticksPerSec2 = (rpm / 60.0) * ticksPerRev2;
+
         rightShooter.setVelocity(ticksPerSec);
+        leftShooter.setVelocity(ticksPerSec2);
     }
 
-    /**
-     * Get current velocity in rpm
-     * @return
-     */
     public double getVelocity() {
 
-        double velocityInTPS = this.rightShooter.getVelocity(); // velocity in ticks per second
+        double velocityInTPS = this.rightShooter.getVelocity();
         double ticksPerRev = 28;
 
         double rpm = (velocityInTPS * 60.0) / ticksPerRev;
