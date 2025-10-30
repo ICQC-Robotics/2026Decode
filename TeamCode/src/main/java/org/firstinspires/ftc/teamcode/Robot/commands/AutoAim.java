@@ -114,10 +114,10 @@ public class AutoAim extends SequentialCommandGroup {
 
             new InstantCommand(() -> {
                 double distance = Math.hypot(vision.getBotX(), vision.getBotY());
-                double minV = 2300;
-                double maxV = 1900;
+                double minD = 30, maxD = 70;
+                double minV = 2300, maxV = 1900;
 
-                double velocity = minV + ((maxV - minV) * (distance - 30)) / (70 - 30);
+                double velocity = minV + (maxV-minV) * (distance-minD) / (maxD-minD);
                 shooter.setVelocity(velocity);
             }),
 
