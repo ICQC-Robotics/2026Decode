@@ -24,7 +24,7 @@ public class Shooter extends SubsystemBase {
         this.rightShooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         this.rightShooter.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
-        this.leftShooter.setDirection(rightDir);
+        this.leftShooter.setDirection(leftDir);
         this.leftShooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         this.leftShooter.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
