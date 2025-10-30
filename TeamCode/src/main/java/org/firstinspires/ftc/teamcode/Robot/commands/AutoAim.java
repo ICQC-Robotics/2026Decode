@@ -105,6 +105,8 @@ public class AutoAim extends SequentialCommandGroup {
                         shooter.setMagazineCover(Positions.OPEN_COVER.getPos())
                 ),
 
+
+
                 new InstantCommand(() -> {
                     double distance = Math.hypot(vision.getBotX(), vision.getBotY());
                     double minV = 2300;
@@ -113,6 +115,8 @@ public class AutoAim extends SequentialCommandGroup {
                     double velocity = minV + (maxV - minV) * (distance - 30) / (70 - 30);
                     shooter.setVelocity(velocity);
                 }),
+
+
 
                 new InstantCommand(() ->
                         shooter.setMagazineCover(Positions.CLOSED_COVER.getPos())
