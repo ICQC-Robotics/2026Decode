@@ -9,12 +9,12 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp(name="Servo tuner")
 public class ServoTuner extends OpMode {
     Servo servo1, servo2;
-    int s1, s2;
+    public static double s1, s2;
 
     @Override
     public void init() {
-        servo1 = hardwareMap.get(Servo.class, "cover");
-        servo2 = hardwareMap.get(Servo.class, "intakeServo");
+        servo1 = hardwareMap.get(Servo.class, "shooter");
+        servo2 = hardwareMap.get(Servo.class, "intake");
     }
 
     @Override

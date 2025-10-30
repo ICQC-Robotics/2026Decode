@@ -14,8 +14,8 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
 public class AutoAim extends SequentialCommandGroup {
 
     enum Positions {
-        OPEN_COVER(0),
-        CLOSED_COVER(1);
+        OPEN_COVER(0.03),
+        CLOSED_COVER(0.29);
         private final double pos;
         Positions(double pos) {
             this.pos = pos;
