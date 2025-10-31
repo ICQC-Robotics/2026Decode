@@ -37,7 +37,7 @@ public class AutoAim extends SequentialCommandGroup {
                         new AutoIntake(intake, shooter).accept(),
                         AimCommand(vision, shooter, drive, wait),
                         new SequentialCommandGroup(
-                            ShootCommand(vision, shooter, drive, wait)
+                            ShootCommand(vision, shooter, intake, wait)
                         )
                 )
         );
@@ -103,7 +103,7 @@ public class AutoAim extends SequentialCommandGroup {
         );
     }
 
-    private SequentialCommandGroup ShootCommand(Vision vision, Shooter shooter, Drive drive, Wait wait) {
+    private SequentialCommandGroup ShootCommand(Vision vision, Shooter shooter, Intake intake, Wait wait) {
         return new SequentialCommandGroup(
             new InstantCommand(() -> {
                 shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
@@ -117,12 +117,11 @@ public class AutoAim extends SequentialCommandGroup {
                 shooter.setMagazineCover(Positions.OPEN_COVER.getPos());
             }),
 
-            new WaitCommand(wait, 0.5),
-
             new InstantCommand(() -> {
                 for (int i = 0; i < 3; i++) {
-                    shoot(vision, shooter);
                     new WaitCommand(wait, 0.5);
+                    new AutoIntake(intake, shooter).accept();
+                    shoot(vision, shooter);
                 }
             }),
 
