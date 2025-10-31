@@ -142,11 +142,20 @@ public class AutoAim extends SequentialCommandGroup {
 
     private void shoot(Vision vision, Shooter shooter) {
         double distance = Math.hypot(vision.getBotX(), vision.getBotY());
-        double minD = 30, maxD = 70;
-        double minV = 2300, maxV = 1900;
+        double minD = 30, maxD = 128;
+        double minV = 1900, maxV = 2850;
+        //128in at 2850rpm
+        //30 at 1900rpm
 
-        double velocity = distance;
-        shooter.setVelocity(450);
+
+        //velocity = minV + (maxV-minV)*(d-minD)/(maxD-minD)
+
+        double velocity = (minV + (maxV - minV)) * ((distance - minD)/maxD-minD);
+
+
+
+        shooter.setPIDF(0.05, 0.0, 0, 0.60 * (velocity / 3000.0));
+        shooter.setVelocity(velocity);
     }
 
 }
