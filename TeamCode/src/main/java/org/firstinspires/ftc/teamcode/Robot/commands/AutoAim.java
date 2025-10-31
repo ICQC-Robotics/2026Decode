@@ -32,11 +32,11 @@ public class AutoAim extends SequentialCommandGroup {
         targetTagId = isBlueAlliance ? 20 : 24;
         addCommands(
                 new ParallelCommandGroup(
-                        new AutoIntake(intake, shooter).accept(),
-                        AimCommand(vision, shooter, drive, wait),
-                        new SequentialCommandGroup(
-                                ShootCommand(vision, shooter, intake, wait)
-                        )
+                     new AutoIntake(intake, shooter).accept(),
+                     AimCommand(vision, shooter, drive, wait),
+                     new SequentialCommandGroup(
+                          ShootCommand(vision, shooter, intake, wait)
+                     )
                 )
         );
     }
@@ -134,7 +134,7 @@ public class AutoAim extends SequentialCommandGroup {
         double minD = 30, maxD = 70;
         double minV = 2300, maxV = 1900;
 
-        double velocity = minV + (maxV-minV) * (distance-minD) / (maxD-minD);
+        double velocity = distance;
         shooter.setVelocity(velocity);
     }
 }
