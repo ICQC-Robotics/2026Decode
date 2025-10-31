@@ -31,8 +31,17 @@ public class Vision extends SubsystemBase {
         lastResult = limelight.getLatestResult();
     }
 
-    public boolean hasTarget() {
-        return lastResult != null && lastResult.isValid();
+    public boolean hasTarget(int targetID) {
+        return lastResult != null && lastResult.isValid() && !lastResult.getFiducialResults().isEmpty() && this.getTagID() == targetID;
+    }
+
+    public int getTagID() {
+        if (lastResult == null || lastResult.getFiducialResults().isEmpty()) {
+            return -1;
+        }
+
+        int lastIndex = lastResult.getFiducialResults().size() - 1;
+        return lastResult.getFiducialResults().get(lastIndex).getFiducialId();
     }
 
     public Pose3D getBotPose() {

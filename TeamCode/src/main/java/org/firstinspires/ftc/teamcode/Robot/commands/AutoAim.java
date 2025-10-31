@@ -27,13 +27,9 @@ public class AutoAim extends SequentialCommandGroup {
 
     private final int targetTagId;
 
-    public AutoAim(Vision vision,
-                   Shooter shooter,
-                   Intake intake,
-                   Drive drive,
-                   Wait wait,
-                   boolean isBlueAlliance) {
+    public AutoAim(Vision vision, Shooter shooter, Intake intake, Drive drive, Wait wait, boolean isBlueAlliance) {
         targetTagId = isBlueAlliance ? 20 : 24;
+        if(!vision.hasTarget(targetTagId)) return;
 
         addCommands(
                 new ParallelCommandGroup(
