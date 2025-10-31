@@ -32,7 +32,7 @@ public class Vision extends SubsystemBase {
     }
 
     public boolean hasTarget(int targetID) {
-        return lastResult != null && lastResult.isValid() && !lastResult.getFiducialResults().isEmpty() && this.getTagID() == targetID;
+        return lastResult != null && !lastResult.getFiducialResults().isEmpty() && this.getTagID() == targetID;
     }
 
     public int getTagID() {
