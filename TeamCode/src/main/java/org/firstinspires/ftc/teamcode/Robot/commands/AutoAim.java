@@ -5,6 +5,7 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 
+import org.firstinspires.ftc.onbotjava.handlers.objbuild.WaitForBuild;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Shooter;
@@ -34,15 +35,15 @@ public class AutoAim extends SequentialCommandGroup {
         addCommands(
                 new ParallelCommandGroup(
                         new AutoIntake(intake, shooter).accept(),
+                        AimCommand(vision, shooter, drive, wait),
                         new SequentialCommandGroup(
-                            Aim(vision, shooter, drive, wait),
-                            Shoot(vision, shooter, drive, wait)
+                            ShootCommand(vision, shooter, drive, wait)
                         )
                 )
         );
     }
 
-    private SequentialCommandGroup Aim(Vision vision, Shooter shooter, Drive drive, Wait wait) {
+    private SequentialCommandGroup AimCommand(Vision vision, Shooter shooter, Drive drive, Wait wait) {
         return new SequentialCommandGroup(
                 new CommandBase() {
                     private final double kP = 0.02, MIN_TURN_POWER = 0.05, MAX_TURN_POWER = 0.4, TX_TOLERANCE_DEG = 1.0;
@@ -102,24 +103,41 @@ public class AutoAim extends SequentialCommandGroup {
         );
     }
 
-    private SequentialCommandGroup Shoot(Vision vision, Shooter shooter, Drive drive, Wait wait) {
+    private SequentialCommandGroup ShootCommand(Vision vision, Shooter shooter, Drive drive, Wait wait) {
         return new SequentialCommandGroup(
-            new InstantCommand(() ->
-                shooter.setMagazineCover(Positions.OPEN_COVER.getPos())
-            ),
-
             new InstantCommand(() -> {
-                double distance = Math.hypot(vision.getBotX(), vision.getBotY());
-                double minD = 30, maxD = 70;
-                double minV = 2300, maxV = 1900;
-
-                double velocity = minV + (maxV-minV) * (distance-minD) / (maxD-minD);
-                shooter.setVelocity(velocity);
+                shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
             }),
 
-            new InstantCommand(() ->
-                shooter.setMagazineCover(Positions.CLOSED_COVER.getPos())
-            )
+            new InstantCommand(() -> {
+                shoot(vision, shooter);
+            }),
+
+            new InstantCommand(() -> {
+                shooter.setMagazineCover(Positions.OPEN_COVER.getPos());
+            }),
+
+            new WaitCommand(wait, 0.5),
+
+            new InstantCommand(() -> {
+                for (int i = 0; i < 3; i++) {
+                    shoot(vision, shooter);
+                    new WaitCommand(wait, 0.5);
+                }
+            }),
+
+            new InstantCommand(() -> {
+                shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
+            })
         );
+    }
+
+    private void shoot(Vision vision, Shooter shooter) {
+        double distance = Math.hypot(vision.getBotX(), vision.getBotY());
+        double minD = 30, maxD = 70;
+        double minV = 2300, maxV = 1900;
+
+        double velocity = minV + (maxV-minV) * (distance-minD) / (maxD-minD);
+        shooter.setVelocity(velocity);
     }
 }
