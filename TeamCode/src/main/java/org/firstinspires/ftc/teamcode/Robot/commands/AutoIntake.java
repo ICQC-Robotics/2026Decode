@@ -5,6 +5,8 @@ import com.arcrobotics.ftclib.command.CommandBase;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Shooter;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
+
 
 public class AutoIntake extends CommandBase {
     enum Positions {
@@ -41,10 +43,18 @@ public class AutoIntake extends CommandBase {
     public Command accept() {
         return new InstantCommand(() -> {
             intake.set(Positions.LOWER_INTAKE.getPos());
-            shooter.cover.setPosition(0.25);
             intake.setSpeed(-1);
         });
     }
+
+    public Command stopShoot(Wait wait) {
+        return new InstantCommand(() -> {
+            intake.set(Positions.LOWER_INTAKE.getPos());
+            intake.setSpeed(0);
+
+        });
+    }
+
 
     public Command reject() {
         return new InstantCommand(() -> {

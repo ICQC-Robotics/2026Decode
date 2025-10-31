@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Robot.commands;
 
+import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
@@ -16,7 +17,7 @@ public class AutoAim extends SequentialCommandGroup {
 
     enum Positions {
         OPEN_COVER(0.03),
-        CLOSED_COVER(0.29);
+        CLOSED_COVER(0.24);
         private final double pos;
         Positions(double pos) {
             this.pos = pos;
@@ -32,7 +33,7 @@ public class AutoAim extends SequentialCommandGroup {
         targetTagId = isBlueAlliance ? 20 : 24;
         addCommands(
                 new ParallelCommandGroup(
-                     new AutoIntake(intake, shooter).accept(),
+                    // new AutoIntake(intake, shooter).accept(),
                      AimCommand(vision, shooter, drive, wait),
                      new SequentialCommandGroup(
                           ShootCommand(vision, shooter, intake, wait)
@@ -101,31 +102,41 @@ public class AutoAim extends SequentialCommandGroup {
         );
     }
 
-    private SequentialCommandGroup ShootCommand(Vision vision, Shooter shooter, Intake intake, Wait wait) {
-        return new SequentialCommandGroup(
-            new InstantCommand(() -> {
-                shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
-            }),
 
+    public Command openShooterCover (Shooter shooter) {
+        return new InstantCommand(() -> {
+            shooter.setMagazineCover(Positions.OPEN_COVER.getPos());
+        });
+    }
+    public Command closeShooterCover (Shooter shooter) {
+        return new InstantCommand(() -> {
+            shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
+        });
+    }
+    private ParallelCommandGroup ShootCommand(Vision vision, Shooter shooter, Intake intake, Wait wait) {
+        return new ParallelCommandGroup(
             new InstantCommand(() -> {
                 shoot(vision, shooter);
             }),
+            new SequentialCommandGroup(
 
-            new InstantCommand(() -> {
-                shooter.setMagazineCover(Positions.OPEN_COVER.getPos());
-            }),
+                openShooterCover(shooter),
+                new AutoIntake(intake, shooter).stopShoot(wait),
+                new WaitCommand(wait, 2),
+                new AutoIntake(intake, shooter).accept(),
+                new WaitCommand(wait, 0.12),
+                new AutoIntake(intake, shooter).stopShoot(wait),
+                new WaitCommand(wait, 1),
+                new AutoIntake(intake, shooter).accept(),
+                new WaitCommand(wait, 0.15),
+                new AutoIntake(intake, shooter).stopShoot(wait),
+                new WaitCommand(wait, 1),
+                new AutoIntake(intake, shooter).accept(),
+                new WaitCommand(wait, 0.65),
+                new AutoIntake(intake, shooter).stopShoot(wait),
+                    closeShooterCover(shooter)
 
-            new InstantCommand(() -> {
-                for (int i = 0; i < 3; i++) {
-                    new WaitCommand(wait, 0.5);
-                    new AutoIntake(intake, shooter).accept();
-                    shoot(vision, shooter);
-                }
-            }),
-
-            new InstantCommand(() -> {
-                shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
-            })
+            )
         );
     }
 
@@ -135,7 +146,7 @@ public class AutoAim extends SequentialCommandGroup {
         double minV = 2300, maxV = 1900;
 
         double velocity = distance;
-        shooter.setVelocity(velocity);
+        shooter.setVelocity(450);
     }
 
 }
