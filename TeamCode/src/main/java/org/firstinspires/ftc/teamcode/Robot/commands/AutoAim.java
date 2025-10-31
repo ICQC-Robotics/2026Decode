@@ -137,4 +137,5 @@ public class AutoAim extends SequentialCommandGroup {
         double velocity = distance;
         shooter.setVelocity(velocity);
     }
+
 }
