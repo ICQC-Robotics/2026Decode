@@ -30,17 +30,17 @@ public class AutoAim extends SequentialCommandGroup {
 
     public AutoAim(Vision vision, Shooter shooter, Intake intake, Drive drive, Wait wait, boolean isBlueAlliance) {
         targetTagId = isBlueAlliance ? 20 : 24;
-        if(!vision.hasTarget(targetTagId)) return;
-
-        addCommands(
-                new ParallelCommandGroup(
-                        new AutoIntake(intake, shooter).accept(),
-                        AimCommand(vision, shooter, drive, wait),
-                        new SequentialCommandGroup(
-                            ShootCommand(vision, shooter, intake, wait)
-                        )
-                )
-        );
+        if(vision.hasTarget(targetTagId)) {
+            addCommands(
+                    new ParallelCommandGroup(
+                            new AutoIntake(intake, shooter).accept(),
+                            AimCommand(vision, shooter, drive, wait),
+                            new SequentialCommandGroup(
+                                    ShootCommand(vision, shooter, intake, wait)
+                            )
+                    )
+            );
+        }
     }
 
     private SequentialCommandGroup AimCommand(Vision vision, Shooter shooter, Drive drive, Wait wait) {
