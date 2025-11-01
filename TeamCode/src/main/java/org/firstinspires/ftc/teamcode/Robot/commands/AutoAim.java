@@ -154,7 +154,7 @@ public class AutoAim extends SequentialCommandGroup {
         tA_frac = Math.max(tA_MIN, Math.min(tA_frac, tA_MAX));
         double u = (tA_MAX - tA_frac) / (tA_MAX - tA_MIN);
         double velocity = V_MIN + (V_MAX - V_MIN) * Math.pow(u, GAMMA);
-        velocity = Math.min(velocity, V_MAX);
+        velocity = 2200;
 
         shooter.setPIDF(0.095, 0.0, 0, 0.57 * (velocity / 3000));
         shooter.setVelocity(velocity);
