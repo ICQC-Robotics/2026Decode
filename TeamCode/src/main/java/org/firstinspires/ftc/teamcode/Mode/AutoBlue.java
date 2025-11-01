@@ -21,9 +21,9 @@ public class AutoBlue extends OpMode {
     MecanumDrive mD;
 
     private static final double STRAFE_IN = 10.0;
-    private static final double TURN_DEG_RIGHT = -60;
+    private static final double TURN_DEG_RIGHT = -80;
     private static final double BURST_TIME_S = 5;
-    private static final double SHOOT_RPM = 2700;
+    private static final double SHOOT_RPM = 3150;
 
     @Override
     public void init() {
@@ -71,8 +71,9 @@ public class AutoBlue extends OpMode {
 
                                 // then open the cover and start feeding
                                 new InstantCommand(() -> negabot.shooter.setMagazineCover(0.03)),
-                                new AutoIntake(negabot.intake, negabot.shooter).accept(),
-                                new WaitCommand(negabot.wait, BURST_TIME_S),
+                                new WaitCommand(negabot.wait, 1),
+                                new AutoIntake(negabot.intake, negabot.shooter).acceptSlow(),
+                                new WaitCommand(negabot.wait, 5),
                                 new AutoIntake(negabot.intake, negabot.shooter).stopShoot(negabot.wait),
                                 new InstantCommand(() -> negabot.shooter.setMagazineCover(0.24))
                         )
