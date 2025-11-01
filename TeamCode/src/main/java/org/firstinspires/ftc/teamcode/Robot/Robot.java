@@ -46,7 +46,7 @@ public class Robot {
                 h.get(DcMotorEx.class, "6"), DcMotorSimple.Direction.FORWARD,
                 h.get(DcMotorEx.class, "7"), DcMotorSimple.Direction.FORWARD,
                 h.get(Servo.class, "shooter"),
-                new PIDFCoefficients(0.005, 0.0, 0, 0.75)
+                new PIDFCoefficients(0.095, 0.0, 0, 0.57)
         );
 
         vision = new Vision(h,
@@ -54,6 +54,7 @@ public class Robot {
         );
 
         wait = new Wait();
+        shooter.setMagazineCover(0.24);
     }
 
     public void Action(GamepadEx g, GamepadKeys.Button b, Command Press, Command Release) {

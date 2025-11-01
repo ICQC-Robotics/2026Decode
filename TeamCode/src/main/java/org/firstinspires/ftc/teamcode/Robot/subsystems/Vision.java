@@ -96,4 +96,15 @@ public class Vision extends SubsystemBase {
         return lastResult.getTx();
     }
 
+    public double getTa() {
+        if (lastResult == null) return Double.NaN;
+        if (!lastResult.isValid()) return Double.NaN;
+        return lastResult.getTa();
+    }
+
+    public double getTy() {
+        if (lastResult == null) return Double.NaN;
+        if (!lastResult.isValid()) return Double.NaN;
+        return lastResult.getTy();
+    }
 }
