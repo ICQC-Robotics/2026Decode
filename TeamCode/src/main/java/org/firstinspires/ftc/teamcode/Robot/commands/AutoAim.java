@@ -21,7 +21,7 @@ public class AutoAim extends SequentialCommandGroup {
 
     enum Positions {
         OPEN_COVER(0.03),
-        CLOSED_COVER(0.24);
+        CLOSED_COVER(0.27);
         private final double pos;
 
         Positions(double pos) {
@@ -129,10 +129,9 @@ public class AutoAim extends SequentialCommandGroup {
                     shoot(vision, shooter);
                 }),
                 new SequentialCommandGroup(
-                        new WaitCommand(wait, 4),
                         openShooterCover(shooter),
                         new WaitCommand(wait, 1),
-                        new AutoIntake(intake, shooter).accept(),
+                        new AutoIntake(intake, shooter).acceptSlowish(),
                         new WaitCommand(wait, 2),
                         new AutoIntake(intake, shooter).stopShoot(wait),
                         closeShooterCover(shooter)
@@ -142,21 +141,7 @@ public class AutoAim extends SequentialCommandGroup {
     }
 
     private void shoot(Vision vision, Shooter shooter) {
-        double tA = vision.getTa();
-        double tA_frac = (tA > 1.0) ? tA / 100.0 : tA;
 
-        final double tA_MIN = 0.0073;
-        final double tA_MAX = 0.059;
-        final double V_MIN = 1600;
-        final double V_MAX = 2600;
-        final double GAMMA = 1.6;
 
-        tA_frac = Math.max(tA_MIN, Math.min(tA_frac, tA_MAX));
-        double u = (tA_MAX - tA_frac) / (tA_MAX - tA_MIN);
-        double velocity = V_MIN + (V_MAX - V_MIN) * Math.pow(u, GAMMA);
-        velocity = 2200;
-
-        shooter.setPIDF(0.095, 0.0, 0, 0.57 * (velocity / 3000));
-        shooter.setVelocity(velocity);
     }
 }

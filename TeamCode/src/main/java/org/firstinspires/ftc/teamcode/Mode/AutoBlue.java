@@ -20,10 +20,10 @@ public class AutoBlue extends OpMode {
     Robot negabot;
     MecanumDrive mD;
 
-    private static final double STRAFE_IN = 10.0;
-    private static final double TURN_DEG_RIGHT = -80;
+    private static final double STRAFE_IN = -10.0;
+    private static final double TURN_DEG_RIGHT = -65;
     private static final double BURST_TIME_S = 5;
-    private static final double SHOOT_RPM = 3150;
+    private static final double SHOOT_RPM = 3050;
 
     @Override
     public void init() {

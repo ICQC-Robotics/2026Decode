@@ -53,6 +53,13 @@ public class AutoIntake extends CommandBase {
         });
     }
 
+    public Command acceptSlowish() {
+        return new InstantCommand(() -> {
+            intake.set(Positions.LOWER_INTAKE.getPos());
+            intake.setSpeed(-0.70);
+        });
+    }
+
     public Command stopShoot(Wait wait) {
         return new InstantCommand(() -> {
             intake.set(Positions.LOWER_INTAKE.getPos());

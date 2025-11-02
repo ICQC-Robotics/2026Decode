@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Robot.subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
@@ -23,10 +24,11 @@ public class Shooter extends SubsystemBase {
         this.rightShooter.setDirection(rightDir);
         this.rightShooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         this.rightShooter.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-
+        this.rightShooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         this.leftShooter.setDirection(leftDir);
         this.leftShooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         this.leftShooter.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        this.leftShooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         this.setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
     }
@@ -51,6 +53,7 @@ public class Shooter extends SubsystemBase {
 
         rightShooter.setVelocity(ticksPerSec);
         leftShooter.setVelocity(ticksPerSec);
+
     }
 
     public double getVelocity() {

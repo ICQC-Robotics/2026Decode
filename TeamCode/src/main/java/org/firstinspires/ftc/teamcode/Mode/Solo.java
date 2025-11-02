@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.Robot.commands.SetRedAlliance;
 public class Solo extends CommandOpMode {
     GamepadEx g;
     Robot negabot;
+    private static final double HOLD_RPM = 2200;
 
     @Override
     public void initialize() {
@@ -62,6 +63,17 @@ public class Solo extends CommandOpMode {
         );
     }
 
+    public void run() {
+        double velocity = 2200;
+
+        negabot.shooter.setPIDF(0.095, 0.0, 0, 0.57 * 0.8);
+        negabot.shooter.setVelocity(velocity);
+        super.run();
+    }
+
+
 
 }
+
+
 
