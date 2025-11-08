@@ -14,11 +14,6 @@ import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 public class AutoAim extends SequentialCommandGroup {
-
-    private static final double STANDBY_RPM = 1500.0;
-    private static final double TX_OK_DEG = 2.0;
-    private static final double TA_MIN_SEEN = 1e-4;
-
     enum Positions {
         OPEN_COVER(0.03),
         CLOSED_COVER(0.27);
