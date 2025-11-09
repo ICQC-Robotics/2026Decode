@@ -11,14 +11,13 @@ import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.DriveCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.SetBlueAlliance;
 import org.firstinspires.ftc.teamcode.Robot.commands.SetRedAlliance;
+import org.firstinspires.ftc.teamcode.Robot.commands.ShooterStandBy;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Vision;
 
 @TeleOp(group=".")
 public class Solo extends CommandOpMode {
     GamepadEx g;
     Robot negabot;
-    private final double aprilTagHeight = 29.5;
-    private final double limelightHeight = 17;
 
     @Override
     public void initialize() {
@@ -26,6 +25,7 @@ public class Solo extends CommandOpMode {
         negabot = new Robot(hardwareMap, g, null, true);
 
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g));
+        negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter));
 
         negabot.Action(g,
                 GamepadKeys.Button.X,
@@ -66,24 +66,8 @@ public class Solo extends CommandOpMode {
     }
 
     public void run() {
-        double distance = calculateDistance(negabot.vision);
-        telemetry.addLine("" + distance);
-        double velocity = 2200;
-
-        negabot.shooter.setPIDF(0.095, 0.0, 0, 0.57 * 0.8); //.8 = velocity / 3000
-        negabot.shooter.setVelocity(velocity);
         super.run();
     }
-
-    public double calculateDistance(Vision vision) {
-        double actualHeight = aprilTagHeight - limelightHeight;
-        double angle = 67 + vision.getTy();
-        double distance = actualHeight / Math.tan(Math.toRadians(angle));
-        return distance;
-    }
-
-
-
 }
 
 

@@ -31,10 +31,6 @@ public class Vision extends SubsystemBase {
         lastResult = limelight.getLatestResult();
     }
 
-    public boolean hasTarget(int targetID) {
-        return lastResult != null && !lastResult.getFiducialResults().isEmpty() && this.getTagID() == targetID;
-    }
-
     public int getTagID() {
         if (lastResult == null || lastResult.getFiducialResults().isEmpty()) {
             return -1;
@@ -50,31 +46,6 @@ public class Vision extends SubsystemBase {
         limelight.updateRobotOrientation(Math.toRadians(mD.localizer.getPose().heading.toDouble()));
         Pose3D pose = lastResult.getBotpose_MT2();
         return new Pose3D(pose.getPosition().toUnit(DistanceUnit.INCH), pose.getOrientation());
-    }
-
-    public Pose2d getBotPose2d() {
-        Pose3D pose = getBotPose();
-        if (pose == null) return new Pose2d();
-        return new Pose2d(
-                pose.getPosition().x,
-                pose.getPosition().y,
-                new Rotation2d(pose.getOrientation().getYaw())
-        );
-    }
-
-    public double getBotX() {
-        Pose3D pose = getBotPose();
-        return pose != null ? pose.getPosition().x : 0.0;
-    }
-
-    public double getBotY() {
-        Pose3D pose = getBotPose();
-        return pose != null ? pose.getPosition().y : 0.0;
-    }
-
-    public double getBotHeading() {
-        Pose3D pose = getBotPose();
-        return pose != null ? Math.toRadians(pose.getOrientation().getYaw()) : 0.0;
     }
 
     public void setPipeline(int index) {

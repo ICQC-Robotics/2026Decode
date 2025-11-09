@@ -30,6 +30,16 @@ public class AutoAim extends SequentialCommandGroup {
 
     private final int targetTagId;
 
+    //vision
+    double limelightHeight = 17.0;
+    double aprilTagHeight = 29.5;
+    private final double limelightPitch = 23.0;
+
+    //get new velocities when retuned
+    private final double minV = 0, maxV = 0;
+    private final double minD = 30, maxD = 70;
+
+
     public AutoAim(Vision vision, Shooter shooter, Intake intake, Drive drive, Wait wait, boolean isBlueAlliance) {
         targetTagId = isBlueAlliance ? 20 : 24;
         addCommands(
@@ -120,10 +130,11 @@ public class AutoAim extends SequentialCommandGroup {
 
     private ParallelCommandGroup ShootCommand(Vision vision, Shooter shooter, Intake intake, Wait wait) {
         return new ParallelCommandGroup(
-                new InstantCommand(() -> {
-                    shoot(vision, shooter);
-                }),
                 new SequentialCommandGroup(
+                            new InstantCommand(() -> {
+                                shooter.setVelocity(calculateVelocity(vision));
+                            }, shooter),
+
                         openShooterCover(shooter),
                         new WaitCommand(wait, 1),
                         new AutoIntake(intake, shooter).acceptSlowish(),
@@ -135,8 +146,12 @@ public class AutoAim extends SequentialCommandGroup {
         );
     }
 
-    private void shoot(Vision vision, Shooter shooter) {
+    public double calculateVelocity(Vision vision) {
+        //calc dist
+        double actualHeight = aprilTagHeight - limelightHeight;
+        double angle = limelightPitch + vision.getTy();
+        double d = actualHeight / Math.tan(Math.toRadians(angle));
 
-
+        return minV + (maxV - minV) * (d - minD)/(maxD-minD); //returns velocity
     }
 }

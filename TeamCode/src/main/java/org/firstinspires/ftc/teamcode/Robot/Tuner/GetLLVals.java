@@ -14,9 +14,6 @@ public class GetLLVals extends OpMode {
     public void init() {
         limelight = hardwareMap.get(Limelight3A.class, "ll");
         limelight.start();
-
-        telemetry.addLine("=== Limelight tA Reader ===");
-        telemetry.addLine("Center the AprilTag in view to see target area values.");
     }
 
     @Override
