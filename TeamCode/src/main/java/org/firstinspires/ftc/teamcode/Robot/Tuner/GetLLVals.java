@@ -9,6 +9,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class GetLLVals extends OpMode {
 
     private Limelight3A limelight;
+    private final double minV = 1950, maxV = 2450;
+    private final double minD = 30, maxD = 70;
 
     @Override
     public void init() {
@@ -31,11 +33,12 @@ public class GetLLVals extends OpMode {
             double actualHeight = 29.5 - 17;
             double angle = 23 + ty;
             double distance = actualHeight / Math.tan(Math.toRadians(angle));
-
+            double v = minV + (maxV - minV) * (distance - minD)/(maxD-minD); //returns velocity
             telemetry.addData("tA (raw)", tA);
             telemetry.addData("tx (raw)", tx);
             telemetry.addData("ty (raw)", ty);
             telemetry.addData("distance", distance);
+            telemetry.addData("rpm needed", v);
 
         }
 
