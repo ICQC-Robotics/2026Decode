@@ -155,12 +155,12 @@ public class AutoAim extends SequentialCommandGroup {
                 new InstantCommand(() -> {
                     double v = calculateVelocity(vision);
                     if (v < 2000) v = 2000;
-                    shooter.setPIDF(0.095, 0.0, 0, 0.63 * (v / 3000));
+                    shooter.setPIDF(0.095, 0.0, 0, 0.63 * (v / 3000)); //retune without x/3000
                     shooter.setVelocity(v);
                 }, shooter),
 
                 new AutoIntake(intake, shooter).acceptSlowish(),
-                new WaitCommand(wait, 2.5),
+                new WaitCommand(wait, 2.5), //change this so it runs when it reaches target velocity
 
                 openShooterCover(shooter),
                 new WaitCommand(wait, 2.5),
