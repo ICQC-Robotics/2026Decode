@@ -32,7 +32,7 @@ public class AutoRed extends OpMode {
         mD = negabot.drive.mD;
 
         negabot.shooter.setMagazineCover(0.24);
-        negabot.shooter.setPIDF(0.05, 0.0, 0.0, 0.75);
+        negabot.shooter.setPIDF(0.05, 0.0, 0.0, 0.58); //retune?
     }
 
     @Override

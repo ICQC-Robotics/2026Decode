@@ -128,40 +128,25 @@ public class AutoAim extends SequentialCommandGroup {
         });
     }
 
-//    private ParallelCommandGroup ShootCommand(Vision vision, Shooter shooter, Intake intake, Wait wait) {
-//        return new ParallelCommandGroup(
-//                new SequentialCommandGroup(
-//                            new InstantCommand(() -> {
-//                                double v = calculateVelocity(vision);
-//                                shooter.setPIDF(0.095, 0.0, 0, 0.57 * (v / 3000));
-//                                shooter.setVelocity(v);
-//                            }, shooter),
-//
-//                        openShooterCover(shooter),
-//                        new WaitCommand(wait, 2),
-//                        new AutoIntake(intake, shooter).accept(),
-//                        new WaitCommand(wait, 2),
-//                        new AutoIntake(intake, shooter).stopShoot(wait),
-//                        closeShooterCover(shooter)
-//                        ),
-//                new InstantCommand(() -> {
-//                    shooter.setVelocity(0);
-//                }, shooter)
-//        );
-//    }
-
     private SequentialCommandGroup ShootCommand(Vision vision, Shooter shooter, Intake intake, Wait wait) {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> {
                     double v = calculateVelocity(vision);
                     if (v < 2000) v = 2000;
-                    shooter.setPIDF(0.095, 0.0, 0, 0.63 * (v / 3000)); //retune without x/3000
                     shooter.setVelocity(v);
                 }, shooter),
 
-                new AutoIntake(intake, shooter).acceptSlowish(),
-                new WaitCommand(wait, 2.5), //change this so it runs when it reaches target velocity
+                new CommandBase() {
+                    @Override
+                    public boolean isFinished() {
+                        double actual = shooter.getVelocity();
+                        double target = calculateVelocity(vision);
+                        return Math.abs(actual - target) < 67;
+                    }
+                },
+                //if the above doesnt work (cuz im retarded), replace with this: new WaitCommand(wait, 2),
 
+                new AutoIntake(intake, shooter).acceptSlowish(),
                 openShooterCover(shooter),
                 new WaitCommand(wait, 2.5),
                 new AutoIntake(intake, shooter).stopShoot(wait),
