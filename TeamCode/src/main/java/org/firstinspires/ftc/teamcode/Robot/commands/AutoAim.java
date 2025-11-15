@@ -166,4 +166,9 @@ public class AutoAim extends SequentialCommandGroup {
 
         return minV + (maxV - minV) * (d - minD)/(maxD-minD); //returns velocity
     }
+
+    @Override
+    public boolean isFinished() {
+        return super.isFinished();
+    }
 }
