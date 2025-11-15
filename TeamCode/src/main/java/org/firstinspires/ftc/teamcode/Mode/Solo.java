@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.Mode;
 
 import com.arcrobotics.ftclib.command.CommandOpMode;
+import com.arcrobotics.ftclib.command.CommandScheduler;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -58,6 +60,15 @@ public class Solo extends CommandOpMode {
                                    negabot.isBlueAlliance()
                        ),
                        null
+        );
+
+        negabot.Action(
+                g,
+                GamepadKeys.Button.Y,
+                new InstantCommand(() -> {
+                    CommandScheduler.getInstance().cancelAll();
+                }),
+                null
         );
     }
 

@@ -32,7 +32,7 @@ public class ShooterTuner extends OpMode {
 
     @Override
     public void loop() {
-        negabot.shooter.setPIDF(kP, kI, kD, kF); //.57 @target = 3000
+        negabot.shooter.setPIDF(kP, kI, kD, kF);
         negabot.shooter.setVelocity(targetRPM);
 
         telemetry.addData("Target RPM", targetRPM);
