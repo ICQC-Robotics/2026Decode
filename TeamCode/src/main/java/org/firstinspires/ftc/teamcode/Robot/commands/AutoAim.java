@@ -144,7 +144,7 @@ public class AutoAim extends SequentialCommandGroup {
                         return Math.abs(actual - target) < 67;
                     }
                 },
-                //if the above doesnt work (cuz im retarded), replace with this: new WaitCommand(wait, 2),
+                new WaitCommand(wait, .5),
 
                 new AutoIntake(intake, shooter).acceptSlowish(),
                 openShooterCover(shooter),
