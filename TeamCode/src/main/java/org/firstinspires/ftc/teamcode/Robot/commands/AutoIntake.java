@@ -5,6 +5,8 @@ import com.arcrobotics.ftclib.command.CommandBase;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Shooter;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
 
 
@@ -25,11 +27,11 @@ public class AutoIntake extends CommandBase {
     }
 
     private Intake intake;
-    private Shooter shooter;
+    private Wait wait;
 
-    public AutoIntake(Intake intake, Shooter shooter) {
+    public AutoIntake(Intake intake, Wait wait) {
         this.intake = intake;
-        this.shooter = shooter;
+        this.wait = wait;
         addRequirements(intake);
     }
 
@@ -46,6 +48,17 @@ public class AutoIntake extends CommandBase {
             intake.setSpeed(-1);
         });
     }
+
+    public Command autoAccept(double seconds) {
+        return new SequentialCommandGroup(
+                new InstantCommand(() -> {
+                    while (wait.elapsed() < seconds) {
+                        intake.setSpeed(1);
+                    }
+                })
+        );
+    }
+
     public Command acceptSlow() {
         return new InstantCommand(() -> {
             intake.set(Positions.LOWER_INTAKE.getPos());
@@ -59,15 +72,6 @@ public class AutoIntake extends CommandBase {
             intake.setSpeed(-0.70);
         });
     }
-
-    public Command stopShoot(Wait wait) {
-        return new InstantCommand(() -> {
-            intake.set(Positions.LOWER_INTAKE.getPos());
-            intake.setSpeed(0);
-
-        });
-    }
-
 
     public Command reject() {
         return new InstantCommand(() -> {

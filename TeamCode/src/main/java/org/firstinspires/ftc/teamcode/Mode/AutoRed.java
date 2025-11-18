@@ -28,7 +28,7 @@ public class AutoRed extends OpMode {
 
     @Override
     public void init() {
-        negabot = new Robot(hardwareMap, null, null, true);
+        negabot = new Robot(hardwareMap, null, null);
         mD = negabot.drive.mD;
 
         negabot.shooter.setMagazineCover(0.24);
@@ -73,9 +73,9 @@ public class AutoRed extends OpMode {
                                 // then open the cover and start feeding
                                 new InstantCommand(() -> negabot.shooter.setMagazineCover(0.03)),
                                 new WaitCommand(negabot.wait, 1),
-                                new AutoIntake(negabot.intake, negabot.shooter).acceptSlow(),
+                                new AutoIntake(negabot.intake, negabot.wait).acceptSlow(),
                                 new WaitCommand(negabot.wait, 5),
-                                new AutoIntake(negabot.intake, negabot.shooter).stopShoot(negabot.wait),
+                                new AutoIntake(negabot.intake, negabot.wait).finish(),
                                 new InstantCommand(() -> negabot.shooter.setMagazineCover(0.24))
                         )
                 )

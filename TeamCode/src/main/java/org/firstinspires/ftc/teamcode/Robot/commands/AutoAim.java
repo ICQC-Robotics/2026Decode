@@ -28,8 +28,6 @@ public class AutoAim extends SequentialCommandGroup {
         }
     }
 
-    private final int targetTagId;
-
     //vision
     double limelightHeight = 17.0;
     double aprilTagHeight = 29.5;
@@ -40,11 +38,10 @@ public class AutoAim extends SequentialCommandGroup {
     private final double minD = 30, maxD = 70;
 
 
-    public AutoAim(Vision vision, Shooter shooter, Intake intake, Drive drive, Wait wait, boolean isBlueAlliance) {
-        targetTagId = isBlueAlliance ? 20 : 24;
+    public AutoAim(Vision vision, Shooter shooter, Intake intake, Drive drive, Wait wait) {
         addCommands(
                 new ParallelCommandGroup(
-                        AimCommand(vision, shooter, drive, wait),
+                        AimCommand(vision, drive, wait),
                         new SequentialCommandGroup(
                                 ShootCommand(vision, shooter, intake, wait)
                         )
@@ -52,7 +49,7 @@ public class AutoAim extends SequentialCommandGroup {
         );
     }
 
-    private SequentialCommandGroup AimCommand(Vision vision, Shooter shooter, Drive drive, Wait wait) {
+    private SequentialCommandGroup AimCommand(Vision vision, Drive drive, Wait wait) {
         return new SequentialCommandGroup(
                 new CommandBase() {
                     private final double kP = 0.03, MIN_TURN_POWER = 0.05, MAX_TURN_POWER = 0.4, TX_TOLERANCE_DEG = .5;
@@ -146,10 +143,10 @@ public class AutoAim extends SequentialCommandGroup {
                     }
                 },
                 //new WaitCommand(wait, 1),
-                new AutoIntake(intake, shooter).acceptSlowish(),
+                new AutoIntake(intake, wait).acceptSlowish(),
                 openShooterCover(shooter),
                 new WaitCommand(wait, 2),
-                new AutoIntake(intake, shooter).stopShoot(wait),
+                new AutoIntake(intake, wait).finish(),
                 closeShooterCover(shooter),
 
                 new InstantCommand(() -> shooter.setVelocity(0), shooter)

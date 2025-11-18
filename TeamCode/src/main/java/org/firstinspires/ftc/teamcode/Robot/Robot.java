@@ -20,11 +20,7 @@ public class Robot {
     public Vision vision;
     public Wait wait;
 
-    boolean isBlue;
-
-    public Robot(HardwareMap h, GamepadEx g1, GamepadEx g2, boolean isBlueAlliance) {
-        isBlue = isBlueAlliance;
-
+    public Robot(HardwareMap h, GamepadEx g1, GamepadEx g2) {
         drive = new Drive(
                 h, g1,
                 h.get(DcMotorEx.class, "fR"), DcMotorSimple.Direction.FORWARD,
@@ -71,13 +67,5 @@ public class Robot {
 
     public void run() {
         CommandScheduler.getInstance().run();
-    }
-
-    public void setAlliance(boolean blue) {
-        isBlue = blue;
-    }
-
-    public boolean isBlueAlliance() {
-        return isBlue;
     }
 }
