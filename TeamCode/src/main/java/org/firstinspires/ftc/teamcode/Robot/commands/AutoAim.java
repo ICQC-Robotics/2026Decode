@@ -133,6 +133,7 @@ public class AutoAim extends SequentialCommandGroup {
                 new InstantCommand(() -> {
                     double v = calculateVelocity(vision);
                     if (v < 2000) v = 2000;
+                    if (v < 3150) v = 2650;
                     shooter.setVelocity(v);
                 }, shooter),
 
@@ -141,14 +142,13 @@ public class AutoAim extends SequentialCommandGroup {
                     public boolean isFinished() {
                         double actual = shooter.getVelocity();
                         double target = calculateVelocity(vision);
-                        return Math.abs(actual - target) < 67;
+                        return Math.abs(actual - target) < 150;
                     }
                 },
-                new WaitCommand(wait, .5),
-
+                //new WaitCommand(wait, 1),
                 new AutoIntake(intake, shooter).acceptSlowish(),
                 openShooterCover(shooter),
-                new WaitCommand(wait, 2.5),
+                new WaitCommand(wait, 2),
                 new AutoIntake(intake, shooter).stopShoot(wait),
                 closeShooterCover(shooter),
 
