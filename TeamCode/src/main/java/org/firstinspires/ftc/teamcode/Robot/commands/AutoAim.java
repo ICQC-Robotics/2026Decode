@@ -14,7 +14,7 @@ import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 public class AutoAim extends SequentialCommandGroup {
-    enum Positions {
+    public enum Positions {
         OPEN_COVER(0.03),
         CLOSED_COVER(0.27);
         private final double pos;

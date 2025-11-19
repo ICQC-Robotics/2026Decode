@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
 
 
 public class AutoIntake extends CommandBase {
-    enum Positions {
+    public enum Positions {
         LOWER_INTAKE(.47),
         UPPER_INTAKE(.7);
 
