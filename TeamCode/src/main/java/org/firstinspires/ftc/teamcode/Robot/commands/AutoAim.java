@@ -28,22 +28,12 @@ public class AutoAim extends SequentialCommandGroup {
         }
     }
 
-    //vision
-    double limelightHeight = 17.0;
-    double aprilTagHeight = 29.5;
-    private final double limelightPitch = 23.0;
-
-    //tuned at 12.8v
-    private final double minV = 1950, maxV = 2450;
-    private final double minD = 30, maxD = 70;
-
-
     public AutoAim(Vision vision, Shooter shooter, Intake intake, Drive drive, Wait wait) {
         addCommands(
                 new ParallelCommandGroup(
                         AimCommand(vision, drive, wait),
                         new SequentialCommandGroup(
-                                ShootCommand(vision, shooter, intake, wait)
+                                ShootCommand(shooter, intake, wait)
                         )
                 )
         );
@@ -52,7 +42,7 @@ public class AutoAim extends SequentialCommandGroup {
     private SequentialCommandGroup AimCommand(Vision vision, Drive drive, Wait wait) {
         return new SequentialCommandGroup(
                 new CommandBase() {
-                    private final double kP = 0.03, MIN_TURN_POWER = 0.05, MAX_TURN_POWER = 0.4, TX_TOLERANCE_DEG = .5;
+                    private final double kP = 0.03, MIN_TURN_POWER = 0.05, MAX_TURN_POWER = 0.4, TX_TOLERANCE_DEG = .3;
 
                     {
                         addRequirements(drive);
@@ -125,43 +115,14 @@ public class AutoAim extends SequentialCommandGroup {
         });
     }
 
-    public SequentialCommandGroup ShootCommand(Vision vision, Shooter shooter, Intake intake, Wait wait) {
+    private SequentialCommandGroup ShootCommand(Shooter shooter, Intake intake, Wait wait) {
         return new SequentialCommandGroup(
-                new InstantCommand(() -> {
-                    double v = calculateVelocity(vision);
-                    if (v < 2000) v = 2000;
-                    //if (v < 3150) v = 2650;
-                    shooter.setVelocity(v);
-                }, shooter),
-
-                new CommandBase() {
-                    @Override
-                    public boolean isFinished() {
-                        double actual = shooter.getVelocity();
-                        double target = calculateVelocity(vision);
-                        return Math.abs(actual - target) < 150;
-                    }
-                },
-
                 new AutoIntake(intake, wait).acceptSlowish(),
                 openShooterCover(shooter),
                 new WaitCommand(wait, 2),
                 new AutoIntake(intake, wait).finish(),
-                closeShooterCover(shooter),
-
-                new InstantCommand(() -> shooter.setVelocity(0), shooter)
+                closeShooterCover(shooter)
         );
-    }
-
-
-    public double calculateVelocity(Vision vision) {
-        //calc dist
-        double actualHeight = aprilTagHeight - limelightHeight;
-        double angle = limelightPitch + vision.getTy();
-        double d = actualHeight / Math.tan(Math.toRadians(angle));
-        if (d < 30) d = 30;
-
-        return minV + (maxV - minV) * (d - minD)/(maxD-minD); //returns velocity
     }
 
     @Override
