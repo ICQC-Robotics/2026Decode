@@ -18,6 +18,7 @@ public class Duo extends CommandOpMode {
     GamepadEx g1;
     GamepadEx g2;
     Robot negabot;
+    private boolean shooterStarted = false;
 
     @Override
     public void initialize() {
@@ -26,8 +27,6 @@ public class Duo extends CommandOpMode {
         negabot = new Robot(hardwareMap, g1, g2);
 
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g1));
-        negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, negabot.vision));
-
 
         negabot.Action(g2,
                 GamepadKeys.Button.DPAD_DOWN,
@@ -66,5 +65,14 @@ public class Duo extends CommandOpMode {
                 }),
                 null
         );
+    }
+
+    public void run() {
+        super.run();
+
+        if (isStarted() && !shooterStarted) {
+            negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, negabot.vision));
+            shooterStarted = true;
+        }
     }
 }

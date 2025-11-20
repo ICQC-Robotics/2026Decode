@@ -17,13 +17,13 @@ import org.firstinspires.ftc.teamcode.Robot.commands.ShooterStandBy;
 public class Solo extends CommandOpMode {
     GamepadEx g;
     Robot negabot;
+    private boolean shooterStarted = false;
 
     @Override
     public void initialize() {
         g = new GamepadEx(gamepad1);
         negabot = new Robot(hardwareMap, g, null);
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g));
-        negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, negabot.vision));
 
         negabot.Action(g,
                        GamepadKeys.Button.RIGHT_BUMPER,
@@ -60,6 +60,11 @@ public class Solo extends CommandOpMode {
 
     public void run() {
         super.run();
+
+        if (isStarted() && !shooterStarted) {
+            negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, negabot.vision));
+            shooterStarted = true;
+        }
     }
 }
 
