@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.DriveCommand;
+import org.firstinspires.ftc.teamcode.Robot.commands.ShooterStandBy;
 
 @TeleOp(group=".")
 public class Solo extends CommandOpMode {
@@ -22,6 +23,7 @@ public class Solo extends CommandOpMode {
         g = new GamepadEx(gamepad1);
         negabot = new Robot(hardwareMap, g, null);
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g));
+        negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, negabot.vision));
 
         negabot.Action(g,
                        GamepadKeys.Button.RIGHT_BUMPER,

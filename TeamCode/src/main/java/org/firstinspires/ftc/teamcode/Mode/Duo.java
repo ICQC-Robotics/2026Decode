@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.DriveCommand;
+import org.firstinspires.ftc.teamcode.Robot.commands.ShooterStandBy;
 
 @TeleOp(group=".")
 public class Duo extends CommandOpMode {
@@ -25,6 +26,8 @@ public class Duo extends CommandOpMode {
         negabot = new Robot(hardwareMap, g1, g2);
 
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g1));
+        negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, negabot.vision));
+
 
         negabot.Action(g2,
                 GamepadKeys.Button.DPAD_DOWN,

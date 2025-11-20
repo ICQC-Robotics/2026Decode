@@ -125,7 +125,7 @@ public class AutoAim extends SequentialCommandGroup {
         });
     }
 
-    private SequentialCommandGroup ShootCommand(Vision vision, Shooter shooter, Intake intake, Wait wait) {
+    public SequentialCommandGroup ShootCommand(Vision vision, Shooter shooter, Intake intake, Wait wait) {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> {
                     double v = calculateVelocity(vision);
