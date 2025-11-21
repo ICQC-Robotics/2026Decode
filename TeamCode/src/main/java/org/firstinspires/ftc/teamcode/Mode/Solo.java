@@ -11,13 +11,11 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.DriveCommand;
-import org.firstinspires.ftc.teamcode.Robot.commands.ShooterStandBy;
 
 @TeleOp(group=".")
 public class Solo extends CommandOpMode {
     GamepadEx g;
     Robot negabot;
-    private boolean shooterStarted = false;
 
     @Override
     public void initialize() {
@@ -60,12 +58,7 @@ public class Solo extends CommandOpMode {
 
     public void run() {
         super.run();
-
-        if (isStarted() && !shooterStarted) {
-            negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, negabot.vision));
-            shooterStarted = true;
         }
-    }
 }
 
 

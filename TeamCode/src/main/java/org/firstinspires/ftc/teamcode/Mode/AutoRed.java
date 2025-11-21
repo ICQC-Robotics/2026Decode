@@ -9,76 +9,156 @@ import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.teamcode.RR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
-import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.WaitCommand;
 
-@Autonomous(group=".")
+@Autonomous(group = ".")
 public class AutoRed extends OpMode {
     Robot negabot;
     MecanumDrive mD;
 
-    private static final double STRAFE_IN = 10.0;
-    private static final double TURN_DEG_RIGHT = -80;
-    private static final double BURST_TIME_S = 5;
+
+    private static final Pose2d START_POSE = new Pose2d(0.0, 0.0, 0.0);
+
+    private static final double FIRST_SHOT_HEADING_DEG = 65;
+
+    private static final Pose2d FIRST_SHOT_POSE = new Pose2d(
+            0.0,
+            10,
+            Math.toRadians(FIRST_SHOT_HEADING_DEG)
+    );
+
+    private static final Pose2d STACK_PRE_POSE = new Pose2d(
+            10,
+            35,
+            Math.toRadians(180)
+
+    );
+
+    private static final Pose2d STACK_INTAKE_POSE = new Pose2d(
+            45.0,
+            35,
+            Math.toRadians(180)
+
+    );
+
     private static final double SHOOT_RPM = 3150;
+
+    private boolean shooterActivated = false;
 
     @Override
     public void init() {
         negabot = new Robot(hardwareMap, null, null);
         mD = negabot.drive.mD;
 
+        mD.localizer.setPose(START_POSE);
+
+        negabot.shooter.setPIDF(0.095, 0.0, 0.005, 0.57);
         negabot.shooter.setMagazineCover(0.24);
-        negabot.shooter.setPIDF(0.05, 0.0, 0.0, 0.58); //retune?
     }
 
     @Override
     public void start() {
+
+        if (!shooterActivated) {
+            negabot.shooter.setVelocity(SHOOT_RPM);
+            shooterActivated = true;
+        }
+
         Command autoSeq = new SequentialCommandGroup(
-                // 1) strafe right
+
+                //1
                 new InstantCommand(() -> {
-                    Pose2d p = mD.localizer.getPose();
                     Actions.runBlocking(
-                            mD.actionBuilder(p)
+                            mD.actionBuilder(mD.localizer.getPose())
                                     .strafeToLinearHeading(
-                                            p.position.plus(new Vector2d(0.0, STRAFE_IN)),
-                                            p.heading
+                                            new Vector2d(
+                                                    FIRST_SHOT_POSE.position.x,
+                                                    FIRST_SHOT_POSE.position.y
+                                            ),
+                                            FIRST_SHOT_POSE.heading
                                     )
                                     .build()
                     );
                 }),
 
-                // 2) turn right
+                //2
+                shoot(),
+
+                //3
                 new InstantCommand(() -> {
-                    Pose2d p = mD.localizer.getPose();
                     Actions.runBlocking(
-                            mD.actionBuilder(p)
-                                    .turn(Math.toRadians(TURN_DEG_RIGHT))
+                            mD.actionBuilder(mD.localizer.getPose())
+                                    .strafeToLinearHeading(
+                                            new Vector2d(
+                                                    STACK_PRE_POSE.position.x,
+                                                    STACK_PRE_POSE.position.y
+                                            ),
+                                            STACK_PRE_POSE.heading
+                                    )
                                     .build()
                     );
                 }),
 
-                // 3) spin shooter
-                new ParallelCommandGroup(
-                        new InstantCommand(() -> {
-                            negabot.shooter.setPIDF(0.05, 0.0, 0.0, 0.58);
-                            negabot.shooter.setVelocity(SHOOT_RPM);
-                        }),
-                        new SequentialCommandGroup(
-                                new WaitCommand(negabot.wait, 5),
+                //3
+                new InstantCommand(() -> {
+                    Actions.runBlocking(
+                            mD.actionBuilder(mD.localizer.getPose())
+                                    .strafeToLinearHeading(
+                                            new Vector2d(
+                                                    STACK_PRE_POSE.position.x,
+                                                    STACK_PRE_POSE.position.y
+                                            ),
+                                            STACK_PRE_POSE.heading
+                                    )
+                                    .build()
+                    );
+                }),
 
-                                // then open the cover and start feeding
-                                new InstantCommand(() -> negabot.shooter.setMagazineCover(0.03)),
-                                new WaitCommand(negabot.wait, 1),
-                                new AutoIntake(negabot.intake, negabot.wait).acceptSlow(),
-                                new WaitCommand(negabot.wait, 5),
-                                new AutoIntake(negabot.intake, negabot.wait).finish(),
-                                new InstantCommand(() -> negabot.shooter.setMagazineCover(0.24))
-                        )
-                )
+                //4
+                new SequentialCommandGroup(
+                        new AutoIntake(negabot.intake, negabot.wait).accept(),
+
+                        new InstantCommand(() -> {
+                            Actions.runBlocking(
+                                    mD.actionBuilder(mD.localizer.getPose())
+                                            .strafeToLinearHeading(
+                                                    new Vector2d(
+                                                            STACK_INTAKE_POSE.position.x,
+                                                            STACK_INTAKE_POSE.position.y
+                                                    ),
+                                                    STACK_INTAKE_POSE.heading
+                                            )
+                                            .build()
+                            );
+                        }),
+
+                        new WaitCommand(negabot.wait, 0.5),
+                        new AutoIntake(negabot.intake, negabot.wait).finish()
+                ),
+
+                //5
+                new InstantCommand(() -> {
+                    Actions.runBlocking(
+                            mD.actionBuilder(mD.localizer.getPose())
+                                    .strafeToLinearHeading(
+                                            new Vector2d(
+                                                    FIRST_SHOT_POSE.position.x,
+                                                    FIRST_SHOT_POSE.position.y
+                                            ),
+                                            Math.toRadians(75) //test
+                                    )
+                                    .build()
+                    );
+                }),
+
+                //6
+                shoot(),
+                new InstantCommand(() -> negabot.shooter.setVelocity(0))
         );
 
         negabot.schedule(autoSeq);
@@ -87,5 +167,19 @@ public class AutoRed extends OpMode {
     @Override
     public void loop() {
         negabot.run();
+    }
+
+    private Command shoot() {
+        return new SequentialCommandGroup(
+                new WaitCommand(negabot.wait, .5),
+                new InstantCommand(() -> negabot.shooter.setMagazineCover(0.03)),
+                new WaitCommand(negabot.wait, 0.5),
+
+                new AutoIntake(negabot.intake, negabot.wait).acceptSlow(),
+                new WaitCommand(negabot.wait, 3.0),
+
+                new AutoIntake(negabot.intake, negabot.wait).finish(),
+                new InstantCommand(() -> negabot.shooter.setMagazineCover(0.24))
+        );
     }
 }
