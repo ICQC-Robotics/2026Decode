@@ -27,8 +27,8 @@ public class AutoBack3 extends OpMode {
 
 
     private static final Pose2d LEAVE_POSE = new Pose2d(
+            15, //tune so it leaves zone
             0,
-            20.0,
             Math.toRadians(0)
     );
 

@@ -71,7 +71,7 @@ public class AutoFrontBlue3 extends OpMode {
                 new InstantCommand(() -> {
                     Pose2d p = mD.localizer.getPose();
                     Vector2d targetPos = new Vector2d(
-                            p.position.x - 15,
+                            p.position.x - 15, //tune so it leaves zone
                             p.position.y
                     );
 
@@ -100,22 +100,14 @@ public class AutoFrontBlue3 extends OpMode {
 
     private Command shoot() {
         return new SequentialCommandGroup(
+                new InstantCommand(() -> negabot.shooter.setVelocity(SHOOT_RPM)),
+                new WaitTilCommand(negabot.shooter, SHOOT_RPM, 100),
+                new AutoIntake(negabot.intake, negabot.wait).acceptSlowish(),
+                new InstantCommand(() -> negabot.shooter.setMagazineCover(0.03)),
+                new WaitCommand(negabot.wait, 3),
                 new AutoIntake(negabot.intake, negabot.wait).finish(),
-                shootHelper(),
-                shootHelper(),
-                shootHelper(),
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(0.24)),
                 new InstantCommand(() -> negabot.shooter.setVelocity(0))
-        );
-    }
-    private Command shootHelper() {
-        return new SequentialCommandGroup(
-                new InstantCommand(() -> negabot.shooter.setVelocity(SHOOT_RPM)),
-                new WaitTilCommand(negabot.shooter, SHOOT_RPM, 100), //Last num is tolerance
-                new AutoIntake(negabot.intake, negabot.wait).acceptSlow(),
-                new InstantCommand(() -> negabot.shooter.setMagazineCover(0.03)),
-                new WaitCommand(negabot.wait, 0.4), //Might Need to Tune
-                new AutoIntake(negabot.intake, negabot.wait).finish()
         );
     }
 }

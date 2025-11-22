@@ -13,20 +13,16 @@ import org.firstinspires.ftc.teamcode.RR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.WaitCommand;
+import org.firstinspires.ftc.teamcode.Robot.commands.WaitTilCommand;
 
-@Autonomous(name = "AutoBackShoot3_1900", group = ".")
-public class CloseAuto extends OpMode {
+@Autonomous(name = "CloseAutoGeneral", group = ".")
+public class AutoClosGeneral extends OpMode {
 
     Robot negabot;
     MecanumDrive mD;
 
-    // Starting pose at (0,0) heading 0
     private static final Pose2d START_POSE = new Pose2d(0, 0, 0);
-
-    // Distance to go backward (inches)
     private static final double BACK_DIST = 24.0;
-
-    // Shooter speed
     private static final double SHOOT_RPM = 1900;
 
     @Override
@@ -34,32 +30,38 @@ public class CloseAuto extends OpMode {
         negabot = new Robot(hardwareMap, null, null);
         mD = negabot.drive.mD;
 
-        // Set starting RoadRunner pose
         mD.localizer.setPose(START_POSE);
 
-        // Default shooter config
-        negabot.shooter.setPIDF(0.095, 0.0, 0.005, 0.57);
-        negabot.shooter.setMagazineCover(0.24); // closed
+        negabot.shooter.setPIDF(0.095, 0.0, 0.005, 0.54);
+        negabot.shooter.setMagazineCover(0.24);
     }
 
     @Override
     public void start() {
         Command autoSeq = new SequentialCommandGroup(
-
-                // 1) Drive backward first using RoadRunner
                 new InstantCommand(() -> {
+                    Pose2d p = mD.localizer.getPose();
+
+                    double heading = p.heading.toDouble();
+                    double dx = -BACK_DIST * Math.cos(heading);
+                    double dy = -BACK_DIST * Math.sin(heading);
+
+                    Vector2d targetPos = new Vector2d(
+                            p.position.x + dx,
+                            p.position.y + dy
+                    );
+
                     Actions.runBlocking(
-                            mD.actionBuilder(mD.localizer.getPose())
+                            mD.actionBuilder(p)
                                     .strafeToLinearHeading(
-                                            new Vector2d(0, -BACK_DIST), // backward = negative Y
-                                            0.0                           // keep heading
+                                            targetPos,
+                                            p.heading      // keep same heading
                                     )
                                     .build()
                     );
                 }),
 
-                // 2) Spin up shooter + shoot 3 notes
-                shootThreeNotes()
+                shoot()
         );
 
         negabot.schedule(autoSeq);
@@ -74,44 +76,22 @@ public class CloseAuto extends OpMode {
         telemetry.update();
     }
 
-    // Spins up shooter, fires 3, then stops shooter
-    private Command shootThreeNotes() {
+    private Command shoot() {
         return new SequentialCommandGroup(
-                // Make sure intake is off before starting
-                new AutoIntake(negabot.intake, negabot.wait).finish(),
-
-                // Spin up shooter
                 new InstantCommand(() -> negabot.shooter.setVelocity(SHOOT_RPM)),
-
-                // Three individual shots
-                shootOne(),
-                shootOne(),
-                shootOne(),
-
-                // Stop shooter & close mag at the end
-                new InstantCommand(() -> negabot.shooter.setVelocity(0)),
+                new WaitTilCommand(negabot.shooter, SHOOT_RPM, 100),
+                new AutoIntake(negabot.intake, negabot.wait).acceptSlowish(),
+                new InstantCommand(() -> negabot.shooter.setMagazineCover(0.03)),
+                new WaitCommand(negabot.wait, 3),
+                new AutoIntake(negabot.intake, negabot.wait).finish(),
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(0.24))
+
         );
     }
 
-    // Fires 1 note at current RPM
-    private Command shootOne() {
+    private Command shootHelper() {
         return new SequentialCommandGroup(
-                // Let shooter stabilize at 1900
-                new WaitCommand(negabot.wait, 1.0),
 
-                // Open mag
-                new InstantCommand(() -> negabot.shooter.setMagazineCover(0.03)),
-
-                // Start feeding
-                new AutoIntake(negabot.intake, negabot.wait).acceptSlow(),
-
-                // Time to send 1 note through – tune this
-                new WaitCommand(negabot.wait, 0.7),
-
-                // Stop feeding and close mag
-                new AutoIntake(negabot.intake, negabot.wait).finish(),
-                new InstantCommand(() -> negabot.shooter.setMagazineCover(0.24))
         );
     }
 }
