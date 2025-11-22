@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.RR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.WaitCommand;
+import org.firstinspires.ftc.teamcode.Robot.commands.WaitTilCommand;
 
 @Autonomous(group = ".")
 public class AutoRed extends OpMode {
@@ -165,16 +166,22 @@ public class AutoRed extends OpMode {
 
     private Command shoot() {
         return new SequentialCommandGroup(
-                new InstantCommand(() -> negabot.shooter.setVelocity(SHOOT_RPM)),
-                new WaitCommand(negabot.wait, 2),
-                new InstantCommand(() -> negabot.shooter.setMagazineCover(0.03)),
                 new AutoIntake(negabot.intake, negabot.wait).acceptSlow(),
-                new WaitCommand(negabot.wait, 3.0),
-
+                shootHelper(),
+                shootHelper(),
+                shootHelper(),
                 new AutoIntake(negabot.intake, negabot.wait).finish(),
-                new InstantCommand(() -> negabot.shooter.setVelocity(0)),
+                new InstantCommand(() -> negabot.shooter.setVelocity(0))
+        );
+    }
+    private Command shootHelper() {
+        return new SequentialCommandGroup(
+                new InstantCommand(() -> negabot.shooter.setVelocity(SHOOT_RPM)),
+                new WaitTilCommand(negabot.shooter, SHOOT_RPM, 100), //Last num is tolerance
+                new InstantCommand(() -> negabot.shooter.setMagazineCover(0.03)),
+                new WaitCommand(negabot.wait, 0.5), //Might Need to Tune
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(0.24))
-
         );
     }
 }
+
