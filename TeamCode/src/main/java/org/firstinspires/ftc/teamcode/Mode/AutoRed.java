@@ -166,11 +166,11 @@ public class AutoRed extends OpMode {
 
     private Command shoot() {
         return new SequentialCommandGroup(
-                new AutoIntake(negabot.intake, negabot.wait).acceptSlow(),
+                new InstantCommand(() -> negabot.shooter.setMagazineCover(0.03)),
                 shootHelper(),
                 shootHelper(),
                 shootHelper(),
-                new AutoIntake(negabot.intake, negabot.wait).finish(),
+                new InstantCommand(() -> negabot.shooter.setMagazineCover(0.24)),
                 new InstantCommand(() -> negabot.shooter.setVelocity(0))
         );
     }
@@ -178,9 +178,9 @@ public class AutoRed extends OpMode {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> negabot.shooter.setVelocity(SHOOT_RPM)),
                 new WaitTilCommand(negabot.shooter, SHOOT_RPM, 100), //Last num is tolerance
-                new InstantCommand(() -> negabot.shooter.setMagazineCover(0.03)),
+                new AutoIntake(negabot.intake, negabot.wait).acceptSlow(),
                 new WaitCommand(negabot.wait, 0.5), //Might Need to Tune
-                new InstantCommand(() -> negabot.shooter.setMagazineCover(0.24))
+                new AutoIntake(negabot.intake, negabot.wait).finish()
         );
     }
 }
