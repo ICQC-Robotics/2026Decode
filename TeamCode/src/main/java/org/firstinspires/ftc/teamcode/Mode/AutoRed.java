@@ -34,21 +34,19 @@ public class AutoRed extends OpMode {
 
     private static final Pose2d STACK_PRE_POSE = new Pose2d(
             10,
-            35,
+            37,
             Math.toRadians(180)
 
     );
 
     private static final Pose2d STACK_INTAKE_POSE = new Pose2d(
             45.0,
-            35,
+            37,
             Math.toRadians(180)
 
     );
 
     private static final double SHOOT_RPM = 3150;
-
-    private boolean shooterActivated = false;
 
     @Override
     public void init() {
@@ -63,12 +61,6 @@ public class AutoRed extends OpMode {
 
     @Override
     public void start() {
-
-        if (!shooterActivated) {
-            negabot.shooter.setVelocity(SHOOT_RPM);
-            shooterActivated = true;
-        }
-
         Command autoSeq = new SequentialCommandGroup(
 
                 //1
@@ -137,7 +129,7 @@ public class AutoRed extends OpMode {
                             );
                         }),
 
-                        new WaitCommand(negabot.wait, 0.5),
+                        new WaitCommand(negabot.wait, .5),
                         new AutoIntake(negabot.intake, negabot.wait).finish()
                 ),
 
@@ -150,15 +142,14 @@ public class AutoRed extends OpMode {
                                                     FIRST_SHOT_POSE.position.x,
                                                     FIRST_SHOT_POSE.position.y
                                             ),
-                                            Math.toRadians(75) //test
+                                            Math.toRadians(85)
                                     )
                                     .build()
                     );
                 }),
 
                 //6
-                shoot(),
-                new InstantCommand(() -> negabot.shooter.setVelocity(0))
+                shoot()
         );
 
         negabot.schedule(autoSeq);
@@ -167,19 +158,23 @@ public class AutoRed extends OpMode {
     @Override
     public void loop() {
         negabot.run();
+        telemetry.addData("Shooter Target RPM", SHOOT_RPM);
+        telemetry.addData("Shooter Actual RPM", negabot.shooter.getVelocity());
+        telemetry.update();
     }
 
     private Command shoot() {
         return new SequentialCommandGroup(
-                new WaitCommand(negabot.wait, .5),
+                new InstantCommand(() -> negabot.shooter.setVelocity(SHOOT_RPM)),
+                new WaitCommand(negabot.wait, 2),
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(0.03)),
-                new WaitCommand(negabot.wait, 0.5),
-
                 new AutoIntake(negabot.intake, negabot.wait).acceptSlow(),
                 new WaitCommand(negabot.wait, 3.0),
 
                 new AutoIntake(negabot.intake, negabot.wait).finish(),
+                new InstantCommand(() -> negabot.shooter.setVelocity(0)),
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(0.24))
+
         );
     }
 }
