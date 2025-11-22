@@ -24,16 +24,16 @@ public class AutoBack3 extends OpMode {
 
 
     private static final Pose2d START_POSE = new Pose2d(0.0, 0.0, 0.0);
-
+    private static final Pose2d FORWARD_POSE = new Pose2d(3.0, 0.0, 0.0);
 
     private static final Pose2d LEAVE_POSE = new Pose2d(
-            15, //tune so it leaves zone
+            15,
             0,
             Math.toRadians(0)
     );
 
 
-    private static final double SHOOT_RPM = 2900;
+    private static final double SHOOT_RPM = 2990;
 
     @Override
     public void init() {
@@ -49,6 +49,20 @@ public class AutoBack3 extends OpMode {
     @Override
     public void start() {
         Command autoSeq = new SequentialCommandGroup(
+                new InstantCommand(() -> {
+                    Actions.runBlocking(
+                            mD.actionBuilder(mD.localizer.getPose())
+                                    .strafeToLinearHeading(
+                                            new Vector2d(
+                                                    FORWARD_POSE.position.x,
+                                                    FORWARD_POSE.position.y
+                                            ),
+                                            LEAVE_POSE.heading
+                                    )
+                                    .build()
+                    );
+                }),
+
                 shoot(),
                 new InstantCommand(() -> {
                     Actions.runBlocking(
@@ -78,25 +92,15 @@ public class AutoBack3 extends OpMode {
 
     private Command shoot() {
         return new SequentialCommandGroup(
+                new InstantCommand(() -> negabot.shooter.setVelocity(SHOOT_RPM)),
+                new WaitTilCommand(negabot.shooter, SHOOT_RPM, 50),
+                new AutoIntake(negabot.intake, negabot.wait).acceptSlow(),
+                new InstantCommand(() -> negabot.shooter.setMagazineCover(0.03)),
+                new WaitCommand(negabot.wait, 5),
                 new AutoIntake(negabot.intake, negabot.wait).finish(),
-                shootHelper(),
-                shootHelper(),
-                shootHelper(),
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(0.24)),
                 new InstantCommand(() -> negabot.shooter.setVelocity(0))
         );
     }
-    private Command shootHelper() {
-        return new SequentialCommandGroup(
-                new InstantCommand(() -> negabot.shooter.setVelocity(SHOOT_RPM)),
-                new WaitTilCommand(negabot.shooter, SHOOT_RPM, 100), //Last num is tolerance
-                new AutoIntake(negabot.intake, negabot.wait).acceptSlow(),
-                new InstantCommand(() -> negabot.shooter.setMagazineCover(0.03)),
-                new WaitCommand(negabot.wait, 0.4), //Might Need to Tune
-                new AutoIntake(negabot.intake, negabot.wait).finish()
-        );
-    }
-
-
 }
 

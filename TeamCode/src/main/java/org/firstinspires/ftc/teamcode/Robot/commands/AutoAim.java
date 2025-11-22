@@ -34,7 +34,7 @@ public class AutoAim extends SequentialCommandGroup {
     private final double limelightPitch = 23.0;
 
     //tuned at 12.8v
-    private final double minV = 1950, maxV = 2450;
+    private final double minV = 1940, maxV = 2445;
     private final double minD = 30, maxD = 70;
 
 

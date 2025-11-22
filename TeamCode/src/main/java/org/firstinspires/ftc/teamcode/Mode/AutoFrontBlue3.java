@@ -71,8 +71,8 @@ public class AutoFrontBlue3 extends OpMode {
                 new InstantCommand(() -> {
                     Pose2d p = mD.localizer.getPose();
                     Vector2d targetPos = new Vector2d(
-                            p.position.x - 15, //tune so it leaves zone
-                            p.position.y
+                            p.position.x,
+                            p.position.y + 20
                     );
 
                     Actions.runBlocking(
