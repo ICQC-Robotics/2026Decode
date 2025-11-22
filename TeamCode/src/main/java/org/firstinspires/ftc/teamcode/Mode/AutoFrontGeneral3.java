@@ -15,8 +15,8 @@ import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.WaitCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.WaitTilCommand;
 
-@Autonomous(name = "CloseAutoGeneral", group = ".")
-public class AutoClosGeneral extends OpMode {
+@Autonomous(name = "AutoFrontGeneral3", group = ".")
+public class AutoFrontGeneral3 extends OpMode {
 
     Robot negabot;
     MecanumDrive mD;
