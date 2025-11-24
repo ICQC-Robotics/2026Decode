@@ -47,6 +47,7 @@ public class AutoAim extends SequentialCommandGroup {
                         )
                 )
         );
+        addRequirements(drive, shooter, intake);
     }
 
     private SequentialCommandGroup AimCommand(Vision vision, Drive drive, Wait wait) {
@@ -147,9 +148,6 @@ public class AutoAim extends SequentialCommandGroup {
                 openShooterCover(shooter),
                 new WaitCommand(wait, 1),
                 new AutoIntake(intake, wait).finish(),
-                closeShooterCover(shooter),
-
-                new InstantCommand(() -> shooter.setVelocity(0), shooter),
                 closeShooterCover(shooter)
         );
     }
