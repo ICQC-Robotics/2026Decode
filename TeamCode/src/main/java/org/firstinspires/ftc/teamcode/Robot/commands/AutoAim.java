@@ -67,7 +67,7 @@ public class AutoAim extends SequentialCommandGroup {
                     public void execute() {
                         double tx = vision.getTx();
                         if (Double.isNaN(tx)) {
-                            drive.stop();
+                            //drive.stop();
                             return;
                         }
 
@@ -145,7 +145,7 @@ public class AutoAim extends SequentialCommandGroup {
 
                 new AutoIntake(intake, wait).acceptSlowish(),
                 openShooterCover(shooter),
-                new WaitCommand(wait, 2),
+                new WaitCommand(wait, 1),
                 new AutoIntake(intake, wait).finish(),
                 closeShooterCover(shooter),
 
