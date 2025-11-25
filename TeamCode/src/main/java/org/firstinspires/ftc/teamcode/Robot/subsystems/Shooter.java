@@ -9,16 +9,14 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 public class Shooter extends SubsystemBase {
     private DcMotorEx rightShooter, leftShooter;
-    public final Servo cover;
     private PIDFCoefficients pidf;
 
     public Shooter(DcMotorEx rightShooter, DcMotorSimple.Direction rightDir,
                    DcMotorEx leftShooter, DcMotorSimple.Direction leftDir,
-                   Servo cover, PIDFCoefficients pidf) {
+                   PIDFCoefficients pidf) {
 
         this.rightShooter = rightShooter;
         this.leftShooter = leftShooter;
-        this.cover = cover;
         this.pidf = pidf;
 
         this.rightShooter.setDirection(rightDir);
@@ -41,10 +39,6 @@ public class Shooter extends SubsystemBase {
 
         this.rightShooter.setVelocityPIDFCoefficients(p, i, d, f);
         this.leftShooter.setVelocityPIDFCoefficients(p, i, d, f);
-    }
-
-    public void setMagazineCover(double pos) {
-        cover.setPosition(pos);
     }
 
     public void setVelocity(double rpm) {

@@ -6,20 +6,17 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class Intake extends SubsystemBase {
-    DcMotorEx intake;
-    Servo intakeServo;
+    DcMotorEx intake1, intake2;
 
-    public Intake(DcMotorEx intake, Servo intakeServo, DcMotorSimple.Direction dir) {
-        this.intake = intake;
-        this.intakeServo = intakeServo;
-        intake.setDirection(dir);
-    }
-
-    public void set(double pos) {
-        intakeServo.setPosition(pos);
+    public Intake(DcMotorEx intake1, DcMotorEx intake2, DcMotorSimple.Direction dir1, DcMotorSimple.Direction dir2) {
+        this.intake1 = intake1;
+        this.intake2 = intake2;
+        intake1.setDirection(dir1);
+        intake2.setDirection(dir2);
     }
 
     public void setSpeed(double speed) {
-        intake.setPower(speed);
+        intake1.setPower(speed);
+        intake2.setPower(speed);
     }
 }

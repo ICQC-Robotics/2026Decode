@@ -23,25 +23,22 @@ public class Robot {
     public Robot(HardwareMap h, GamepadEx g1, GamepadEx g2) {
         drive = new Drive(
                 h, g1,
-                h.get(DcMotorEx.class, "fR"), DcMotorSimple.Direction.FORWARD,
-                h.get(DcMotorEx.class, "fL"), DcMotorSimple.Direction.REVERSE,
-                h.get(DcMotorEx.class, "bR"), DcMotorSimple.Direction.FORWARD,
-                h.get(DcMotorEx.class, "bL"), DcMotorSimple.Direction.REVERSE
+                h.get(DcMotorEx.class, "m2"), DcMotorSimple.Direction.FORWARD,
+                h.get(DcMotorEx.class, "m1"), DcMotorSimple.Direction.REVERSE,
+                h.get(DcMotorEx.class, "m3"), DcMotorSimple.Direction.FORWARD,
+                h.get(DcMotorEx.class, "m4"), DcMotorSimple.Direction.REVERSE
         );
 
-        //m5 = intake
-        //m6 = shooter
-
         intake = new Intake(
-                h.get(DcMotorEx.class, "5"),
-                h.get(Servo.class, "intake"),
+                h.get(DcMotorEx.class, "m5"),
+                h.get(DcMotorEx.class, "m6"),
+                DcMotorSimple.Direction.FORWARD,
                 DcMotorSimple.Direction.FORWARD
         );
 
         shooter = new Shooter(
-                h.get(DcMotorEx.class, "6"), DcMotorSimple.Direction.FORWARD,
-                h.get(DcMotorEx.class, "7"), DcMotorSimple.Direction.FORWARD,
-                h.get(Servo.class, "shooter"),
+                h.get(DcMotorEx.class, "m7"), DcMotorSimple.Direction.FORWARD,
+                h.get(DcMotorEx.class, "m8"), DcMotorSimple.Direction.FORWARD,
                 new PIDFCoefficients(0.075, 0.0, 0.005, 0.5)
         );
 
@@ -50,7 +47,6 @@ public class Robot {
         );
 
         wait = new Wait();
-        shooter.setMagazineCover(0.24);
     }
 
     public void Action(GamepadEx g, GamepadKeys.Button b, Command Press, Command Release) {
