@@ -23,7 +23,7 @@ public class Solo extends CommandOpMode {
         g = new GamepadEx(gamepad1);
         negabot = new Robot(hardwareMap, g, null);
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g));
-        negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, 3000));
+        //negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, 3000));
         negabot.Action(g,
                        GamepadKeys.Button.RIGHT_BUMPER,
                        new AutoIntake(negabot.intake, negabot.wait).accept(),
