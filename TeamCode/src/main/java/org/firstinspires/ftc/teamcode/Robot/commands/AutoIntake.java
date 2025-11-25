@@ -9,7 +9,6 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
 
-
 public class AutoIntake extends CommandBase {
     public enum Positions {
         LOWER_INTAKE(.47),

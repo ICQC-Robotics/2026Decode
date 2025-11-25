@@ -68,7 +68,7 @@ public class AutoAim extends SequentialCommandGroup {
                     public void execute() {
                         double tx = vision.getTx();
                         if (Double.isNaN(tx)) {
-                            //drive.stop();
+                            drive.stop();
                             return;
                         }
 
