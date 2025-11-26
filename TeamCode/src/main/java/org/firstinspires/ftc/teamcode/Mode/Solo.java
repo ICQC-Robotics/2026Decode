@@ -16,38 +16,38 @@ import org.firstinspires.ftc.teamcode.Robot.commands.ShooterStandBy;
 @TeleOp(group=".")
 public class Solo extends CommandOpMode {
     GamepadEx g;
-    Robot negabot;
+    Robot goonbot;
 
     @Override
     public void initialize() {
         g = new GamepadEx(gamepad1);
-        negabot = new Robot(hardwareMap, g, null);
-        negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g));
+        goonbot = new Robot(hardwareMap, g, null);
+        goonbot.drive.setDefaultCommand(new DriveCommand(goonbot.drive, g));
 
-        negabot.Action(g,
+        goonbot.Action(g,
                        GamepadKeys.Button.RIGHT_BUMPER,
-                       new AutoIntake(negabot.intake, negabot.wait).accept(),
-                       new AutoIntake(negabot.intake, negabot.wait).finish()
+                       new AutoIntake(goonbot.intake, goonbot.wait).accept(),
+                       new AutoIntake(goonbot.intake, goonbot.wait).finish()
         );
 
-        negabot.Action(g,
+        goonbot.Action(g,
                 GamepadKeys.Button.LEFT_BUMPER,
-                new AutoIntake(negabot.intake, negabot.wait).reject(),
-                new AutoIntake(negabot.intake, negabot.wait).finish()
+                new AutoIntake(goonbot.intake, goonbot.wait).reject(),
+                new AutoIntake(goonbot.intake, goonbot.wait).finish()
         );
 
-        negabot.Action(g,
+        goonbot.Action(g,
                        GamepadKeys.Button.A,
-                       new AutoAim(negabot.vision,
-                                   negabot.shooter,
-                                   negabot.intake,
-                                   negabot.drive,
-                                   negabot.wait
+                       new AutoAim(goonbot.vision,
+                                   goonbot.shooter,
+                                   goonbot.intake,
+                                   goonbot.drive,
+                                   goonbot.wait
                        ),
                        null
         );
 
-        negabot.Action(
+        goonbot.Action(
                 g,
                 GamepadKeys.Button.Y,
                 new InstantCommand(() -> {

@@ -11,51 +11,44 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.DriveCommand;
+import org.firstinspires.ftc.teamcode.Robot.commands.ShooterStandBy;
 
 @TeleOp(group=".")
 public class Duo extends CommandOpMode {
-    GamepadEx g1;
-    GamepadEx g2;
-    Robot negabot;
+    GamepadEx g1, g2;
+    Robot goonbot;
 
     @Override
     public void initialize() {
         g1 = new GamepadEx(gamepad1);
         g2 = new GamepadEx(gamepad2);
-        negabot = new Robot(hardwareMap, g1, g2);
+        goonbot = new Robot(hardwareMap, g1, g2);
+        goonbot.drive.setDefaultCommand(new DriveCommand(goonbot.drive, g1));
 
-        negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g1));
-
-        negabot.Action(g2,
-                GamepadKeys.Button.DPAD_DOWN,
-                new AutoIntake(negabot.intake, negabot.wait).accept(),
-                null
+        goonbot.Action(g2,
+                GamepadKeys.Button.RIGHT_BUMPER,
+                new AutoIntake(goonbot.intake, goonbot.wait).accept(),
+                new AutoIntake(goonbot.intake, goonbot.wait).finish()
         );
 
-        negabot.Action(g2,
-                GamepadKeys.Button.DPAD_UP,
-                new AutoIntake(negabot.intake, negabot.wait).reject(),
-                null
+        goonbot.Action(g2,
+                GamepadKeys.Button.LEFT_BUMPER,
+                new AutoIntake(goonbot.intake, goonbot.wait).reject(),
+                new AutoIntake(goonbot.intake, goonbot.wait).finish()
         );
 
-        negabot.Action(g2,
-                GamepadKeys.Button.DPAD_LEFT,
-                new AutoIntake(negabot.intake, negabot.wait).finish(),
-                null
-        );
-
-        negabot.Action(g2,
+        goonbot.Action(g2,
                 GamepadKeys.Button.A,
-                new AutoAim(negabot.vision,
-                        negabot.shooter,
-                        negabot.intake,
-                        negabot.drive,
-                        negabot.wait
+                new AutoAim(goonbot.vision,
+                        goonbot.shooter,
+                        goonbot.intake,
+                        goonbot.drive,
+                        goonbot.wait
                 ),
                 null
         );
 
-        negabot.Action(
+        goonbot.Action(
                 g2,
                 GamepadKeys.Button.Y,
                 new InstantCommand(() -> {
@@ -69,3 +62,6 @@ public class Duo extends CommandOpMode {
         super.run();
     }
 }
+
+
+

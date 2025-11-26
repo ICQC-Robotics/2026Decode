@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.*;
 
 public class Robot {
@@ -42,8 +43,8 @@ public class Robot {
                 new PIDFCoefficients(0.075, 0.0, 0.005, 0.5)
         );
 
-        vision = new Vision(h,
-                drive
+        vision = new Vision(
+                h.get(WebcamName.class, "webcam1")
         );
 
         wait = new Wait();

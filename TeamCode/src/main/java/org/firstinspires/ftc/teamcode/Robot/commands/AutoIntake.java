@@ -10,21 +10,6 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
 
 public class AutoIntake extends CommandBase {
-    public enum Positions {
-        LOWER_INTAKE(.47),
-        UPPER_INTAKE(.7);
-
-        private final double pos;
-
-        Positions(double pos) {
-            this.pos = pos;
-        }
-
-        public double getPos() {
-            return pos;
-        }
-    }
-
     private Intake intake;
     private Wait wait;
 
@@ -34,16 +19,14 @@ public class AutoIntake extends CommandBase {
         addRequirements(intake);
     }
 
-    public Command raiseIntake() {
+    public Command accept() {
         return new InstantCommand(() -> {
-            intake.set(Positions.LOWER_INTAKE.getPos());
-
+            intake.setSpeed(1);
         });
     }
 
-    public Command accept() {
+    public Command reject() {
         return new InstantCommand(() -> {
-            intake.set(Positions.LOWER_INTAKE.getPos());
             intake.setSpeed(-1);
         });
     }
@@ -58,31 +41,9 @@ public class AutoIntake extends CommandBase {
         );
     }
 
-    public Command acceptSlow() {
-        return new InstantCommand(() -> {
-            intake.set(Positions.LOWER_INTAKE.getPos());
-            intake.setSpeed(-0.45);
-        });
-    }
-
-    public Command acceptSlowish() {
-        return new InstantCommand(() -> {
-            intake.set(Positions.LOWER_INTAKE.getPos());
-            intake.setSpeed(-0.70);
-        });
-    }
-
-    public Command reject() {
-        return new InstantCommand(() -> {
-            intake.set(Positions.LOWER_INTAKE.getPos());
-            intake.setSpeed(1);
-        });
-    }
-
     public Command finish() {
         return new InstantCommand(() -> {
             intake.setSpeed(0);
-            intake.set(Positions.LOWER_INTAKE.getPos());
         });
     }
 }
