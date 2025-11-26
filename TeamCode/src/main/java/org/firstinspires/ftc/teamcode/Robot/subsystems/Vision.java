@@ -18,11 +18,6 @@ public class Vision extends SubsystemBase {
     private AprilTagDetection latestDetection = null;
 
     public Vision(WebcamName webcam) {
-        initializeAprilTag(webcam);
-    }
-
-    private void initializeAprilTag(WebcamName webcam) {
-
         aprilTagProcessor = new AprilTagProcessor.Builder()
                 // .setDrawAxes(true)
                 // .setDrawTagOutline(true)
@@ -40,12 +35,36 @@ public class Vision extends SubsystemBase {
         return latestDetection != null;
     }
 
+    public AprilTagDetection getTag() {
+        return latestDetection;
+    }
+
     public int getTagID() {
         return hasTag() ? latestDetection.id : -1;
     }
 
-    public AprilTagDetection getTag() {
-        return latestDetection;
+    public double getTagX() {
+        return hasTag() ? latestDetection.ftcPose.x : Double.NaN;
+    }
+
+    public double getTagY() {
+        return hasTag() ? latestDetection.ftcPose.y : Double.NaN;
+    }
+
+    public double getTagZ() {
+        return hasTag() ? latestDetection.ftcPose.z : Double.NaN;
+    }
+
+    public double getTagYaw() {
+        return hasTag() ? latestDetection.ftcPose.yaw : Double.NaN;
+    }
+
+    public double getTagPitch() {
+        return hasTag() ? latestDetection.ftcPose.pitch : Double.NaN;
+    }
+
+    public double getTagRoll() {
+        return hasTag() ? latestDetection.ftcPose.roll : Double.NaN;
     }
 
     public List<AprilTagDetection> getAllTags() {
