@@ -13,6 +13,8 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import java.io.Closeable;
+
 public class AutoAim extends SequentialCommandGroup {
     public enum Positions {
         OPEN_COVER(0.03),
@@ -34,7 +36,7 @@ public class AutoAim extends SequentialCommandGroup {
     private final double limelightPitch = 23.0;
 
     //tuned at 12.8v
-    private final double minV = 1940, maxV = 2445;
+    private final double minV = 1950, maxV = 2450;
     private final double minD = 30, maxD = 70;
 
 
@@ -131,7 +133,6 @@ public class AutoAim extends SequentialCommandGroup {
                 new InstantCommand(() -> {
                     double v = calculateVelocity(vision);
                     if (v < 2000) v = 2000;
-                    //if (v < 3150) v = 2650;
                     shooter.setVelocity(v);
                 }, shooter),
 
@@ -148,7 +149,10 @@ public class AutoAim extends SequentialCommandGroup {
                 openShooterCover(shooter),
                 new WaitCommand(wait, 1),
                 new AutoIntake(intake, wait).finish(),
-                closeShooterCover(shooter)
+                closeShooterCover(shooter),
+                new InstantCommand(() -> {
+                    shooter.setVelocity(0);
+                }, shooter)
         );
     }
 
