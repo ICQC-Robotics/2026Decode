@@ -31,6 +31,8 @@ public class Shooter extends SubsystemBase {
         this.leftShooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         this.setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
+
+        this.setMagazineCover(.24);
     }
 
     public void setPIDF(double p, double i, double d, double f) {

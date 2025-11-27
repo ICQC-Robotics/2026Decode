@@ -29,9 +29,6 @@ public class Robot {
                 h.get(DcMotorEx.class, "bL"), DcMotorSimple.Direction.REVERSE
         );
 
-        //m5 = intake
-        //m6 = shooter
-
         intake = new Intake(
                 h.get(DcMotorEx.class, "5"),
                 h.get(Servo.class, "intake"),
@@ -50,7 +47,6 @@ public class Robot {
         );
 
         wait = new Wait();
-        shooter.setMagazineCover(0.24);
     }
 
     public void Action(GamepadEx g, GamepadKeys.Button b, Command Press, Command Release) {
