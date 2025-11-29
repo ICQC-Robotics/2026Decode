@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Mode;
 
 import static org.firstinspires.ftc.teamcode.PP.Tuning.follower;
 
+import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
@@ -95,8 +96,11 @@ public class AutoPedro extends OpMode {
 
     @Override
     public void init() {
+        CommandScheduler.getInstance().reset();
+
         Robot negabot = new Robot(hardwareMap, null, null);
         follower = Constants.createFollower(hardwareMap);
+        follower.setStartingPose(startPose);
         buildPaths();
 
         CommandScheduler.getInstance().schedule(
@@ -173,6 +177,7 @@ public class AutoPedro extends OpMode {
     @Override
     public void loop() {
         follower.update();
+        CommandScheduler.getInstance().run();
 
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
