@@ -37,6 +37,7 @@ public class AutoPedro extends OpMode {
     double r1y = 84; //Y of top row
     double r2y = 60; //Y of middle row
     double r3y = 36; //Y of bottom row
+
     public void buildPaths() {
         startPose = new Pose(144 - 14.57 - robotFrontToCenter * Math.cos(Math.toRadians(54.046)), 144 - 15.6 - robotFrontToCenter * Math.sin(Math.toRadians(54.046)), Math.toRadians(54.046));
         shoot = new Pose(96, 96, Math.toRadians(54.046));
@@ -92,6 +93,8 @@ public class AutoPedro extends OpMode {
     @Override
     public void init() {
         Robot negabot = new Robot(hardwareMap, null, null);
+        buildPaths();
+
         CommandScheduler.getInstance().schedule(
             new SequentialCommandGroup(
                     new ParallelCommandGroup(
