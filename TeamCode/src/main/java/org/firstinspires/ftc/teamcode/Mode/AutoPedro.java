@@ -181,7 +181,7 @@ public class AutoPedro extends OpMode {
 
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
-        telemetry.addData("heading", follower.getPose().getHeading());
+        //telemetry.addData("heading", follower.getPose().getHeading());
         telemetry.update();
     }
 }
