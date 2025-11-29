@@ -6,6 +6,7 @@ import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.pedropathing.Drivetrain;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.localization.localizers.PinpointLocalizer;
@@ -18,6 +19,7 @@ import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.teamcode.PP.Constants;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
@@ -26,6 +28,7 @@ import org.firstinspires.ftc.teamcode.Robot.commands.WaitCommand;
 
 @Autonomous
 public class AutoPedro extends OpMode {
+    private Follower follower;
     Path s;
     PathChain i1, s1, i2, s2, i3, s3, leave;
     Pose startPose, shoot, grab1i, grab1f, grab2i, grab2f, grab3i, grab3f, leavePos;
@@ -93,6 +96,7 @@ public class AutoPedro extends OpMode {
     @Override
     public void init() {
         Robot negabot = new Robot(hardwareMap, null, null);
+        follower = Constants.createFollower(hardwareMap);
         buildPaths();
 
         CommandScheduler.getInstance().schedule(
