@@ -69,7 +69,6 @@ public class TruePedro extends CommandOpMode {
                                    negabot.wait)
                 )
         );
-
     }
 
     public void run() {
