@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.*;
 
 public class Robot {
@@ -20,9 +21,9 @@ public class Robot {
     public Vision vision;
     public Wait wait;
 
-    public Robot(HardwareMap h, GamepadEx g1, GamepadEx g2) {
+    public Robot(HardwareMap h, Telemetry t) {
         drive = new Drive(
-                h, g1,
+                h, t,
                 h.get(DcMotorEx.class, "fR"), DcMotorSimple.Direction.FORWARD,
                 h.get(DcMotorEx.class, "fL"), DcMotorSimple.Direction.REVERSE,
                 h.get(DcMotorEx.class, "bR"), DcMotorSimple.Direction.FORWARD,
@@ -57,7 +58,7 @@ public class Robot {
         }
     }
 
-    public void schedule(Command command) {
+    public void schedule(Command... command) {
         CommandScheduler.getInstance().schedule(command);
     }
 
