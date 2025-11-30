@@ -22,7 +22,7 @@ public class GetRPMVals extends OpMode {
     public void init() {
         GamepadEx g = new GamepadEx(gamepad1);
 
-        negabot = new Robot(hardwareMap, g, null);
+        negabot = new Robot(hardwareMap, telemetry);
 
         telemetry.addLine("dpad up/down = +/- 50 RPM");
         telemetry.addLine("dpad right/left =  +/- 200 RPM");

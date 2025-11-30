@@ -24,8 +24,7 @@ public class ShooterTuner extends OpMode {
     @Override
     public void init() {
         negabot = new Robot(hardwareMap,
-                new GamepadEx(gamepad1),
-                new GamepadEx(gamepad2)
+                telemetry
         );
     }
 
