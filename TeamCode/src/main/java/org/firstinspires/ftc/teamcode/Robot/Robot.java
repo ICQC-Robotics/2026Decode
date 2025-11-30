@@ -43,8 +43,8 @@ public class Robot {
                 new PIDFCoefficients(0.075, 0.0, 0.005, 0.5)
         );
 
-        vision = new Vision(h,
-                drive
+        vision = new Vision(
+                h, drive
         );
 
         wait = new Wait();
