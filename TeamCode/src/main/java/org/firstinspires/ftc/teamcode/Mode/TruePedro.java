@@ -66,7 +66,7 @@ public class TruePedro extends CommandOpMode {
                                 negabot.wait),
                     new FollowPathCommand(follower, moveToGrab),
                     new AutoIntake(negabot.intake,
-                                   negabot.wait)
+                                   negabot.wait).autoAccept(3)
                 )
         );
     }
