@@ -100,8 +100,11 @@ public class AutoPedro extends OpMode {
 
         Robot negabot = new Robot(hardwareMap, null, null);
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(startPose);
+        telemetry.addData("follower",follower);
+        telemetry.update();
         buildPaths();
+        follower.setStartingPose(startPose);
+
 
         CommandScheduler.getInstance().schedule(
             new SequentialCommandGroup(
@@ -181,7 +184,7 @@ public class AutoPedro extends OpMode {
 
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
-        //telemetry.addData("heading", follower.getPose().getHeading());
+        telemetry.addData("heading", follower.getPose().getHeading());
         telemetry.update();
     }
 }
