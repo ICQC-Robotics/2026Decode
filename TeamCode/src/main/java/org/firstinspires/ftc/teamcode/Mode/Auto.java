@@ -7,7 +7,7 @@ import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
@@ -16,11 +16,12 @@ import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
 /**
 * @author
  * In the name of Allah, the Most Compassionate, the Most Merciful
+ * True Pedro
  * Brutal
  */
 
 @Autonomous(group="!", name="Auto")
-public class TruePedro extends CommandOpMode {
+public class Auto extends CommandOpMode {
     Robot negabot;
     Follower follower = negabot.drive.follower;
     PathChain moveToShoot, moveToGrab;
