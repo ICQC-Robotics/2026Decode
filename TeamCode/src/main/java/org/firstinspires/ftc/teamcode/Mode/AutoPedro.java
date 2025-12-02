@@ -33,9 +33,9 @@ public class AutoPedro extends OpMode {
     Path s;
     PathChain i1, s1, i2, s2, i3, s3, leave;
     Pose startPose, shoot, grab1i, grab1f, grab2i, grab2f, grab3i, grab3f, leavePos;
-    double shooterVelo = 1500; //speed the shooter should shoot at TODO: Find
-    double shooterWaitTime = 1; //how long (in seconds) the shooter should shoot for TODO: Find
-    double robotFrontToCenter = 6.7; //distance between the front of the robot and the center TODO: Fimd
+    double shooterVelo = 2250; //speed the shooter should shoot at TODO: Find
+    double shooterWaitTime = 2.9; //how long (in seconds) the shooter should shoot for TODO: Find
+    double robotFrontToCenter = 7; //distance between the front of the robot and the center TODO: Fimd
     double intakeXi = 100; //X to start intaking at
     double intakeXf = 120; //X to stop intaking at
     double r1y = 84; //Y of top row
