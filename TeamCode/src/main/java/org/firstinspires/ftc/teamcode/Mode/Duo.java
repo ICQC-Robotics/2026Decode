@@ -22,7 +22,7 @@ public class Duo extends CommandOpMode {
     public void initialize() {
         g1 = new GamepadEx(gamepad1);
         g2 = new GamepadEx(gamepad2);
-        negabot = new Robot(hardwareMap, g1, g2);
+        negabot = new Robot(hardwareMap, telemetry);
 
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g1));
 
@@ -66,6 +66,6 @@ public class Duo extends CommandOpMode {
     }
 
     public void run() {
-        super.run();
+        negabot.run();
     }
 }

@@ -27,7 +27,7 @@ public class AutoFrontGeneral3 extends OpMode {
 
     @Override
     public void init() {
-        negabot = new Robot(hardwareMap, null, null);
+        negabot = new Robot(hardwareMap, telemetry);
         mD = negabot.drive.mD;
 
         mD.localizer.setPose(START_POSE);

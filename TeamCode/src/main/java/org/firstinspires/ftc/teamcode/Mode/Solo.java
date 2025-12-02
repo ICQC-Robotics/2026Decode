@@ -21,7 +21,7 @@ public class Solo extends CommandOpMode {
     @Override
     public void initialize() {
         g = new GamepadEx(gamepad1);
-        negabot = new Robot(hardwareMap, g, null);
+        negabot = new Robot(hardwareMap, telemetry);
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g));
 
         negabot.Action(g,
@@ -58,8 +58,8 @@ public class Solo extends CommandOpMode {
     }
 
     public void run() {
-        super.run();
-        }
+        negabot.run();
+    }
 }
 
 
