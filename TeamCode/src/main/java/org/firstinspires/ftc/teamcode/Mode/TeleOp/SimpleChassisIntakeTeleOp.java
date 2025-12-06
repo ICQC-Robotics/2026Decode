@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 public class SimpleChassisIntakeTeleOp extends OpMode {
 
     private DcMotor frontLeft, frontRight, backLeft, backRight;
-    private DcMotor intake;
+    //private DcMotor intake;
 
     @Override
     public void init() {
@@ -17,7 +17,7 @@ public class SimpleChassisIntakeTeleOp extends OpMode {
         frontRight = hardwareMap.get(DcMotor.class, "m2");
         backLeft   = hardwareMap.get(DcMotor.class, "m3");
         backRight  = hardwareMap.get(DcMotor.class, "m4");
-        intake     = hardwareMap.get(DcMotor.class, "intake");
+      //  intake     = hardwareMap.get(DcMotor.class, "intake");
 
         frontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeft.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -41,10 +41,10 @@ public class SimpleChassisIntakeTeleOp extends OpMode {
 
         // --- INTAKE ---
         // If 'A' pressed, run intake forward; else stop
-        if (gamepad1.a) {
-            intake.setPower(1.0);
-        } else {
-            intake.setPower(0.0);
+        //if (gamepad1.a) {
+            //intake.setPower(1.0);
+        //} else {
+           // intake.setPower(0.0);
         }
 
         // (Optional) Add reverse with another button:
@@ -52,7 +52,7 @@ public class SimpleChassisIntakeTeleOp extends OpMode {
 
         telemetry.addData("Left Power", leftPower);
         telemetry.addData("Right Power", rightPower);
-        telemetry.addData("Intake Power", intake.getPower());
+        //telemetry.addData("Intake Power", intake.getPower());
         telemetry.update();
     }
 }
