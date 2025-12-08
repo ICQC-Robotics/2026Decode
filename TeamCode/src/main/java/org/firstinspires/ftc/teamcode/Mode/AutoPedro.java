@@ -30,13 +30,15 @@ import org.firstinspires.ftc.teamcode.Robot.commands.WaitCommand;
 @Autonomous
 public class AutoPedro extends OpMode {
     private Follower follower;
+    private Robot negabot;
     Path s;
     PathChain i1, s1, i2, s2, i3, s3, leave;
     Pose startPose, shoot, grab1i, grab1f, grab2i, grab2f, grab3i, grab3f, leavePos;
-    double shooterVelo = 2250; //speed the shooter should shoot at TODO: Find
-    double shooterWaitTime = 2.9; //how long (in seconds) the shooter should shoot for TODO: Find
-    double robotFrontToCenter = 7; //distance between the front of the robot and the center TODO: Fimd
+    double shooterVelo = 2150; //speed the shooter should shoot at
+    double shooterWaitTime = 2; //how long (in seconds) the shooter should shoot for
+    double robotFrontToCenter = 8; //distance between the front of the robot and the center
     double intakeXi = 100; //X to start intaking at
+    double intakeHeadingRad = Math.toRadians(180);
     double intakeXf = 120; //X to stop intaking at
     double r1y = 84; //Y of top row
     double r2y = 60; //Y of middle row
@@ -45,12 +47,12 @@ public class AutoPedro extends OpMode {
     public void buildPaths() {
         startPose = new Pose(144 - 14.57 - robotFrontToCenter * Math.cos(Math.toRadians(54.046)), 144 - 15.6 - robotFrontToCenter * Math.sin(Math.toRadians(54.046)), Math.toRadians(54.046));
         shoot = new Pose(96, 96, Math.toRadians(54.046));
-        grab1i = new Pose(intakeXi, r1y, 0);
-        grab1f = new Pose(intakeXf, r1y, 0);
-        grab2i = new Pose(intakeXi, r2y, 0);
-        grab2f = new Pose(intakeXf, r2y, 0);
-        grab3i = new Pose(intakeXi, r3y, 0);
-        grab3f = new Pose(intakeXf, r3y, 0);
+        grab1i = new Pose(intakeXi, r1y, intakeHeadingRad);
+        grab1f = new Pose(intakeXf, r1y, intakeHeadingRad);
+        grab2i = new Pose(intakeXi, r2y, intakeHeadingRad);
+        grab2f = new Pose(intakeXf, r2y, intakeHeadingRad);
+        grab3i = new Pose(intakeXi, r3y, intakeHeadingRad);
+        grab3f = new Pose(intakeXf, r3y, intakeHeadingRad);
         leavePos = new Pose(110, 100, Math.toRadians(54.046));
 
         s = new Path(new BezierCurve(startPose, shoot));
@@ -100,82 +102,84 @@ public class AutoPedro extends OpMode {
 
         Robot negabot = new Robot(hardwareMap, telemetry);
         follower = Constants.createFollower(hardwareMap);
-        telemetry.addData("follower",follower);
+        telemetry.addData("follower", follower);
         telemetry.update();
         buildPaths();
         follower.setStartingPose(startPose);
-
-
-        CommandScheduler.getInstance().schedule(
-            new SequentialCommandGroup(
-                    new ParallelCommandGroup(
-                            new FollowPathCommand(follower, s),
-                            new InstantCommand(() -> {
-                                negabot.shooter.setVelocity(shooterVelo);
-                            }),
-                            new InstantCommand(() -> {
-                                negabot.intake.setSpeed(-1);
-                            })
-                    ),
-                    new InstantCommand(() -> {
-                        negabot.shooter.setMagazineCover(AutoAim.Positions.OPEN_COVER.getPos());
-                    }),
-                    new WaitCommand(negabot.wait, shooterWaitTime),
-                    new ParallelCommandGroup(
-                            new FollowPathCommand(follower, i1),
-                            new InstantCommand(() -> {
-                                negabot.shooter.setMagazineCover(AutoAim.Positions.CLOSED_COVER.getPos());
-                            }),
-                            new InstantCommand(() -> {
-                                negabot.intake.set(AutoIntake.Positions.LOWER_INTAKE.getPos());
-                            })
-                    ),
-                    new InstantCommand(() -> {
-                        negabot.intake.set(AutoIntake.Positions.UPPER_INTAKE.getPos());
-                    }),
-                    new FollowPathCommand(follower, s1),
-                    new InstantCommand(() -> {
-                        negabot.shooter.setMagazineCover(AutoAim.Positions.OPEN_COVER.getPos());
-                    }),
-                    new WaitCommand(negabot.wait, shooterWaitTime),
-                    new ParallelCommandGroup(
-                            new FollowPathCommand(follower, i2),
-                            new InstantCommand(() -> {
-                                negabot.shooter.setMagazineCover(AutoAim.Positions.CLOSED_COVER.getPos());
-                            }),
-                            new InstantCommand(() -> {
-                                negabot.intake.set(AutoIntake.Positions.LOWER_INTAKE.getPos());
-                            })
-                    ),
-                    new InstantCommand(() -> {
-                        negabot.intake.set(AutoIntake.Positions.UPPER_INTAKE.getPos());
-                    }),
-                    new FollowPathCommand(follower, s2),
-                    new InstantCommand(() -> {
-                        negabot.shooter.setMagazineCover(AutoAim.Positions.OPEN_COVER.getPos());
-                    }),
-                    new WaitCommand(negabot.wait, shooterWaitTime),
-                    new ParallelCommandGroup(
-                            new FollowPathCommand(follower, i3),
-                            new InstantCommand(() -> {
-                                negabot.shooter.setMagazineCover(AutoAim.Positions.CLOSED_COVER.getPos());
-                            }),
-                            new InstantCommand(() -> {
-                                negabot.intake.set(AutoIntake.Positions.LOWER_INTAKE.getPos());
-                            })
-                    ),
-                    new InstantCommand(() -> {
-                        negabot.intake.set(AutoIntake.Positions.UPPER_INTAKE.getPos());
-                    }),
-                    new FollowPathCommand(follower, s3),
-                    new InstantCommand(() -> {
-                        negabot.shooter.setMagazineCover(AutoAim.Positions.OPEN_COVER.getPos());
-                    }),
-                    new WaitCommand(negabot.wait, shooterWaitTime),
-                    new FollowPathCommand(follower, leave)
-            )
-        );
     }
+
+    @Override
+    public void start() {
+            CommandScheduler.getInstance().schedule(
+                    new SequentialCommandGroup(
+                            new ParallelCommandGroup(
+                                    new FollowPathCommand(follower, s),
+                                    new InstantCommand(() -> {
+                                        negabot.shooter.setVelocity(shooterVelo);
+                                    }),
+                                    new InstantCommand(() -> {
+                                        negabot.intake.setSpeed(-1);
+                                    })
+                            ),
+                            new InstantCommand(() -> {
+                                negabot.shooter.setMagazineCover(AutoAim.Positions.OPEN_COVER.getPos());
+                            }),
+                            new WaitCommand(negabot.wait, shooterWaitTime),
+                            new ParallelCommandGroup(
+                                    new FollowPathCommand(follower, i1),
+                                    new InstantCommand(() -> {
+                                        negabot.shooter.setMagazineCover(AutoAim.Positions.CLOSED_COVER.getPos());
+                                    }),
+                                    new InstantCommand(() -> {
+                                        negabot.intake.set(AutoIntake.Positions.LOWER_INTAKE.getPos());
+                                    })
+                            ),
+                            new InstantCommand(() -> {
+                                negabot.intake.set(AutoIntake.Positions.UPPER_INTAKE.getPos());
+                            }),
+                            new FollowPathCommand(follower, s1),
+                            new InstantCommand(() -> {
+                                negabot.shooter.setMagazineCover(AutoAim.Positions.OPEN_COVER.getPos());
+                            }),
+                            new WaitCommand(negabot.wait, shooterWaitTime),
+                            new ParallelCommandGroup(
+                                    new FollowPathCommand(follower, i2),
+                                    new InstantCommand(() -> {
+                                        negabot.shooter.setMagazineCover(AutoAim.Positions.CLOSED_COVER.getPos());
+                                    }),
+                                    new InstantCommand(() -> {
+                                        negabot.intake.set(AutoIntake.Positions.LOWER_INTAKE.getPos());
+                                    })
+                            ),
+                            new InstantCommand(() -> {
+                                negabot.intake.set(AutoIntake.Positions.UPPER_INTAKE.getPos());
+                            }),
+                            new FollowPathCommand(follower, s2),
+                            new InstantCommand(() -> {
+                                negabot.shooter.setMagazineCover(AutoAim.Positions.OPEN_COVER.getPos());
+                            }),
+                            new WaitCommand(negabot.wait, shooterWaitTime),
+                            new ParallelCommandGroup(
+                                    new FollowPathCommand(follower, i3),
+                                    new InstantCommand(() -> {
+                                        negabot.shooter.setMagazineCover(AutoAim.Positions.CLOSED_COVER.getPos());
+                                    }),
+                                    new InstantCommand(() -> {
+                                        negabot.intake.set(AutoIntake.Positions.LOWER_INTAKE.getPos());
+                                    })
+                            ),
+                            new InstantCommand(() -> {
+                                negabot.intake.set(AutoIntake.Positions.UPPER_INTAKE.getPos());
+                            }),
+                            new FollowPathCommand(follower, s3),
+                            new InstantCommand(() -> {
+                                negabot.shooter.setMagazineCover(AutoAim.Positions.OPEN_COVER.getPos());
+                            }),
+                            new WaitCommand(negabot.wait, shooterWaitTime),
+                            new FollowPathCommand(follower, leave)
+                    )
+            );
+        }
 
     @Override
     public void loop() {
