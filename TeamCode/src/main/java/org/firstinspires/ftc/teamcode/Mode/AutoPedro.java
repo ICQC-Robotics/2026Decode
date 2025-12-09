@@ -101,7 +101,7 @@ public class AutoPedro extends OpMode {
         CommandScheduler.getInstance().reset();
 
         Robot negabot = new Robot(hardwareMap, telemetry);
-        follower = Constants.createFollower(hardwareMap);
+        follower = negabot.drive.follower;
         telemetry.addData("follower", follower);
         telemetry.update();
         buildPaths();
@@ -183,7 +183,6 @@ public class AutoPedro extends OpMode {
 
     @Override
     public void loop() {
-        follower.update();
         CommandScheduler.getInstance().run();
 
         telemetry.addData("x", follower.getPose().getX());
