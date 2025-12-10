@@ -18,7 +18,7 @@ public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(7.71)
             .forwardZeroPowerAcceleration(-32.448) //TODO: change manually
-            .lateralZeroPowerAcceleration(-61.192)
+            .lateralZeroPowerAcceleration(-61.192) //TODO: change manually
             .translationalPIDFCoefficients(new PIDFCoefficients(0.1, 0, 0.01, 0))
             .headingPIDFCoefficients(new PIDFCoefficients(1, 0, .02, 0))
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.1,0.0,0.0001,0.6,0.0)); //TODO: retune
@@ -26,7 +26,7 @@ public class Constants {
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1.15, 1.15);
 
     public static MecanumConstants driveConstants = new MecanumConstants()
-            .maxPower(1) //TODO: lower this to see if accuracy changes
+            .maxPower(1)
             .rightFrontMotorName("fR")
             .rightRearMotorName("bR")
             .leftRearMotorName("bL")

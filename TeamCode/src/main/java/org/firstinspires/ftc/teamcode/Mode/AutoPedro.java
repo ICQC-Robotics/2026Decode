@@ -99,8 +99,7 @@ public class AutoPedro extends OpMode {
     @Override
     public void init() {
         CommandScheduler.getInstance().reset();
-
-        Robot negabot = new Robot(hardwareMap, telemetry);
+        negabot = new Robot(hardwareMap, telemetry);
         follower = negabot.drive.follower;
         telemetry.addData("follower", follower);
         telemetry.update();
