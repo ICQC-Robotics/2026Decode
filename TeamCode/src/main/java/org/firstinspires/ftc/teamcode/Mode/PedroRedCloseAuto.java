@@ -28,7 +28,7 @@ import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.WaitCommand;
 
 @Autonomous
-public class AutoPedro extends OpMode {
+public class PedroRedCloseAuto extends OpMode {
     private Follower follower;
     private Robot negabot;
     Path s;
