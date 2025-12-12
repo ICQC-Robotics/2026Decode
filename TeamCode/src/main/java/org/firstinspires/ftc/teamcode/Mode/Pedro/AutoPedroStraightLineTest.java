@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Mode;
+package org.firstinspires.ftc.teamcode.Mode.Pedro;
 
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;

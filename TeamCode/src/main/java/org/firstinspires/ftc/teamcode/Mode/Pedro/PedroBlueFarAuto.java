@@ -153,7 +153,7 @@ public class PedroBlueFarAuto extends OpMode {
                                         negabot.shooter.setVelocity(shooterVelo)
                                 ),
                                 new InstantCommand(() ->
-                                        negabot.intake.setSpeed(-1)
+                                        negabot.intake.setSpeed(-.7)
                                 )
                         ),
                         new InstantCommand(() ->
