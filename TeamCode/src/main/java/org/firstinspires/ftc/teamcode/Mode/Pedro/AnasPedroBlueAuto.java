@@ -16,6 +16,8 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
+import org.firstinspires.ftc.teamcode.Robot.commands.WaitCommand;
+import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
 
 
 class Paths {
@@ -133,37 +135,50 @@ public class AnasPedroBlueAuto extends OpMode {
     public void start(){
         // build a sequential group of commands
         autoSequence = new SequentialCommandGroup(
+                new InstantCommand(()->{
+                    negabot.shooter.setVelocity(shooterVelo);
+                }),
+                new InstantCommand(()->{
+                    negabot.intake.setSpeed(-1);
+                }),
                 // Path 1
                 new FollowPathCommand(follower, Path1),
                 // Path 2
                 new FollowPathCommand(follower, Path2),
                 new InstantCommand(() ->{
-                    new AutoAim(negabot.vision,negabot.shooter,negabot.intake,negabot.drive,negabot.wait);
+                    negabot.shooter.setMagazineCover(AutoAim.Positions.OPEN_COVER.getPos());
                 }),
-                new InstantCommand(()->{
-                    new AutoIntake(negabot.intake,negabot.wait);
+                new WaitCommand(negabot.wait, shooterWaitTime),
+                new InstantCommand(() ->{
+                    negabot.shooter.setMagazineCover(AutoAim.Positions.CLOSED_COVER.getPos());
                 }),
 
                 // Path 3 (reversed path)
                 new FollowPathCommand(follower, Path3),
                 // Path 4
                 new FollowPathCommand(follower, Path4),
+                new FollowPathCommand(follower, Path2),
                 new InstantCommand(() ->{
-                    new AutoAim(negabot.vision,negabot.shooter,negabot.intake,negabot.drive,negabot.wait);
+                    negabot.shooter.setMagazineCover(AutoAim.Positions.OPEN_COVER.getPos());
                 }),
-                new InstantCommand(()->{
-                    new AutoIntake(negabot.intake,negabot.wait);
+                new WaitCommand(negabot.wait, shooterWaitTime),
+                new InstantCommand(() ->{
+                    negabot.shooter.setMagazineCover(AutoAim.Positions.CLOSED_COVER.getPos());
                 }),
+
                 // Path 5 (reversed path)
                 new FollowPathCommand(follower, Path5),
                 // Path 6
                 new FollowPathCommand(follower, Path6),
+                new FollowPathCommand(follower, Path2),
                 new InstantCommand(() ->{
-                    new AutoAim(negabot.vision,negabot.shooter,negabot.intake,negabot.drive,negabot.wait);
+                    negabot.shooter.setMagazineCover(AutoAim.Positions.OPEN_COVER.getPos());
                 }),
-                new InstantCommand(()->{
-                    new AutoIntake(negabot.intake,negabot.wait);
+                new WaitCommand(negabot.wait, shooterWaitTime),
+                new InstantCommand(() ->{
+                    negabot.shooter.setMagazineCover(AutoAim.Positions.CLOSED_COVER.getPos());
                 })
+
 
         );
 
