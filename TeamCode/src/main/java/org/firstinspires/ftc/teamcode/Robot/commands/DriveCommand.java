@@ -2,13 +2,13 @@ package org.firstinspires.ftc.teamcode.Robot.commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
+import org.firstinspires.ftc.teamcode.Robot.subsystems.FieldCentricDrive;
 
 public class DriveCommand extends CommandBase {
-    private final Drive driveSubsystem;
+    private final FieldCentricDrive driveSubsystem;
     private final GamepadEx gamepad;
 
-    public DriveCommand(Drive drive, GamepadEx g) {
+    public DriveCommand(FieldCentricDrive drive, GamepadEx g) {
         this.driveSubsystem = drive;
         this.gamepad = g;
         addRequirements(driveSubsystem);

@@ -5,15 +5,11 @@ import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
+import org.firstinspires.ftc.teamcode.Robot.subsystems.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Vision;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
-import com.arcrobotics.ftclib.command.ConditionalCommand;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-
-import java.io.Closeable;
 
 public class AutoAim extends SequentialCommandGroup {
     public enum Positions {
@@ -40,7 +36,7 @@ public class AutoAim extends SequentialCommandGroup {
     private final double minD = 30, maxD = 70;
 
 
-    public AutoAim(Vision vision, Shooter shooter, Intake intake, Drive drive, Wait wait) {
+    public AutoAim(Vision vision, Shooter shooter, Intake intake, FieldCentricDrive drive, Wait wait) {
         addCommands(
                 new ParallelCommandGroup(
                         AimCommand(vision, drive, wait),
@@ -52,7 +48,7 @@ public class AutoAim extends SequentialCommandGroup {
         addRequirements(drive, shooter, intake);
     }
 
-    private SequentialCommandGroup AimCommand(Vision vision, Drive drive, Wait wait) {
+    private SequentialCommandGroup AimCommand(Vision vision, FieldCentricDrive drive, Wait wait) {
         return new SequentialCommandGroup(
                 new CommandBase() {
                     private final double kP = 0.03, MIN_TURN_POWER = 0.05, MAX_TURN_POWER = 0.4, TX_TOLERANCE_DEG = .3;

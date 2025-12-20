@@ -50,7 +50,7 @@ public class FieldCentricDrive extends SubsystemBase {
 
 
         double x = g.getLeftX();
-        double y = -g.getLeftY();
+        double y = g.getLeftY();
 
         double heading = this.getHeading();
 

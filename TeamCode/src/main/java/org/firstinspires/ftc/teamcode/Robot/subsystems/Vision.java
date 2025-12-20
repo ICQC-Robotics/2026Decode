@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.Robot.subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.arcrobotics.ftclib.geometry.Pose2d;
-import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -10,8 +8,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.robotcore.external.navigation.Position;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.RR.MecanumDrive;
 
 public class Vision extends SubsystemBase {
@@ -19,7 +15,7 @@ public class Vision extends SubsystemBase {
     private final Limelight3A limelight;
     private LLResult lastResult;
 
-    public Vision(HardwareMap hardwareMap, Drive drive) {
+    public Vision(HardwareMap hardwareMap, FieldCentricDrive drive) {
         mD = drive.getMecanumDrive();
         limelight = hardwareMap.get(Limelight3A.class, "ll");
         limelight.pipelineSwitch(0);
