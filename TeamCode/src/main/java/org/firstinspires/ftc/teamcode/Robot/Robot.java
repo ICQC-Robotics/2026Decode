@@ -18,6 +18,7 @@ public class Robot {
     public FieldCentricDrive drive;
     public Intake intake;
     public Shooter shooter;
+    public Turret turret;
     public Vision vision;
     public Wait wait;
 
@@ -39,8 +40,16 @@ public class Robot {
         shooter = new Shooter(
                 h.get(DcMotorEx.class, "6"), DcMotorSimple.Direction.FORWARD,
                 h.get(DcMotorEx.class, "7"), DcMotorSimple.Direction.FORWARD,
-                h.get(Servo.class, "shooter"),
+                h.get(Servo.class, "leftCover"),
+                h.get(Servo.class, "rightCover"),
+                h.get(Servo.class, "hood"),
                 new PIDFCoefficients(0.075, 0.0, 0.005, 0.5)
+        );
+
+        turret = new Turret(
+                h.get(DcMotorEx.class, "turret"),
+                DcMotorSimple.Direction.FORWARD,
+                new PIDFCoefficients(0, 0, 0, 0)
         );
 
         vision = new Vision(

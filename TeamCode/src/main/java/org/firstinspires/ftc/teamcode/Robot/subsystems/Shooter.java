@@ -8,23 +8,27 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class Shooter extends SubsystemBase {
-    private DcMotorEx rightShooter, leftShooter;
-    public final Servo cover;
-    private PIDFCoefficients pidf;
+    private final DcMotorEx rightShooter, leftShooter;
+    public final Servo leftCover, rightCover, hood;
+    private final PIDFCoefficients pidf;
 
     public Shooter(DcMotorEx rightShooter, DcMotorSimple.Direction rightDir,
                    DcMotorEx leftShooter, DcMotorSimple.Direction leftDir,
-                   Servo cover, PIDFCoefficients pidf) {
+                   Servo leftCover, Servo rightCover,Servo hood,
+                   PIDFCoefficients pidf) {
 
         this.rightShooter = rightShooter;
         this.leftShooter = leftShooter;
-        this.cover = cover;
+        this.leftCover = leftCover;
+        this.rightCover = rightCover;
+        this.hood = hood;
         this.pidf = pidf;
 
         this.rightShooter.setDirection(rightDir);
         this.rightShooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         this.rightShooter.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         this.rightShooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         this.leftShooter.setDirection(leftDir);
         this.leftShooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         this.leftShooter.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -32,7 +36,8 @@ public class Shooter extends SubsystemBase {
 
         this.setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
 
-        this.setMagazineCover(.24);
+        this.setHoodPos(.676767); //TODO: find default hood angle pos
+        this.setMagazineCover(.24); // TODO: change accordingly to new cover
     }
 
     public void setPIDF(double p, double i, double d, double f) {
@@ -46,7 +51,12 @@ public class Shooter extends SubsystemBase {
     }
 
     public void setMagazineCover(double pos) {
-        cover.setPosition(pos);
+        leftCover.setPosition(pos);
+        rightCover.setPosition(pos);
+    }
+
+    public void setHoodPos(double pos) {
+        hood.setPosition(pos);
     }
 
     public void setVelocity(double rpm) {
@@ -60,7 +70,7 @@ public class Shooter extends SubsystemBase {
 
     public double getVelocity() {
         double velocityInTPS = this.rightShooter.getVelocity();
-        double ticksPerRev = 28;
+        double ticksPerRev = this.rightShooter.getMotorType().getTicksPerRev() ;
 
         return (velocityInTPS * 60.0) / ticksPerRev;
     }
