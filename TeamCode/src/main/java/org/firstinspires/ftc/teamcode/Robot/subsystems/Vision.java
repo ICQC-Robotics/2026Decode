@@ -15,7 +15,7 @@ public class Vision extends SubsystemBase {
     private final Limelight3A limelight;
     private LLResult lastResult;
 
-    public Vision(HardwareMap hardwareMap, FieldCentricDrive drive) {
+    public Vision(HardwareMap hardwareMap, Drive drive) {
         mD = drive.getMecanumDrive();
         limelight = hardwareMap.get(Limelight3A.class, "ll");
         limelight.pipelineSwitch(0);

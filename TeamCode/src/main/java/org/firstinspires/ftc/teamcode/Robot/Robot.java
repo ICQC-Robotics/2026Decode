@@ -15,7 +15,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.*;
 
 public class Robot {
-    public FieldCentricDrive drive;
+    public Drive drive;
     public Intake intake;
     public Shooter shooter;
     public Turret turret;
@@ -23,7 +23,7 @@ public class Robot {
     public Wait wait;
 
     public Robot(HardwareMap h, Telemetry t) {
-        drive = new FieldCentricDrive(
+        drive = new Drive(
                 h, t,
                 h.get(DcMotorEx.class, "fR"), DcMotorSimple.Direction.FORWARD,
                 h.get(DcMotorEx.class, "fL"), DcMotorSimple.Direction.REVERSE,
