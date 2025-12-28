@@ -12,13 +12,14 @@ public class TurretTuner extends OpMode {
 
     DcMotorEx turretMotor;
 
-    double P = 0.01;
+    double P = 0.00;
     double D = 0.0;
 
-    double[] stepSizes = {0.1, 0.01, 0.001, 0.0001};
+    double[] stepSizes = {0.00001, 0.01, 0.001, 0.0001};
     int stepIndex = 1;
 
     static final double GEAR_RATIO = 2.9047619048;
+    static final double MOTOR_GEAR_RATIO = 19.2307692308;
     static final double MIN_ANGLE = 0;
     static final double MAX_ANGLE = 270;
 
@@ -32,13 +33,13 @@ public class TurretTuner extends OpMode {
     @Override
     public void init() {
         turretMotor = hardwareMap.get(DcMotorEx.class, "turret");
-        turretMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        turretMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         ticksPerDeg =
-                (turretMotor.getMotorType().getTicksPerRev() * GEAR_RATIO) / 360.0;
+                (537.6 * GEAR_RATIO) / (360.0);
 
         zeroOffset = turretMotor.getCurrentPosition();
 

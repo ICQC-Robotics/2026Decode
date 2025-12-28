@@ -32,23 +32,23 @@ public class Robot {
         );
 
         intake = new Intake(
-                h.get(DcMotorEx.class, "5"),
-                h.get(Servo.class, "intake"),
+                h.get(DcMotorEx.class, "intake"),
+                h.get(Servo.class, "servo3"),
                 DcMotorSimple.Direction.FORWARD
         );
 
         shooter = new Shooter(
-                h.get(DcMotorEx.class, "6"), DcMotorSimple.Direction.FORWARD,
-                h.get(DcMotorEx.class, "7"), DcMotorSimple.Direction.FORWARD,
-                h.get(Servo.class, "leftCover"),
-                h.get(Servo.class, "rightCover"),
-                h.get(Servo.class, "hood"),
+                h.get(DcMotorEx.class, "shooter2"), DcMotorSimple.Direction.REVERSE,
+                h.get(DcMotorEx.class, "shooter1"), DcMotorSimple.Direction.FORWARD,
+                h.get(Servo.class, "servo0"),
+                h.get(Servo.class, "servo2"),
+                h.get(Servo.class, "servo1"),
                 new PIDFCoefficients(0.075, 0.0, 0.005, 0.5)
         );
 
         turret = new Turret(
                 h.get(DcMotorEx.class, "turret"),
-                DcMotorSimple.Direction.FORWARD,
+                DcMotorSimple.Direction.REVERSE,
                 new PIDFCoefficients(0, 0, 0, 0)
         );
 

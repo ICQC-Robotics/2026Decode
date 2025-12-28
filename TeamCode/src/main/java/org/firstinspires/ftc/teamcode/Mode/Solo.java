@@ -36,6 +36,7 @@ public class Solo extends CommandOpMode {
                 new AutoIntake(negabot.intake, negabot.wait).finish()
         );
 
+
         negabot.Action(g,
                        GamepadKeys.Button.A,
                        new AutoAim(negabot.vision,
@@ -55,6 +56,8 @@ public class Solo extends CommandOpMode {
                 }),
                 null
         );
+
+
     }
 
     public void run() {

@@ -8,18 +8,22 @@ import com.qualcomm.robotcore.hardware.Servo;
 @Configurable
 @TeleOp(name="Servo tuner")
 public class ServoTuner extends OpMode {
-    Servo servo1, servo2;
-    public static double s1, s2;
+    Servo servo0, servo1, servo2, servo3;
+    public static double s0, s1, s2, s3;
 
     @Override
     public void init() {
-        servo1 = hardwareMap.get(Servo.class, "shooter");
-        servo2 = hardwareMap.get(Servo.class, "intake");
+        servo0 = hardwareMap.get(Servo.class, "servo0");
+        servo1 = hardwareMap.get(Servo.class, "servo1");
+        servo2 = hardwareMap.get(Servo.class, "servo2");
+        servo3 = hardwareMap.get(Servo.class, "servo3");
     }
 
     @Override
     public void loop() {
+        servo0.setPosition(s0);
         servo1.setPosition(s1);
         servo2.setPosition(s2);
+        servo3.setPosition(s3);
     }
 }
