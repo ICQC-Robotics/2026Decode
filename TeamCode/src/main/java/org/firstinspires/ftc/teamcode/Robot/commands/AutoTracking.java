@@ -30,7 +30,7 @@ public class AutoTracking extends CommandBase {
             return;
         }
 
-        turret.setVisionTxDeg(tx); //flip to -tx if turning the other way
+        turret.setVisionTxDeg(tx);
     }
 
     @Override

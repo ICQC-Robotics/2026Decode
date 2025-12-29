@@ -1,172 +1,127 @@
 package org.firstinspires.ftc.teamcode.Robot.commands;
 
-import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.InstantCommand;
-import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 
-import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
-import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
+import org.firstinspires.ftc.teamcode.Mode.Auto;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Vision;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
 
 public class AutoAim extends SequentialCommandGroup {
-    public enum Positions {
-        OPEN_COVER(0.1),
-        CLOSED_COVER(0.9);
-        private final double pos;
+    private static final double LIMELIGHT_HEIGHT_IN = 12.0;
+    private static final double APRILTAG_HEIGHT_IN = 29.5;
+    private static final double LIMELIGHT_PITCH_DEG = 12.0;
 
-        Positions(double pos) {
-            this.pos = pos;
-        }
+    private static final double COVER_OPEN_POS = 0.10;
+    private static final double COVER_CLOSED_POS = 0.90;
 
-        public double getPos() {
-            return pos;
-        }
-    }
+    private static final double RPM_TOLERANCE = 150.0;
+    private static final double SHOOT_WAIT_S = 2.0;
 
-    //vision
-    double limelightHeight = 17.0;
-    double aprilTagHeight = 29.5;
-    private final double limelightPitch = 23.0;
+    //TODO: find
+    private static final double A = 0.0;
+    private static final double B = 0.0;
+    private static final double C = 1945;
 
-    //tuned at 12.8v
-    private final double minV = 1950, maxV = 2450;
-    private final double minD = 30, maxD = 70;
+    //TODO: find
+    private static final double MIN_RPM = 1945;
+    private static final double MAX_RPM = 2710;
 
-
-    public AutoAim(Vision vision, Shooter shooter, Intake intake, Drive drive, Wait wait) {
+    public AutoAim(Vision vision, Shooter shooter, Intake intake, Wait wait) {
         addCommands(
-                new ParallelCommandGroup(
-                        AimCommand(vision, drive, wait),
-                        new SequentialCommandGroup(
-                                ShootCommand(vision, shooter, intake, wait)
-                        )
-                )
+                shootSequence(vision, shooter, intake, wait)
         );
-        addRequirements(drive, shooter, intake);
+
+        addRequirements(shooter, intake);
     }
 
-    private SequentialCommandGroup AimCommand(Vision vision, Drive drive, Wait wait) {
+    private SequentialCommandGroup shootSequence(Vision vision, Shooter shooter, Intake intake, Wait wait) {
         return new SequentialCommandGroup(
-                new CommandBase() {
-                    private final double kP = 0.03, MIN_TURN_POWER = 0.05, MAX_TURN_POWER = 0.4, TX_TOLERANCE_DEG = .3;
 
-                    {
-                        addRequirements(drive);
-                    }
-
-                    @Override
-                    public void initialize() {
-                        drive.stop();
-                    }
-
-                    @Override
-                    public void execute() {
-                        double tx = vision.getTx();
-                        if (Double.isNaN(tx)) {
-                            drive.stop();
-                            return;
-                        }
-
-                        double turnPower = kP * tx;
-
-                        if (Math.abs(turnPower) < MIN_TURN_POWER)
-                            turnPower = Math.signum(turnPower) * MIN_TURN_POWER;
-
-                        if (turnPower > MAX_TURN_POWER) turnPower = MAX_TURN_POWER;
-                        if (turnPower < -MAX_TURN_POWER) turnPower = -MAX_TURN_POWER;
-
-                        if (Math.abs(tx) <= TX_TOLERANCE_DEG)
-                            drive.stop();
-                        else
-                            drive.turnInPlace(turnPower);
-                    }
-
-                    @Override
-                    public boolean isFinished() {
-                        double tx = vision.getTx();
-                        if (Double.isNaN(tx)) return true;
-                        return Math.abs(tx) <= TX_TOLERANCE_DEG;
-                    }
-
-                    public void end(boolean interrupted) {
-                        drive.stop();
-                    }
-
-                },
-
-                new CommandBase() {
-                    @Override
-                    public void initialize() {
-                        wait.start();
-                    }
-
-                    @Override
-                    public boolean isFinished() {
-                        return wait.elapsed() >= 1;
-                    }
-                }
-        );
-    }
-
-
-    public Command openShooterCover(Shooter shooter) {
-        return new InstantCommand(() -> {
-            shooter.setMagazineCover(Positions.OPEN_COVER.getPos());
-        });
-    }
-
-    public Command closeShooterCover(Shooter shooter) {
-        return new InstantCommand(() -> {
-            shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
-        });
-    }
-
-    private SequentialCommandGroup ShootCommand(Vision vision, Shooter shooter, Intake intake, Wait wait) {
-        return new SequentialCommandGroup(
                 new InstantCommand(() -> {
-                    double v = calculateVelocity(vision);
-                    if (v < 2000) v = 2000;
-                    shooter.setVelocity(v);
+                    double distanceIn = calculateDistanceIn(vision);
+
+                    if (Double.isNaN(distanceIn)) {
+                        shooter.setVelocity(0);
+                        shooter.setMagazineCover(COVER_CLOSED_POS);
+                        return;
+                    }
+
+                    double rpm = calculateRpm(distanceIn);
+                    rpm = clamp(rpm, MIN_RPM, MAX_RPM);
+                    shooter.setHoodPos(hoodFromDistance(distanceIn));
+                    shooter.setVelocity(rpm);
                 }, shooter),
 
                 new CommandBase() {
                     @Override
                     public boolean isFinished() {
+                        double distanceIn = calculateDistanceIn(vision);
+                        if (Double.isNaN(distanceIn)) return true;
+
+                        double target = clamp(calculateRpm(distanceIn), MIN_RPM, MAX_RPM);
                         double actual = shooter.getVelocity();
-                        double target = calculateVelocity(vision);
-                        return Math.abs(actual - target) < 150;
+                        return Math.abs(actual - target) <= RPM_TOLERANCE;
                     }
                 },
 
-                new AutoIntake(intake, wait).acceptSlowish(),
-                openShooterCover(shooter),
-                new WaitCommand(wait, 1),
-                new AutoIntake(intake, wait).finish(),
-                closeShooterCover(shooter),
-                new InstantCommand(() -> {
-                    shooter.setVelocity(0);
-                }, shooter)
-        );
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> intake.setSpeed(-.75), intake),
+
+                        new InstantCommand(() -> shooter.setMagazineCover(COVER_OPEN_POS), shooter),
+
+                        new WaitCommand(wait, SHOOT_WAIT_S),
+
+                        new InstantCommand(() -> {
+                            shooter.setVelocity(0);
+                            shooter.setMagazineCover(COVER_CLOSED_POS);
+                            intake.setSpeed(0); // or intake.finish(), if you have it
+                        }, shooter, intake)
+                );
     }
 
+    //distance = (aprilTagHeight - llHeight) / tan(llPitch + ty)
+    public double calculateDistanceIn(Vision vision) {
+        double ty = vision.getTy();
+        if (Double.isNaN(ty)) return Double.NaN;
 
-    public double calculateVelocity(Vision vision) {
-        //calc dist
-        double actualHeight = aprilTagHeight - limelightHeight;
-        double angle = limelightPitch + vision.getTy();
-        double d = actualHeight / Math.tan(Math.toRadians(angle));
-        if (d < 30) d = 30;
+        double angleDeg = LIMELIGHT_PITCH_DEG + ty;
+        double angleRad = Math.toRadians(angleDeg);
 
-        return minV + (maxV - minV) * (d - minD)/(maxD-minD); //returns velocity
+        double dh = APRILTAG_HEIGHT_IN - LIMELIGHT_HEIGHT_IN;
+        double tan = Math.tan(angleRad);
+
+        if (Math.abs(tan) < 1e-6) return Double.NaN;
+
+        double d = dh / tan;
+        if (d < 0) return Double.NaN;
+        return d;
     }
 
-    @Override
-    public boolean isFinished() {
-        return super.isFinished();
+    public double calculateRpm(double distanceIn) {
+        return (A * distanceIn * distanceIn) + (B * distanceIn) + C;
+    }
+
+    //TODO: tune these vals
+    private double hoodFromDistance(double distanceIn) {
+        double minDist = 30;
+        double maxDist = 160;
+
+        double hoodNear = 0.25;
+        double hoodFar = 0.75;
+
+        double t = (distanceIn - minDist) / (maxDist - minDist);
+        if (t < 0) t = 0;
+        if (t > 1) t = 1;
+        return hoodNear + t * (hoodFar - hoodNear);
+    }
+
+    private static double clamp(double v, double lo, double hi) {
+        if (v < lo) return lo;
+        if (v > hi) return hi;
+        return v;
     }
 }
