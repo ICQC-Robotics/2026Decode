@@ -53,7 +53,7 @@ public class Robot {
         );
 
         vision = new Vision(
-                h, drive
+                h
         );
 
         wait = new Wait();

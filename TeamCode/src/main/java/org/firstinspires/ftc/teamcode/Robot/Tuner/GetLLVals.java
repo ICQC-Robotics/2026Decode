@@ -28,8 +28,8 @@ public class GetLLVals extends OpMode {
             double tA = result.getTa();
             double tx = result.getTx();
             double ty = result.getTy();
-            double actualHeight = 29.5 - 17;
-            double angle = 23 + ty;
+            double actualHeight = 29.5 - 12;
+            double angle = 12 + ty;
             double distance = actualHeight / Math.tan(Math.toRadians(angle));
             telemetry.addData("tA (raw)", tA);
             telemetry.addData("tx (raw)", tx);

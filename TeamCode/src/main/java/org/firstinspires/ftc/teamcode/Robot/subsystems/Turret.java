@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Robot.subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -9,111 +8,117 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 public class Turret extends SubsystemBase {
 
-    public static final double MIN_ANGLE_DEG = 0;
-    public static final double MAX_ANGLE_DEG = 270;
-    public static final double SOFT_MIN_DEG = 2;
-    public static final double SOFT_MAX_DEG = 268;
-
+    public static final double MIN_DEG = 0;
+    public static final double MAX_DEG = 270;
     public static final double GEAR_RATIO = 2.9047619048;
 
     private final DcMotorEx turretMotor;
-    private final PIDFCoefficients pidc;
-    private final PIDController pid;
+    private final PIDFCoefficients pidf;
 
     private final double ticksPerDeg;
 
-    private double targetAngleDeg = 135;
-    private double zeroOffsetTicks;
+    private double targetDeg = 0;
+    private double visionTxDeg = Double.NaN;
+    private static final double TX_DEADBAND_DEG = 0.3;
 
-    //TODO: tune and adjust below
-    private static final double ANGLE_TOLERANCE_DEG = 1.0;
-    private static final double MIN_POWER = 0.06;
-    private static final double MAX_POWER = 0.67;
+    public Turret(DcMotorEx turretMotor,
+                  DcMotorSimple.Direction direction,
+                  PIDFCoefficients pidf) {
 
-    public Turret(DcMotorEx turretMotor, DcMotorSimple.Direction turretDir, PIDFCoefficients pidc) {
         this.turretMotor = turretMotor;
-        this.pidc = pidc;
-        this.pid = new PIDController(pidc.p, pidc.i, pidc.d);
+        this.pidf = pidf;
 
-        this.turretMotor.setDirection(turretDir);
-        this.turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        this.turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        this.turretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        turretMotor.setDirection(direction);
+        turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        this.ticksPerDeg = (this.turretMotor.getMotorType().getTicksPerRev() * GEAR_RATIO) / 360.0;
+        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turretMotor.setTargetPosition(0);
+        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        turretMotor.setPower(0.0);
 
-        this.pid.setTolerance(ANGLE_TOLERANCE_DEG);
+        ticksPerDeg = (537.7 * GEAR_RATIO) / 360.0;
 
-        this.zeroOffsetTicks = this.turretMotor.getCurrentPosition();
-        this.targetAngleDeg = getAngleDeg();
+        this.setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
+        this.setTargetDeg(clamp(getAngleDeg(), MIN_DEG, MAX_DEG));
     }
 
-    public void setPID(double p, double i, double d) {
-        this.pidc.p = p;
-        this.pidc.i = i;
-        this.pidc.d = d;
-        this.pid.setPID(p, i, d);
+    public void setPIDF(double p, double i, double d, double f) {
+        this.pidf.p = p;
+        this.pidf.i = i;
+        this.pidf.d = d;
+        this.pidf.f = f;
+
+        turretMotor.setPIDFCoefficients(
+                DcMotor.RunMode.RUN_TO_POSITION,
+                new PIDFCoefficients(p, i, d, f)
+        );
+        turretMotor.setTargetPositionTolerance((int) (1.0 * ticksPerDeg));
+    }
+
+    public void setVisionTxDeg(double txDeg) {
+        visionTxDeg = txDeg;
+    }
+
+    public void clearVisionTx() {
+        visionTxDeg = Double.NaN;
+    }
+
+    public void setTargetDeg(double deg) {
+        targetDeg = clamp(deg, MIN_DEG, MAX_DEG);
+        int ticks = degToTicks(targetDeg);
+        turretMotor.setTargetPosition(ticks);
+        turretMotor.setPower(0.6);
+    }
+
+    public void holdCurrentAngle() {
+        setTargetDeg(getAngleDeg());
     }
 
     public void setCurrentAsZero() {
-        this.zeroOffsetTicks = turretMotor.getCurrentPosition();
-        this.targetAngleDeg = 0.0;
-        this.pid.reset();
+        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turretMotor.setTargetPosition(0);
+        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        turretMotor.setPower(0.0);
+
+        targetDeg = 0.0;
+        visionTxDeg = Double.NaN;
     }
 
     public double getAngleDeg() {
-        double ticks = turretMotor.getCurrentPosition() - zeroOffsetTicks;
-        double deg = ticks / ticksPerDeg;
-        return clamp(deg, MIN_ANGLE_DEG, MAX_ANGLE_DEG);
+        return turretMotor.getCurrentPosition() / ticksPerDeg;
     }
 
-    public void setTargetAngleDeg(double targetDeg) {
-        this.targetAngleDeg = clamp(targetDeg, SOFT_MIN_DEG, SOFT_MAX_DEG);
+    public double getTargetDeg() {
+        return targetDeg;
     }
 
-    public double getTargetAngleDeg() {
-        return targetAngleDeg;
-    }
-
-    public boolean atTarget() {
-        return pid.atSetPoint();
-    }
-
-    public void aimWithTx(double txDeg) {
-        if (Double.isNaN(txDeg)) {
-            setTargetAngleDeg(getAngleDeg());
-            return;
-        }
-        setTargetAngleDeg(getAngleDeg() + txDeg);
+    public boolean atTarget(double toleranceDeg) {
+        return Math.abs(targetDeg - getAngleDeg()) <= toleranceDeg;
     }
 
     @Override
     public void periodic() {
-        double current = getAngleDeg();
-        double out = pid.calculate(current, targetAngleDeg);
+        if (!Double.isNaN(visionTxDeg)) {
 
-        if (Math.abs(out) > 0 && Math.abs(out) < MIN_POWER) {
-            out = Math.signum(out) * MIN_POWER;
+            double tx = visionTxDeg;
+            if (Math.abs(tx) < TX_DEADBAND_DEG) tx = 0;
+
+            double current = getAngleDeg();
+            double desired = current + tx;
+            desired = clamp(desired, MIN_DEG, MAX_DEG);
+
+            setTargetDeg(desired);
+            visionTxDeg = Double.NaN;
         }
-
-        if (out > MAX_POWER) out = MAX_POWER;
-        if (out < -MAX_POWER) out = -MAX_POWER;
-
-        if (pid.atSetPoint()) out = 0.0;
-
-        setPowerWithLimits(out);
     }
 
-    private void setPowerWithLimits(double power) {
-        double angle = getAngleDeg();
-
-        if (angle <= SOFT_MIN_DEG && power < 0) power = 0;
-        if (angle >= SOFT_MAX_DEG && power > 0) power = 0;
-
-        turretMotor.setPower(power);
+    private int degToTicks(double deg) {
+        return (int) Math.round(deg * ticksPerDeg);
     }
 
     private static double clamp(double v, double lo, double hi) {
-        return Math.max(lo, Math.min(hi, v));
+        if (v < lo) return lo;
+        if (v > hi) return hi;
+        return v;
     }
 }
