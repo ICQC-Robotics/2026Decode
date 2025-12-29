@@ -60,7 +60,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public void setVelocity(double rpm) {
-        double ticksPerRev = rightShooter.getMotorType().getTicksPerRev();
+        double ticksPerRev = 28;
         double ticksPerSec = (rpm / 60.0) * ticksPerRev;
 
         rightShooter.setVelocity(ticksPerSec);
@@ -70,7 +70,7 @@ public class Shooter extends SubsystemBase {
 
     public double getVelocity() {
         double velocityInTPS = this.rightShooter.getVelocity();
-        double ticksPerRev = this.rightShooter.getMotorType().getTicksPerRev() ;
+        double ticksPerRev = 28;
 
         return (velocityInTPS * 60.0) / ticksPerRev;
     }

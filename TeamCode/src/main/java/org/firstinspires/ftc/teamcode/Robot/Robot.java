@@ -38,8 +38,8 @@ public class Robot {
         );
 
         shooter = new Shooter(
-                h.get(DcMotorEx.class, "shooter2"), DcMotorSimple.Direction.REVERSE,
                 h.get(DcMotorEx.class, "shooter1"), DcMotorSimple.Direction.FORWARD,
+                h.get(DcMotorEx.class, "shooter2"), DcMotorSimple.Direction.REVERSE,
                 h.get(Servo.class, "servo0"),
                 h.get(Servo.class, "servo2"),
                 h.get(Servo.class, "servo1"),
