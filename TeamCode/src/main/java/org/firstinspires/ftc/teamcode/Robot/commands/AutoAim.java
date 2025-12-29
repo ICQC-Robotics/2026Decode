@@ -52,7 +52,7 @@ public class AutoAim extends SequentialCommandGroup {
 
                     double rpm = calculateRpm(distanceIn);
                     rpm = clamp(rpm, MIN_RPM, MAX_RPM);
-                    shooter.setHoodPos(hoodFromDistance(distanceIn));
+                    shooter.setHoodPos(setHood(distanceIn));
                     shooter.setVelocity(rpm);
                 }, shooter),
 
@@ -80,7 +80,7 @@ public class AutoAim extends SequentialCommandGroup {
                             shooter.setMagazineCover(COVER_CLOSED_POS);
                             intake.setSpeed(0); // or intake.finish(), if you have it
                         }, shooter, intake)
-                );
+                ));
     }
 
     //distance = (aprilTagHeight - llHeight) / tan(llPitch + ty)
@@ -106,7 +106,7 @@ public class AutoAim extends SequentialCommandGroup {
     }
 
     //TODO: tune these vals
-    private double hoodFromDistance(double distanceIn) {
+    private double setHood(double distanceIn) {
         double minDist = 30;
         double maxDist = 160;
 
