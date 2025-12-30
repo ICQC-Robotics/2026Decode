@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.Robot.commands;
 import com.arcrobotics.ftclib.command.CommandBase;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Vision;
-import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim.Positions;
 
 public class ShooterStandBy extends CommandBase {
 
