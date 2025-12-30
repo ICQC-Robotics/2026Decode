@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Mode;
+package org.firstinspires.ftc.teamcode.Robot.Tuner;
 
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;

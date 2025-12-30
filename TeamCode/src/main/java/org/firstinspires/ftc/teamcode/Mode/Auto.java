@@ -145,7 +145,6 @@ public class Auto extends CommandOpMode {
                     new AutoAim(negabot.vision,
                                 negabot.shooter,
                                 negabot.intake,
-                                negabot.drive,
                                 negabot.wait),
                     new FollowPathCommand(follower, moveToGrab),
                     new AutoIntake(negabot.intake,
