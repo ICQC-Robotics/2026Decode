@@ -8,21 +8,6 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class Shooter extends SubsystemBase {
-
-    public enum Positions {
-        OPEN_COVER(0.1),
-        CLOSED_COVER(0.9);
-
-        private final double pos;
-
-        Positions(double pos) {
-            this.pos = pos;
-        }
-
-        public double getPos() {
-            return pos;
-        }
-    }
     private final DcMotorEx rightShooter, leftShooter;
     public final Servo leftCover, rightCover, hood;
     private final PIDFCoefficients pidf;
@@ -52,7 +37,7 @@ public class Shooter extends SubsystemBase {
         this.setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
 
         this.setHoodPos(.5); //TODO: find default hood angle pos
-        this.setMagazineCover(Positions.CLOSED_COVER); // TODO: change accordingly to new cover
+        this.setMagazineCover(.24); // TODO: change accordingly to new cover
     }
 
     public void setPIDF(double p, double i, double d, double f) {
@@ -67,13 +52,8 @@ public class Shooter extends SubsystemBase {
 
     public void setMagazineCover(double pos) {
         leftCover.setPosition(pos);
-        rightCover.setPosition(1 - pos);
+        rightCover.setPosition(1-pos);
     }
-
-    public void setMagazineCover(Positions position) {
-        setMagazineCover(position.getPos());
-    }
-
 
     public void setHoodPos(double pos) {
         hood.setPosition(pos);

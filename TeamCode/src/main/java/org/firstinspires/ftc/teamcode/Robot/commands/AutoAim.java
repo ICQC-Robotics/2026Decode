@@ -7,9 +7,24 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Vision;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
-import org.firstinspires.ftc.teamcode.Robot.subsystems.Shooter.Positions;
 
 public class AutoAim extends SequentialCommandGroup {
+
+    public enum Positions {
+        OPEN_COVER(0.1),
+        CLOSED_COVER(0.9);
+
+        private final double pos;
+
+        Positions(double pos) {
+            this.pos = pos;
+        }
+
+        public double getPos() {
+            return pos;
+        }
+    }
+
     private static final double LIMELIGHT_HEIGHT_IN = 12.0;
     private static final double APRILTAG_HEIGHT_IN = 29.5;
     private static final double LIMELIGHT_PITCH_DEG = 12.0;
@@ -42,7 +57,7 @@ public class AutoAim extends SequentialCommandGroup {
 
                     if (Double.isNaN(distanceIn)) {
                         shooter.setVelocity(0);
-                        shooter.setMagazineCover(Positions.CLOSED_COVER);
+                        shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
                         return;
                     }
 
@@ -65,13 +80,13 @@ public class AutoAim extends SequentialCommandGroup {
                 },
 
                 new SequentialCommandGroup(
-                        new InstantCommand(() -> shooter.setMagazineCover(Positions.OPEN_COVER), shooter),
+                        new InstantCommand(() -> shooter.setMagazineCover(Positions.OPEN_COVER.getPos()), shooter),
                         new InstantCommand(() -> intake.setSpeed(-.75), intake),
                         new WaitCommand(wait, SHOOT_WAIT_S),
 
                         new InstantCommand(() -> {
                             shooter.setVelocity(0);
-                            shooter.setMagazineCover(Positions.CLOSED_COVER);
+                            shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
                             intake.setSpeed(0);
                         }, shooter, intake)
                 ));
