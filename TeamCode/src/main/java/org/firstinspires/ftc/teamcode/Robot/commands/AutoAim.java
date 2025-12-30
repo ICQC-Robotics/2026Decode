@@ -41,6 +41,13 @@ public class AutoAim extends SequentialCommandGroup {
     private static final double MIN_RPM = 1945;
     private static final double MAX_RPM = 2710;
 
+    //TODO: find
+    private static final double BUMP_NEAR = 0.02;
+    private static final double BUMP_FAR  = 0.07;
+
+    private static final double MIN_DIST = 30;
+    private static final double MAX_DIST = 160;
+
     public AutoAim(Vision vision, Shooter shooter, Intake intake, Wait wait) {
         addCommands(
                 shootSequence(vision, shooter, intake, wait)
@@ -81,6 +88,21 @@ public class AutoAim extends SequentialCommandGroup {
 
                 new SequentialCommandGroup(
                         new InstantCommand(() -> shooter.setMagazineCover(Positions.OPEN_COVER.getPos()), shooter),
+
+                        new InstantCommand(() -> {
+                            double distanceIn = calculateDistanceIn(vision);
+                            if (Double.isNaN(distanceIn)) return;
+
+                            double x = calculateCoverIncrease(distanceIn);
+                            double current = shooter.hood.getPosition();
+                            double bumped = current + x;
+
+                            if (bumped > 1.0) bumped = 1.0;
+                            if (bumped < 0.0) bumped = 0.0;
+
+                            shooter.setHoodPos(bumped);
+                        }, shooter),
+
                         new InstantCommand(() -> intake.setSpeed(-.75), intake),
                         new WaitCommand(wait, SHOOT_WAIT_S),
 
@@ -116,16 +138,20 @@ public class AutoAim extends SequentialCommandGroup {
 
     //TODO: tune these vals
     private double setHood(double distanceIn) {
-        double minDist = 30;
-        double maxDist = 160;
+        double hoodNear = .75;
+        double hoodFar = .25;
 
-        double hoodNear = 0.25;
-        double hoodFar = 0.75;
-
-        double t = (distanceIn - minDist) / (maxDist - minDist);
+        double t = (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
         if (t < 0) t = 0;
         if (t > 1) t = 1;
         return hoodNear + t * (hoodFar - hoodNear);
+    }
+
+    private double calculateCoverIncrease(double distanceIn) {
+        double t = (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
+        if (t < 0) t = 0;
+        if (t > 1) t = 1;
+        return BUMP_NEAR + t * (BUMP_FAR - BUMP_NEAR);
     }
 
     private static double clamp(double v, double lo, double hi) {
