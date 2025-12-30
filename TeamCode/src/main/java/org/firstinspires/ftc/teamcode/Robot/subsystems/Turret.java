@@ -112,7 +112,6 @@ public class Turret extends SubsystemBase {
             else if (desired < MIN_DEG) {
                 desired = current + Math.abs(tx);
             }
-
             desired = clamp(desired, MIN_DEG, MAX_DEG);
             setTargetDeg(desired);
             visionTxDeg = Double.NaN;
