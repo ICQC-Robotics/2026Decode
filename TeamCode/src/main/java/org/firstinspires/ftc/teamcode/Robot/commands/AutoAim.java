@@ -3,20 +3,31 @@ package org.firstinspires.ftc.teamcode.Robot.commands;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-
-import org.firstinspires.ftc.teamcode.Mode.Auto;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Vision;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
 
 public class AutoAim extends SequentialCommandGroup {
+
+    public enum Positions {
+        OPEN_COVER(0.1),
+        CLOSED_COVER(0.9);
+
+        private final double pos;
+
+        Positions(double pos) {
+            this.pos = pos;
+        }
+
+        public double getPos() {
+            return pos;
+        }
+    }
+
     private static final double LIMELIGHT_HEIGHT_IN = 12.0;
     private static final double APRILTAG_HEIGHT_IN = 29.5;
     private static final double LIMELIGHT_PITCH_DEG = 12.0;
-
-    private static final double COVER_OPEN_POS = 0.10;
-    private static final double COVER_CLOSED_POS = 0.90;
 
     private static final double RPM_TOLERANCE = 150.0;
     private static final double SHOOT_WAIT_S = 2.0;
@@ -46,7 +57,7 @@ public class AutoAim extends SequentialCommandGroup {
 
                     if (Double.isNaN(distanceIn)) {
                         shooter.setVelocity(0);
-                        shooter.setMagazineCover(COVER_CLOSED_POS);
+                        shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
                         return;
                     }
 
@@ -69,16 +80,14 @@ public class AutoAim extends SequentialCommandGroup {
                 },
 
                 new SequentialCommandGroup(
+                        new InstantCommand(() -> shooter.setMagazineCover(Positions.OPEN_COVER.getPos()), shooter),
                         new InstantCommand(() -> intake.setSpeed(-.75), intake),
-
-                        new InstantCommand(() -> shooter.setMagazineCover(COVER_OPEN_POS), shooter),
-
                         new WaitCommand(wait, SHOOT_WAIT_S),
 
                         new InstantCommand(() -> {
                             shooter.setVelocity(0);
-                            shooter.setMagazineCover(COVER_CLOSED_POS);
-                            intake.setSpeed(0); // or intake.finish(), if you have it
+                            shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
+                            intake.setSpeed(0);
                         }, shooter, intake)
                 ));
     }
