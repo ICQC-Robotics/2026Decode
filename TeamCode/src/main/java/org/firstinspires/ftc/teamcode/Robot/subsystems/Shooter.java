@@ -52,7 +52,7 @@ public class Shooter extends SubsystemBase {
         this.setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
 
         this.setHoodPos(.5); //TODO: find default hood angle pos
-        this.setMagazineCover(.24); // TODO: change accordingly to new cover
+        this.setMagazineCover(Positions.CLOSED_COVER); // TODO: change accordingly to new cover
     }
 
     public void setPIDF(double p, double i, double d, double f) {
