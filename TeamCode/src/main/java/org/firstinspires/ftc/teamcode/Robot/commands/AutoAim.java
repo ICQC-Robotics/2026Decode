@@ -12,7 +12,7 @@ public class AutoAim extends SequentialCommandGroup {
 
     public enum Positions {
         OPEN_COVER(0.1),
-        CLOSED_COVER(0.9);
+        CLOSED_COVER(1);
 
         private final double pos;
 

@@ -43,7 +43,7 @@ public class Robot {
                 h.get(Servo.class, "servo0"),
                 h.get(Servo.class, "servo2"),
                 h.get(Servo.class, "servo1"),
-                new PIDFCoefficients(0.075, 0.0, 0.005, 0.5)
+                new PIDFCoefficients(8, 0.0, 0.005, 10)
         );
 
         turret = new Turret(
