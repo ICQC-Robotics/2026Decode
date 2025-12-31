@@ -52,8 +52,8 @@ public class ChudAuto extends OpMode {
 
     @Override
     public void loop() {
-        follower.update();
         CommandScheduler.getInstance().run();
+        follower.update();
 
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());

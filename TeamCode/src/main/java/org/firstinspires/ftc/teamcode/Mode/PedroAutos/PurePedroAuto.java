@@ -4,7 +4,6 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
-import com.pedropathing.util.Timer;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -18,7 +17,6 @@ public class PurePedroAuto extends OpMode {
     private Follower follower;
     private Paths paths;
 
-    private Timer pathTimer;
     private int pathState = -1;
 
     private static final Pose START_POSE = new Pose(21.000, 126.000, Math.toRadians(234.6));
@@ -38,7 +36,6 @@ public class PurePedroAuto extends OpMode {
 
     @Override
     public void start() {
-        pathTimer.resetTimer();
         setPathState(0);
     }
 
@@ -90,7 +87,6 @@ public class PurePedroAuto extends OpMode {
 
     private void setPathState(int newState) {
         pathState = newState;
-        pathTimer.resetTimer();
     }
 
     public static class Paths {
