@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
 
 
-@Autonomous(group = "!",name = "Pedro back and forth")
+@Autonomous(group = "!",name = "back and forth testing")
 public class backAndForth extends OpMode {
     private Follower follower;
     private Robot negabot;
