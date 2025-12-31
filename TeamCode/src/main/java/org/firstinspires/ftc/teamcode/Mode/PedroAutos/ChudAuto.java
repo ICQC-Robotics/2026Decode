@@ -44,21 +44,22 @@ public class ChudAuto extends OpMode {
                 .addPath(
                         new BezierLine(
                                 new Pose(37.000, 106.000),
-                                new Pose(42.685, 84.000)
+                                new Pose(37.000, 84.000)
                         )
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(234.6), Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(234.6))
+
                 .build();
 
         Path3 = follower
                 .pathBuilder()
                 .addPath(
                         new BezierLine(
-                                new Pose(42.685, 84.000),
-                                new Pose(18.685, 84.000)
+                                new Pose(37.000, 84.000),
+                                new Pose(18, 84.000)
                         )
                 )
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setLinearHeadingInterpolation(Math.toRadians(234.6), Math.toRadians(180))
                 .build();
     }
 
