@@ -30,23 +30,21 @@ public class AutoAim extends SequentialCommandGroup {
     private static final double LIMELIGHT_PITCH_DEG = 12.0;
 
     private static final double RPM_TOLERANCE = 150.0;
-    private static final double SHOOT_WAIT_S = 2.0;
+    private static final double SHOOT_WAIT_S = 3.0;
 
-    //TODO: find
-    private static final double A = 0.0;
-    private static final double B = 0.0;
-    private static final double C = 1945;
+    private static final double A = -0.00618007;
+    private static final double B = 9.22787;
+    private static final double C = 3100;
 
-    //TODO: find
-    private static final double MIN_RPM = 1945;
-    private static final double MAX_RPM = 2710;
+    private static final double MIN_RPM = 2333;
+    private static final double MAX_RPM = 4700;
 
     //TODO: find
     private static final double BUMP_NEAR = 0.02;
-    private static final double BUMP_FAR  = 0.07;
+    private static final double BUMP_FAR  = 0.1;
 
-    private static final double MIN_DIST = 30;
-    private static final double MAX_DIST = 160;
+    private static final double MIN_DIST = 35;
+    private static final double MAX_DIST = 135;
 
     public AutoAim(Vision vision, Shooter shooter, Intake intake, Wait wait) {
         addCommands(
@@ -89,6 +87,10 @@ public class AutoAim extends SequentialCommandGroup {
                 new SequentialCommandGroup(
                         new InstantCommand(() -> shooter.setMagazineCover(Positions.OPEN_COVER.getPos()), shooter),
 
+
+
+                        new WaitCommand(wait, 1),
+
                         new InstantCommand(() -> {
                             double distanceIn = calculateDistanceIn(vision);
                             if (Double.isNaN(distanceIn)) return;
@@ -103,8 +105,10 @@ public class AutoAim extends SequentialCommandGroup {
                             shooter.setHoodPos(bumped);
                         }, shooter),
 
-                        new InstantCommand(() -> intake.setSpeed(-.75), intake),
+                        new InstantCommand(() -> intake.setSpeed(-1), intake),
                         new WaitCommand(wait, SHOOT_WAIT_S),
+
+
 
                         new InstantCommand(() -> {
                             shooter.setVelocity(0);
@@ -138,8 +142,8 @@ public class AutoAim extends SequentialCommandGroup {
 
     //TODO: tune these vals
     private double setHood(double distanceIn) {
-        double hoodNear = .75;
-        double hoodFar = .25;
+        double hoodNear = .4;
+        double hoodFar = .1;
 
         double t = (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
         if (t < 0) t = 0;
