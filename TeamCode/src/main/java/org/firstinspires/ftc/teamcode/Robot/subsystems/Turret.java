@@ -105,7 +105,7 @@ public class Turret extends SubsystemBase {
 
             double current = getAngleDeg();
             double desired = current + tx;
-            
+
             desired = clamp(desired, MIN_DEG, MAX_DEG);
             setTargetDeg(desired);
             visionTxDeg = Double.NaN;
