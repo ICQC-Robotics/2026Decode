@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Robot.commands;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Vision;
@@ -25,32 +26,30 @@ public class AutoAim extends SequentialCommandGroup {
         }
     }
 
-    private static final double LIMELIGHT_HEIGHT_IN = 12.0;
+    private static final double LIMELIGHT_HEIGHT_IN = 12;
     private static final double APRILTAG_HEIGHT_IN = 29.5;
-    private static final double LIMELIGHT_PITCH_DEG = 12.0;
+    private static final double LIMELIGHT_PITCH_DEG = 12;
 
-    private static final double RPM_TOLERANCE = 150.0;
-    private static final double SHOOT_WAIT_S = 3.0;
+    //change if needed
+    private static final double RPM_TOLERANCE = 150;
+    private static final double WAIT_S = 2;
 
-    private static final double A = -0.00618007;
-    private static final double B = 9.22787;
-    private static final double C = 3100;
-
-    private static final double MIN_RPM = 2333;
-    private static final double MAX_RPM = 4700;
-
-    //TODO: find
     private static final double BUMP_NEAR = 0.02;
-    private static final double BUMP_FAR  = 0.1;
+    private static final double BUMP_FAR  = 0.07;
 
-    private static final double MIN_DIST = 35;
-    private static final double MAX_DIST = 135;
+    //linear interp vals
+    private static final double MIN_DIST = 36;
+    private static final double MAX_DIST = 130;
+    public static final double MIN_V = 3050;
+    public static final double MAX_V = 4300;
+
+    private double lastValidDistanceIn = Double.NaN;
+    private double desiredRPM = 0;
 
     public AutoAim(Vision vision, Shooter shooter, Intake intake, Wait wait) {
         addCommands(
                 shootSequence(vision, shooter, intake, wait)
         );
-
         addRequirements(shooter, intake);
     }
 
@@ -58,67 +57,97 @@ public class AutoAim extends SequentialCommandGroup {
         return new SequentialCommandGroup(
 
                 new InstantCommand(() -> {
-                    double distanceIn = calculateDistanceIn(vision);
+                    shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
 
-                    if (Double.isNaN(distanceIn)) {
-                        shooter.setVelocity(0);
-                        shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
-                        return;
+                    double d = calculateDistanceIn(vision);
+                    if (!Double.isNaN(d)) {
+                        lastValidDistanceIn = d;
+                        shooter.setHoodPos(setHood(d));
                     }
-
-                    double rpm = calculateRpm(distanceIn);
-                    rpm = clamp(rpm, MIN_RPM, MAX_RPM);
-                    shooter.setHoodPos(setHood(distanceIn));
-                    shooter.setVelocity(rpm);
                 }, shooter),
 
                 new CommandBase() {
+                    {
+                        addRequirements(shooter);
+                    }
+
+                    @Override
+                    public void execute() {
+                        desiredRPM = updateRPM(vision, shooter);
+                        shooter.setVelocity(desiredRPM);
+                    }
+
                     @Override
                     public boolean isFinished() {
-                        double distanceIn = calculateDistanceIn(vision);
-                        if (Double.isNaN(distanceIn)) return true;
-
-                        double target = clamp(calculateRpm(distanceIn), MIN_RPM, MAX_RPM);
-                        double actual = shooter.getVelocity();
-                        return Math.abs(actual - target) <= RPM_TOLERANCE;
+                        if (Double.isNaN(lastValidDistanceIn) || desiredRPM <= 0) {
+                            return false;
+                        }
+                        return Math.abs(shooter.getVelocity() - desiredRPM) <= RPM_TOLERANCE;
                     }
                 },
 
                 new SequentialCommandGroup(
                         new InstantCommand(() -> shooter.setMagazineCover(Positions.OPEN_COVER.getPos()), shooter),
 
-
-
-                        new WaitCommand(wait, 1),
-
                         new InstantCommand(() -> {
-                            double distanceIn = calculateDistanceIn(vision);
-                            if (Double.isNaN(distanceIn)) return;
+                            if (Double.isNaN(lastValidDistanceIn)) return;
 
-                            double x = calculateCoverIncrease(distanceIn);
-                            double current = shooter.hood.getPosition();
-                            double bumped = current + x;
+                            double hoodPosF = shooter.hood.getPosition()
+                                    + calculateCoverIncrease(lastValidDistanceIn);
 
-                            if (bumped > 1.0) bumped = 1.0;
-                            if (bumped < 0.0) bumped = 0.0;
+                            if (hoodPosF > 1.0) hoodPosF = 1.0;
+                            if (hoodPosF < 0.0) hoodPosF = 0.0;
 
-                            shooter.setHoodPos(bumped);
+                            shooter.setHoodPos(hoodPosF);
                         }, shooter),
 
-                        new InstantCommand(() -> intake.setSpeed(-1), intake),
-                        new WaitCommand(wait, SHOOT_WAIT_S),
+                        new InstantCommand(() -> intake.setSpeed(-0.75), intake),
 
+                        new CommandBase() {
+                            {
+                                addRequirements(shooter);
+                            }
 
+                            @Override
+                            public void initialize() {
+                                wait.start();
+                            }
+
+                            @Override
+                            public void execute() {
+                                double desiredRPM = updateRPM(vision, shooter);
+                                shooter.setVelocity(desiredRPM);
+                            }
+
+                            @Override
+                            public boolean isFinished() {
+                                return wait.elapsed() >= WAIT_S;
+                            }
+                        },
 
                         new InstantCommand(() -> {
-                            shooter.setVelocity(0);
                             shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
                             intake.setSpeed(0);
+                            lastValidDistanceIn = Double.NaN;
                         }, shooter, intake)
-                ));
+                )
+        );
     }
 
-    //distance = (aprilTagHeight - llHeight) / tan(llPitch + ty)
+    private double updateRPM(Vision vision, Shooter shooter) {
+        double distanceIn = calculateDistanceIn(vision);
+        if (!Double.isNaN(distanceIn)) {
+            lastValidDistanceIn = distanceIn;
+        }
+        if (Double.isNaN(lastValidDistanceIn)) {
+            return 0;
+        }
+        shooter.setHoodPos(setHood(lastValidDistanceIn));
+        return clamp(calculateRpm(lastValidDistanceIn), MIN_V, MAX_V);
+    }
+
+
+    // distance = (aprilTagHeight - llHeight) / tan(llPitch + ty)
     public double calculateDistanceIn(Vision vision) {
         double ty = vision.getTy();
         if (Double.isNaN(ty)) return Double.NaN;
@@ -136,18 +165,21 @@ public class AutoAim extends SequentialCommandGroup {
         return d;
     }
 
+    // linear interp
     public double calculateRpm(double distanceIn) {
-        return (A * distanceIn * distanceIn) + (B * distanceIn) + C;
+        if (distanceIn < MIN_DIST) distanceIn = MIN_DIST;
+        if (distanceIn > MAX_DIST) distanceIn = MAX_DIST;
+        return MIN_V + (MAX_V - MIN_V) * (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
     }
 
-    //TODO: tune these vals
     private double setHood(double distanceIn) {
-        double hoodNear = .4;
-        double hoodFar = .1;
+        double hoodNear = 0.75;
+        double hoodFar  = 0.25;
 
         double t = (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
         if (t < 0) t = 0;
         if (t > 1) t = 1;
+
         return hoodNear + t * (hoodFar - hoodNear);
     }
 
