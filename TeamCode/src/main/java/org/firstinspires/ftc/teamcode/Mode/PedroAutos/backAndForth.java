@@ -26,7 +26,7 @@ public class backAndForth extends OpMode {
                 .addPath(
                         new BezierLine(new Pose(72.000, 72.000), new Pose(72.000, 120.000))
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(90))
+                .setConstantHeadingInterpolation(Math.toRadians(90))
                 .build();
 
         Path2 = follower
@@ -34,7 +34,7 @@ public class backAndForth extends OpMode {
                 .addPath(
                         new BezierLine(new Pose(72.000, 120.000), new Pose(72.000, 72.000))
                 )
-                .setTangentHeadingInterpolation()
+                .setConstantHeadingInterpolation(Math.toRadians(90))
                 .build();
 
         Path3 = follower
@@ -42,7 +42,7 @@ public class backAndForth extends OpMode {
                 .addPath(
                         new BezierLine(new Pose(72.000, 72.000), new Pose(72.000, 120.000))
                 )
-                .setTangentHeadingInterpolation()
+                .setConstantHeadingInterpolation(Math.toRadians(90))
                 .build();
 
         Path4 = follower
@@ -50,7 +50,7 @@ public class backAndForth extends OpMode {
                 .addPath(
                         new BezierLine(new Pose(72.000, 120.000), new Pose(72.000, 72.000))
                 )
-                .setTangentHeadingInterpolation()
+                .setConstantHeadingInterpolation(Math.toRadians(90))
                 .build();
     }
 
