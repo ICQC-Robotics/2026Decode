@@ -21,20 +21,17 @@ public class ChudAuto extends OpMode {
     private Follower follower;
     private Paths paths;
 
+    private static final Pose START_POSE = new Pose(21.000, 126.000, Math.toRadians(234.6));
+
     @Override
     public void init() {
         CommandScheduler.getInstance().reset();
 
         negabot = new Robot(hardwareMap, telemetry);
         follower = negabot.drive.follower;
+        follower.setStartingPose(START_POSE);
 
-        paths = new Paths(follower);
-
-        follower.setStartingPose(
-                new Pose(18.577, 122.938, Math.toRadians(234.5))
-        );
-
-        telemetry.addLine("Pedro Paths Ready");
+        telemetry.addLine("im a fat chud");
         telemetry.update();
     }
 
@@ -42,92 +39,63 @@ public class ChudAuto extends OpMode {
     public void start() {
         CommandScheduler.getInstance().schedule(
                 new SequentialCommandGroup(
-                        new FollowPathCommand(follower, paths.Path1),
-                        new FollowPathCommand(follower, paths.Path2),
-                        new FollowPathCommand(follower, paths.Path3),
-                        new FollowPathCommand(follower, paths.Path4),
-                        new FollowPathCommand(follower, paths.Path5)
+                        new FollowPathCommand(follower, paths.Path1, false, 1.0),
+                        new FollowPathCommand(follower, paths.Path2, false, 1.0),
+                        new FollowPathCommand(follower, paths.Path3, true, 1.0)
                 )
         );
     }
 
     @Override
     public void loop() {
-        follower.update();
         CommandScheduler.getInstance().run();
+        follower.update();
 
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
+        telemetry.addData("busy", follower.isBusy());
         telemetry.update();
     }
+
     public static class Paths {
 
-        public PathChain Path1;
-        public PathChain Path2;
-        public PathChain Path3;
-        public PathChain Path4;
-        public PathChain Path5;
+        public final PathChain Path1;
+        public final PathChain Path2;
+        public final PathChain Path3;
 
         public Paths(Follower follower) {
-
-            Path1 = follower.pathBuilder()
+            Path1 = follower
+                    .pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(18.577, 122.938),
-                                    new Pose(36.000, 107.000)
+                                    new Pose(21.000, 126.000),
+                                    new Pose(37.000, 106.000)
                             )
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(234.5))
+                    .setConstantHeadingInterpolation(Math.toRadians(234.6))
                     .build();
 
-            Path2 = follower.pathBuilder()
+            Path2 = follower
+                    .pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(36.000, 107.000),
-                                    new Pose(43.070, 83.655)
+                                    new Pose(37.000, 106.000),
+                                    new Pose(42.685, 84.000)
                             )
                     )
-                    .setLinearHeadingInterpolation(
-                            Math.toRadians(234.5),
-                            Math.toRadians(180)
-                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(234.6), Math.toRadians(180))
                     .build();
 
-            Path3 = follower.pathBuilder()
+            Path3 = follower
+                    .pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(43.070, 83.655),
-                                    new Pose(19.168, 83.773)
+                                    new Pose(42.685, 84.000),
+                                    new Pose(18.685, 84.000)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(180))
-                    .build();
-
-            Path4 = follower.pathBuilder()
-                    .addPath(
-                            new BezierLine(
-                                    new Pose(19.168, 83.773),
-                                    new Pose(35.970, 107.083)
-                            )
-                    )
-                    .setLinearHeadingInterpolation(
-                            Math.toRadians(180),
-                            Math.toRadians(234.5)
-                    )
-                    .build();
-
-            Path5 = follower.pathBuilder()
-                    .addPath(
-                            new BezierLine(
-                                    new Pose(35.970, 107.083),
-                                    new Pose(17.867, 107.083)
-                            )
-                    )
-                    .setLinearHeadingInterpolation(
-                            Math.toRadians(234.5),
-                            Math.toRadians(180)
-                    )
                     .build();
         }
     }
