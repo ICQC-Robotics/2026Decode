@@ -88,12 +88,14 @@ public class AutoAim extends SequentialCommandGroup {
 
                 new SequentialCommandGroup(
                         new InstantCommand(() -> shooter.setMagazineCover(Positions.OPEN_COVER.getPos()), shooter),
-                        new WaitCommand(wait, 1),
+                        new WaitCommand(wait, 1)),
 
                         new InstantCommand(() -> {
                             if (Double.isNaN(lastValidDistanceIn)) return;
 
-                            double hoodPosF = shooter.hood.getPosition() + calculateCoverIncrease(lastValidDistanceIn);
+                            double hoodPosF = shooter.hood.getPosition()
+                                    + calculateCoverIncrease(lastValidDistanceIn);
+
                             if (hoodPosF > 1.0) hoodPosF = 1.0;
                             if (hoodPosF < 0.0) hoodPosF = 0.0;
 
@@ -129,7 +131,7 @@ public class AutoAim extends SequentialCommandGroup {
                             intake.setSpeed(0);
                             lastValidDistanceIn = Double.NaN;
                         }, shooter, intake)
-                ));
+        );
     }
 
     private double updateRPM(Vision vision, Shooter shooter) {

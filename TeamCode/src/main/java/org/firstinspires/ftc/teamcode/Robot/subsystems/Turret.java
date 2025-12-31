@@ -105,13 +105,7 @@ public class Turret extends SubsystemBase {
 
             double current = getAngleDeg();
             double desired = current + tx;
-
-            if (desired > MAX_DEG) {
-                desired = current - Math.abs(tx);
-            }
-            else if (desired < MIN_DEG) {
-                desired = current + Math.abs(tx);
-            }
+            
             desired = clamp(desired, MIN_DEG, MAX_DEG);
             setTargetDeg(desired);
             visionTxDeg = Double.NaN;
