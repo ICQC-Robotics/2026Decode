@@ -22,7 +22,7 @@ public class ChudAuto extends OpMode {
     public PathChain Path3;
 
     private static final Pose START_POSE =
-            new Pose(126, 21.000, Math.toRadians(234.6));
+            new Pose(21.000, 126.000, Math.toRadians(234.6));
 
     private SequentialCommandGroup autoSequence;
 
@@ -33,7 +33,7 @@ public class ChudAuto extends OpMode {
                 .addPath(
                         new BezierLine(
                                 START_POSE,
-                                new Pose(111, 23)
+                                new Pose(37, 111)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(234.6))
@@ -89,9 +89,9 @@ public class ChudAuto extends OpMode {
         }
 
         autoSequence = new SequentialCommandGroup(
-                new FollowPathCommand(follower, Path1)
-//                new FollowPathCommand(follower, Path2),
-//                new FollowPathCommand(follower, Path3)
+                new FollowPathCommand(follower, Path1),
+                new FollowPathCommand(follower, Path2),
+                new FollowPathCommand(follower, Path3)
         );
 
         autoSequence.initialize();
