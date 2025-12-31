@@ -24,7 +24,7 @@ public class requestedAuto extends OpMode {
         Path1 = follower
                 .pathBuilder()
                 .addPath(
-                        new BezierLine(new Pose(22.841, 125.462), new Pose(48.662, 94.510))
+                        new BezierLine(new Pose(22.841, 125.462), new Pose(35.421, 107.586))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(232), Math.toRadians(180))
                 .build();
