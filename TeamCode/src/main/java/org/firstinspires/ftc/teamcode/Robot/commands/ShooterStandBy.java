@@ -14,7 +14,7 @@ public class ShooterStandBy extends CommandBase {
 
     @Override
     public void execute() {
-        shooter.setVelocity(AutoAim.MIN_V);
+        shooter.setVelocity(3500); //midpoint v of the close zone
     }
 
     @Override

@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
 
 @Autonomous(name = "chudAuto", group = "Auto")
-public class ImAChud extends OpMode {
+public class ChudAuto extends OpMode {
 
     private Robot negabot;
     private Follower follower;
@@ -92,7 +92,6 @@ public class ImAChud extends OpMode {
                             Math.toRadians(234.5),
                             Math.toRadians(180)
                     )
-                    .setReversed(true)
                     .build();
 
             Path3 = follower.pathBuilder()

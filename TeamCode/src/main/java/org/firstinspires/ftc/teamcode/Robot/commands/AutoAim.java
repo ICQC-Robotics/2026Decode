@@ -88,6 +88,7 @@ public class AutoAim extends SequentialCommandGroup {
 
                 new SequentialCommandGroup(
                         new InstantCommand(() -> shooter.setMagazineCover(Positions.OPEN_COVER.getPos()), shooter),
+                        new WaitCommand(wait, 1)),
 
                         new InstantCommand(() -> {
                             if (Double.isNaN(lastValidDistanceIn)) return;
@@ -130,7 +131,6 @@ public class AutoAim extends SequentialCommandGroup {
                             intake.setSpeed(0);
                             lastValidDistanceIn = Double.NaN;
                         }, shooter, intake)
-                )
         );
     }
 
