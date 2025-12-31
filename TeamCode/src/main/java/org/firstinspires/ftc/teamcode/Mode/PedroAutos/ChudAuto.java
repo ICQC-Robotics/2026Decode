@@ -33,7 +33,7 @@ public class ChudAuto extends OpMode {
                 .addPath(
                         new BezierLine(
                                 START_POSE,
-                                new Pose(37.000, 106.000)
+                                new Pose(23, 111)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(234.6))
@@ -43,8 +43,8 @@ public class ChudAuto extends OpMode {
                 .pathBuilder()
                 .addPath(
                         new BezierLine(
-                                new Pose(37.000, 106.000),
-                                new Pose(37.000, 84.000)
+                                new Pose(23, 111),
+                                new Pose(23, 100)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(234.6))
@@ -55,8 +55,8 @@ public class ChudAuto extends OpMode {
                 .pathBuilder()
                 .addPath(
                         new BezierLine(
-                                new Pose(37.000, 84.000),
-                                new Pose(18, 84.000)
+                                new Pose(23, 100),
+                                new Pose(20, 84.000)
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(234.6), Math.toRadians(180))
