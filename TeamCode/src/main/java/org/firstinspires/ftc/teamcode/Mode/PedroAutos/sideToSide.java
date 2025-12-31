@@ -61,7 +61,7 @@ public class sideToSide extends OpMode {
         negabot = new Robot(hardwareMap, telemetry);
         follower = negabot.drive.follower;
         buildPaths(follower);
-        follower.setStartingPose(new Pose(23.007, 125.959));
+        follower.setStartingPose(new Pose(72, 72));
     }
 
     public void start(){
