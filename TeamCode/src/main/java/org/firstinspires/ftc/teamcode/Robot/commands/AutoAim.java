@@ -40,8 +40,8 @@ public class AutoAim extends SequentialCommandGroup {
     //linear interp vals
     private static final double MIN_DIST = 36;
     private static final double MAX_DIST = 130;
-    public static final double MIN_V = 3050;
-    public static final double MAX_V = 4300;
+    public static final double MIN_V = 3300;
+    public static final double MAX_V = 4800;
 
     private double lastValidDistanceIn = Double.NaN;
     private double desiredRPM = 0;
@@ -142,8 +142,17 @@ public class AutoAim extends SequentialCommandGroup {
         if (Double.isNaN(lastValidDistanceIn)) {
             return 0;
         }
-        shooter.setHoodPos(setHood(lastValidDistanceIn));
-        return clamp(calculateRpm(lastValidDistanceIn), MIN_V, MAX_V);
+
+        if (lastValidDistanceIn > 100)
+        {
+            shooter.setHoodPos(0.15);
+            return 4650;
+
+        }
+        else {
+            shooter.setHoodPos(setHood(lastValidDistanceIn));
+            return clamp(calculateRpm(lastValidDistanceIn), MIN_V, MAX_V);
+        }
     }
 
 
@@ -173,8 +182,8 @@ public class AutoAim extends SequentialCommandGroup {
     }
 
     private double setHood(double distanceIn) {
-        double hoodNear = 0.75;
-        double hoodFar  = 0.25;
+        double hoodNear = 0.4;
+        double hoodFar  = 0;
 
         double t = (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
         if (t < 0) t = 0;
