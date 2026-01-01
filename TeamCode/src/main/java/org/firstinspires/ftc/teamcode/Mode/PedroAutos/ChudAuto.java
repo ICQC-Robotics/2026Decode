@@ -8,6 +8,7 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
 
@@ -17,49 +18,44 @@ public class ChudAuto extends OpMode {
     private Robot negabot;
     private Follower follower;
 
-    public PathChain Path1;
-    public PathChain Path2;
-    public PathChain Path3;
-
-    private static final Pose START_POSE =
-            new Pose(21.000, 126.000, Math.toRadians(234.6));
-
+    private PathChain p1, p2, p3;
     private SequentialCommandGroup autoSequence;
 
-    public void buildPaths(Follower follower) {
+    private static final double START_HEADING = Math.toRadians(234.6);
 
-        Path1 = follower
-                .pathBuilder()
-                .addPath(
-                        new BezierLine(
-                                START_POSE,
-                                new Pose(37, 111)
-                        )
-                )
-                .setConstantHeadingInterpolation(Math.toRadians(234.6))
+    private final Pose startPose =
+            new Pose(21.000, 126.000, START_HEADING);
+
+    public void buildPaths() {
+
+        Pose p1End = new Pose(
+                37.000, 106.000, START_HEADING
+        );
+
+        Pose p2End = new Pose(
+                42.685, 84.000, Math.toRadians(180)
+        );
+
+        Pose p3End = new Pose(
+                18.685, 84.000, Math.toRadians(180)
+        );
+
+        p1 = follower.pathBuilder()
+                .addPath(new BezierLine(startPose, p1End))
+                .setConstantHeadingInterpolation(START_HEADING)
                 .build();
 
-        Path2 = follower
-                .pathBuilder()
-                .addPath(
-                        new BezierLine(
-                                new Pose(23, 111),
-                                new Pose(23, 100)
-                        )
+        p2 = follower.pathBuilder()
+                .addPath(new BezierLine(p1End, p2End))
+                .setLinearHeadingInterpolation(
+                        p1End.getHeading(),
+                        p2End.getHeading()
                 )
-                .setConstantHeadingInterpolation(Math.toRadians(234.6))
-
                 .build();
 
-        Path3 = follower
-                .pathBuilder()
-                .addPath(
-                        new BezierLine(
-                                new Pose(23, 100),
-                                new Pose(20, 84.000)
-                        )
-                )
-                .setLinearHeadingInterpolation(Math.toRadians(234.6), Math.toRadians(180))
+        p3 = follower.pathBuilder()
+                .addPath(new BezierLine(p2End, p3End))
+                .setConstantHeadingInterpolation(p3End.getHeading())
                 .build();
     }
 
@@ -70,28 +66,18 @@ public class ChudAuto extends OpMode {
         negabot = new Robot(hardwareMap, telemetry);
         follower = negabot.drive.follower;
 
-        follower.setStartingPose(START_POSE);
-        buildPaths(follower);
-
-        telemetry.addData("Path1", Path1 == null);
-        telemetry.addData("Path2", Path2 == null);
-        telemetry.addData("Path3", Path3 == null);
-        telemetry.update();
+        buildPaths();
+        follower.setStartingPose(startPose);
     }
 
     @Override
     public void start() {
         CommandScheduler.getInstance().cancelAll();
 
-        if (Path1 == null || Path2 == null || Path3 == null) {
-            follower.setPose(START_POSE);
-            buildPaths(follower);
-        }
-
         autoSequence = new SequentialCommandGroup(
-                new FollowPathCommand(follower, Path1),
-                new FollowPathCommand(follower, Path2),
-                new FollowPathCommand(follower, Path3)
+                new FollowPathCommand(follower, p1, false),
+                new FollowPathCommand(follower, p2, false),
+                new FollowPathCommand(follower, p3, false)
         );
 
         autoSequence.initialize();
@@ -102,7 +88,7 @@ public class ChudAuto extends OpMode {
     public void loop() {
         follower.update();
         CommandScheduler.getInstance().run();
-        telemetry.addData("active", follower.isBusy());
+
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
