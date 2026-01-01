@@ -24,7 +24,7 @@ public class Drive extends SubsystemBase {
     public final Follower follower;
     private final Telemetry telemetry;
 
-    public Drive(HardwareMap h, Telemetry t,
+    public Drive(HardwareMap h, Telemetry t, Pose startPose,
                  DcMotorEx fR, DcMotorSimple.Direction fRD,
                  DcMotorEx fL, DcMotorSimple.Direction fLD,
                  DcMotorEx bR, DcMotorSimple.Direction bRD,
@@ -36,6 +36,7 @@ public class Drive extends SubsystemBase {
         this.bL = bL;
 
         follower = Constants.createFollower(h);
+        follower.setStartingPose(startPose);
         telemetry = t;
 
         fR.setDirection(fRD);
@@ -90,11 +91,6 @@ public class Drive extends SubsystemBase {
 
     public double getHeading() {
         return follower.getPose().getHeading();
-    }
-
-    public void setStartPose(Pose p) {
-        follower.setStartingPose(p);
-        follower.update();
     }
 
     public void turnInPlace(double turnPower) {

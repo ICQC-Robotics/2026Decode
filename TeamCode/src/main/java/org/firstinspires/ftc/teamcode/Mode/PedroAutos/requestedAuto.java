@@ -34,7 +34,7 @@ public class requestedAuto extends OpMode {
     @Override
     public void init() {
         CommandScheduler.getInstance().reset();
-        negabot = new Robot(hardwareMap, telemetry);
+        negabot = new Robot(hardwareMap, telemetry, new Pose(0,0));
         follower = negabot.drive.follower;
         buildPaths(follower);
         follower.setStartingPose(new Pose(23.007, 125.959));

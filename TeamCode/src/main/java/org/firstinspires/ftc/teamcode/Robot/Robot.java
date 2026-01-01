@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Robot;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -23,9 +24,9 @@ public class Robot {
     public Vision vision;
     public Wait wait;
 
-    public Robot(HardwareMap h, Telemetry t) {
+    public Robot(HardwareMap h, Telemetry t, Pose startPose) {
         drive = new Drive(
-                h, t,
+                h, t, startPose,
                 h.get(DcMotorEx.class, "fR"), DcMotorSimple.Direction.FORWARD,
                 h.get(DcMotorEx.class, "fL"), DcMotorSimple.Direction.REVERSE,
                 h.get(DcMotorEx.class, "bR"), DcMotorSimple.Direction.FORWARD,

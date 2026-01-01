@@ -63,7 +63,7 @@ public class ChudAuto extends OpMode {
     public void init() {
         CommandScheduler.getInstance().reset();
 
-        negabot = new Robot(hardwareMap, telemetry);
+        negabot = new Robot(hardwareMap, telemetry, startPose);
         follower = negabot.drive.follower;
 
         buildPaths();

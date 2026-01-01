@@ -23,7 +23,7 @@ public class PurePedroAuto extends OpMode {
 
     @Override
     public void init() {
-        negabot = new Robot(hardwareMap, telemetry);
+        negabot = new Robot(hardwareMap, telemetry, START_POSE);
         follower = negabot.drive.follower;
 
         follower.setStartingPose(START_POSE);

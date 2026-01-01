@@ -45,7 +45,7 @@ public class backAndForth extends OpMode {
     private Path backwards;
     @Override
     public void init() {
-        negabot = new Robot(hardwareMap, telemetry);
+        negabot = new Robot(hardwareMap, telemetry, new Pose(72, 72));
         Drive d = negabot.drive;
         follower = d.follower;
         follower.setStartingPose(new Pose(72, 72));

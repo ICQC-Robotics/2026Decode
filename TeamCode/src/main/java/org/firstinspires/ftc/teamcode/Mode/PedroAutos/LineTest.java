@@ -19,11 +19,10 @@ public class LineTest extends CommandOpMode {
 
         @Override
         public void initialize() {
-                negabot = new Robot(hardwareMap, telemetry);
+                negabot = new Robot(hardwareMap, telemetry, new Pose(72, 72, Math.toRadians(90)));
+
                 Drive d = negabot.drive;
                 Follower f = d.follower;
-
-                d.setStartPose(new Pose(72, 72, Math.toRadians(90)));
 
                 path(f);
 

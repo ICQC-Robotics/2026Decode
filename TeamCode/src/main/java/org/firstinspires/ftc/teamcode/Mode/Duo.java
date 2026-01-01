@@ -5,6 +5,7 @@ import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
@@ -22,7 +23,7 @@ public class Duo extends CommandOpMode {
     public void initialize() {
         g1 = new GamepadEx(gamepad1);
         g2 = new GamepadEx(gamepad2);
-        negabot = new Robot(hardwareMap, telemetry);
+        negabot = new Robot(hardwareMap, telemetry, new Pose(0,0));
 
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g1));
 

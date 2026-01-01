@@ -132,7 +132,7 @@ public class Auto extends CommandOpMode {
 
     @Override
     public void initialize() {
-        negabot = new Robot(hardwareMap, telemetry);
+        negabot = new Robot(hardwareMap, telemetry, new Pose(72,72));
         telemetry.addLine("X for Red Close, Y for Red Far, A for Blue Close, B for Blue Far");
         if(gamepad1.x) redClose();
         if(gamepad1.y) redFar();
