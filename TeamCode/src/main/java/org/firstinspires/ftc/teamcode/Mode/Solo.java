@@ -25,7 +25,7 @@ public class Solo extends CommandOpMode {
         g = new GamepadEx(gamepad1);
         negabot = new Robot(hardwareMap, telemetry);
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g));
-        negabot.turret.setDefaultCommand( new AutoTracking(negabot.turret, negabot.vision));
+        negabot.turret.setDefaultCommand(new AutoTracking(negabot.turret, negabot.vision));
 
         negabot.Action(g,
                        GamepadKeys.Button.RIGHT_BUMPER,
