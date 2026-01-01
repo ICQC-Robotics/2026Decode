@@ -40,7 +40,7 @@ public class AutoAim extends SequentialCommandGroup {
     //linear interp vals
     private static final double MIN_DIST = 36;
     private static final double MAX_DIST = 130;
-    public static final double MIN_V = 3300;
+    public static final double MIN_V = 3100;
     public static final double MAX_V = 4800;
 
     private double lastValidDistanceIn = Double.NaN;
