@@ -28,8 +28,8 @@ public class Vision extends SubsystemBase {
 
     private static final double TX_DEADBAND_DEG = 0.3;
 
-    public Vision(HardwareMap hardwareMap) {
-        limelight = hardwareMap.get(Limelight3A.class, "ll");
+    public Vision(Limelight3A vision) {
+        limelight = vision;
         limelight.pipelineSwitch(0);
         limelight.start();
     }
