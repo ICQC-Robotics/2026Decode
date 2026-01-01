@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Mode.PedroAutos;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
@@ -15,63 +16,64 @@ import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
 public class ChudAuto extends OpMode {
 
     private Robot negabot;
-    private Follower follower;
 
-    public PathChain Path1;
-    public PathChain Path2;
-    public PathChain Path3;
+    public PathChain Path1, Path2, Path3;
 
-    private static final Pose START_POSE =
-            new Pose(21.000, 126.000, Math.toRadians(234.6));
-
-    private SequentialCommandGroup autoSequence;
+    private static final Pose START_POSE = new Pose(21.000, 126.000, Math.toRadians(234.6));
 
     public void buildPaths(Follower follower) {
-
-        Path1 = follower
-                .pathBuilder()
+        Path1 = follower.pathBuilder()
                 .addPath(
-                        new BezierLine(
+                        new BezierCurve(
                                 START_POSE,
-                                new Pose(37, 111)
+                                new Pose(23, 111, 234.6)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(234.6))
                 .build();
 
-        Path2 = follower
-                .pathBuilder()
+        Path2 = follower.pathBuilder()
                 .addPath(
-                        new BezierLine(
-                                new Pose(23, 111),
-                                new Pose(23, 100)
+                        new BezierCurve(
+                                new Pose(23, 111, 234.6),
+                                new Pose(23, 100, 234.6)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(234.6))
-
                 .build();
 
         Path3 = follower
                 .pathBuilder()
                 .addPath(
-                        new BezierLine(
-                                new Pose(23, 100),
-                                new Pose(20, 84.000)
+                        new BezierCurve(
+                                new Pose(23, 100, 234.6),
+                                new Pose(20, 84.000, 180)
                         )
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(234.6), Math.toRadians(180))
+                .setLinearHeadingInterpolation(
+                        Math.toRadians(234.6),
+                        Math.toRadians(180)
+                )
                 .build();
     }
 
     @Override
     public void init() {
-        CommandScheduler.getInstance().reset();
-
         negabot = new Robot(hardwareMap, telemetry);
-        follower = negabot.drive.follower;
+        Follower follower = negabot.drive.follower;
+
+        negabot.reset();
 
         follower.setStartingPose(START_POSE);
         buildPaths(follower);
+
+        SequentialCommandGroup autoSequence = new SequentialCommandGroup(
+                new FollowPathCommand(follower, Path1, true),
+                new FollowPathCommand(follower, Path2, true),
+                new FollowPathCommand(follower, Path3, true)
+        );
+
+        negabot.schedule(autoSequence);
 
         telemetry.addData("Path1", Path1 == null);
         telemetry.addData("Path2", Path2 == null);
@@ -80,32 +82,7 @@ public class ChudAuto extends OpMode {
     }
 
     @Override
-    public void start() {
-        CommandScheduler.getInstance().cancelAll();
-
-        if (Path1 == null || Path2 == null || Path3 == null) {
-            follower.setStartingPose(START_POSE);
-            buildPaths(follower);
-        }
-
-        autoSequence = new SequentialCommandGroup(
-                new FollowPathCommand(follower, Path1),
-                new FollowPathCommand(follower, Path2),
-                new FollowPathCommand(follower, Path3)
-        );
-
-        autoSequence.initialize();
-        CommandScheduler.getInstance().schedule(autoSequence);
-    }
-
-    @Override
     public void loop() {
-        follower.update();
-        CommandScheduler.getInstance().run();
-        telemetry.addData("active", follower.isBusy());
-        telemetry.addData("x", follower.getPose().getX());
-        telemetry.addData("y", follower.getPose().getY());
-        telemetry.addData("heading", follower.getPose().getHeading());
-        telemetry.update();
+        negabot.run();
     }
 }
