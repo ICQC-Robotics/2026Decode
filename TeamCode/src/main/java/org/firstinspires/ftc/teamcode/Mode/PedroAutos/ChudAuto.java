@@ -67,7 +67,7 @@ public class ChudAuto extends OpMode {
         follower = negabot.drive.follower;
 
         buildPaths();
-        follower.setStartingPose(startPose);
+        follower.setPose(startPose);
     }
 
     @Override
