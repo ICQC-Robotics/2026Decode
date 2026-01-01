@@ -92,7 +92,10 @@ public class Drive extends SubsystemBase {
         return follower.getPose().getHeading();
     }
 
-    public void setStartPose(Pose p) { follower.setStartingPose(p);}
+    public void setStartPose(Pose p) {
+        follower.setStartingPose(p);
+        follower.update();
+    }
 
     public void turnInPlace(double turnPower) {
         fL.setPower(turnPower);
@@ -113,9 +116,9 @@ public class Drive extends SubsystemBase {
         follower.update();
         mD.localizer.update();
 
-        telemetry.addData("X", follower.getPose().getX());
-        telemetry.addData("Y", follower.getPose().getY());
-        telemetry.addData("Heading", follower.getPose().getHeading());
+        telemetry.addData("X", this.getX());
+        telemetry.addData("Y", this.getY());
+        telemetry.addData("Heading", this.getHeading());
         telemetry.update();
     }
 }

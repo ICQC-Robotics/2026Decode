@@ -23,17 +23,17 @@ public class LineTest extends CommandOpMode {
                 Drive d = negabot.drive;
                 Follower f = d.follower;
 
-                f.activateAllPIDFs();
                 d.setStartPose(new Pose(72, 72, Math.toRadians(90)));
 
                 path(f);
 
                 negabot.schedule(
-                                new SequentialCommandGroup(
-                                                new FollowPathCommand(f, Path1),
-                                                new FollowPathCommand(f, Path2),
-                                                new FollowPathCommand(f, Path3),
-                                                new FollowPathCommand(f, Path4)));
+                        new SequentialCommandGroup(
+                                new FollowPathCommand(f, Path1),
+                                new FollowPathCommand(f, Path2),
+                                new FollowPathCommand(f, Path3),
+                                new FollowPathCommand(f, Path4))
+                );
         }
 
         public void path(Follower follower) {
