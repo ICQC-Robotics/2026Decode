@@ -6,10 +6,13 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
 
+@Autonomous
 public class LineTest extends CommandOpMode {
     Robot negabot;
     PathChain Path1, Path2, Path3, Path4;
