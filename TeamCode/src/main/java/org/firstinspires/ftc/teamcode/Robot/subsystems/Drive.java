@@ -114,8 +114,8 @@ public class Drive extends SubsystemBase {
         mD.localizer.update();
 
         telemetry.addData("X", follower.getPose().getX());
-        telemetry.addData("Y", follower.getPose().getX());
-        telemetry.addData("Heading", follower.getPose().getX());
+        telemetry.addData("Y", follower.getPose().getY());
+        telemetry.addData("Heading", follower.getPose().getHeading());
         telemetry.update();
     }
 }
