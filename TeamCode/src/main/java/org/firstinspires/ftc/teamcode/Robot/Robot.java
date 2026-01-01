@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Robot;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.arcrobotics.ftclib.command.button.GamepadButton;
@@ -53,7 +54,7 @@ public class Robot {
         );
 
         vision = new Vision(
-                h
+                h.get(Limelight3A.class, "ll")
         );
 
         wait = new Wait();
