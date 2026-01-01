@@ -64,16 +64,18 @@ public class backAndForth extends OpMode {
     @Override
     public void init() {
         negabot = new Robot(hardwareMap, telemetry);
+        Follower follower = negabot.drive.follower;
+
         negabot.reset();
 
-        buildPaths(negabot.drive.follower);
-        negabot.drive.setStart(new Pose(72, 72, 90));
+        buildPaths(follower);
+        follower.setStartingPose(new Pose(72, 72, 90));
 
         SequentialCommandGroup autoSequence = new SequentialCommandGroup(
-                new FollowPathCommand(negabot.drive.follower, Path1, true),
-                new FollowPathCommand(negabot.drive.follower, Path2, true),
-                new FollowPathCommand(negabot.drive.follower, Path3, true),
-                new FollowPathCommand(negabot.drive.follower, Path4, true)
+                new FollowPathCommand(follower, Path1, true),
+                new FollowPathCommand(follower, Path2, true),
+                new FollowPathCommand(follower, Path3, true),
+                new FollowPathCommand(follower, Path4, true)
         );
 
         negabot.schedule(autoSequence);

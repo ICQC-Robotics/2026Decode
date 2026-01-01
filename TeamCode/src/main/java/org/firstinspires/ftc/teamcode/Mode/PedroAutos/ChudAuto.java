@@ -60,15 +60,17 @@ public class ChudAuto extends OpMode {
     @Override
     public void init() {
         negabot = new Robot(hardwareMap, telemetry);
+        Follower follower = negabot.drive.follower;
+
         negabot.reset();
 
-        negabot.drive.setStart(START_POSE);
-        buildPaths(negabot.drive.follower);
+        follower.setStartingPose(START_POSE);
+        buildPaths(follower);
 
         SequentialCommandGroup autoSequence = new SequentialCommandGroup(
-                new FollowPathCommand(negabot.drive.follower, Path1, true),
-                new FollowPathCommand(negabot.drive.follower, Path2, true),
-                new FollowPathCommand(negabot.drive.follower, Path3, true)
+                new FollowPathCommand(follower, Path1, true),
+                new FollowPathCommand(follower, Path2, true),
+                new FollowPathCommand(follower, Path3, true)
         );
 
         negabot.schedule(autoSequence);
