@@ -5,87 +5,75 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import com.bylazar.configurables.PanelsConfigurables;
+import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.field.FieldManager;
+import com.bylazar.field.PanelsField;
+import com.bylazar.field.Style;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.*;
+import com.pedropathing.math.*;
+import com.pedropathing.paths.*;
+import com.pedropathing.telemetry.SelectableOpMode;
+import com.pedropathing.util.*;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
+import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
 
 
 @Autonomous(group = "!",name = "back and forth testing")
 public class backAndForth extends OpMode {
-    private Follower follower;
-    private Robot negabot;
-    private SequentialCommandGroup autoSequence;
-    public PathChain Path1, Path2, Path3, Path4;
+    public static double DISTANCE = 40;
 
-    public void buildPaths(Follower follower) {
-        Path1 = follower
-                .pathBuilder()
-                .addPath(
-                        new BezierLine(new Pose(72.000, 72.000), new Pose(72.000, 120.000))
-                )
-                .setConstantHeadingInterpolation(Math.toRadians(90))
-                .build();
+    Robot negabot;
+    public static Follower follower;
 
-        Path2 = follower
-                .pathBuilder()
-                .addPath(
-                        new BezierLine(new Pose(72.000, 120.000), new Pose(72.000, 72.000))
-                )
-                .setConstantHeadingInterpolation(Math.toRadians(90))
-                .build();
+    private boolean forward = true;
 
-        Path3 = follower
-                .pathBuilder()
-                .addPath(
-                        new BezierLine(new Pose(72.000, 72.000), new Pose(72.000, 120.000))
-                )
-                .setConstantHeadingInterpolation(Math.toRadians(90))
-                .build();
-
-        Path4 = follower
-                .pathBuilder()
-                .addPath(
-                        new BezierLine(new Pose(72.000, 120.000), new Pose(72.000, 72.000))
-                )
-                .setConstantHeadingInterpolation(Math.toRadians(90))
-                .build();
-    }
-
-
+    private Path forwards;
+    private Path backwards;
     @Override
     public void init() {
-        CommandScheduler.getInstance().reset();
         negabot = new Robot(hardwareMap, telemetry);
-        follower = negabot.drive.follower;
-        buildPaths(follower);
-        follower.setPose(new Pose(72, 72));
+        Drive d = negabot.drive;
+        follower = d.follower;
+        follower.setStartingPose(new Pose(72, 72));
     }
 
-    public void start(){
-        // build a sequential group of commands
-        autoSequence = new SequentialCommandGroup(
-                // Path 1
-                new FollowPathCommand(follower, Path1),
-                new FollowPathCommand(follower, Path2),
-                new FollowPathCommand(follower, Path3),
-                new FollowPathCommand(follower, Path4)
-        );
-
-        autoSequence.initialize();  // prepare all commands
-        CommandScheduler.getInstance().schedule(autoSequence);
-
+    public void start() {
+        follower.activateAllPIDFs();
+        follower.setStartingPose(new Pose(72, 72));
+        forwards = new Path(new BezierLine(new Pose(72,72), new Pose(DISTANCE + 72,72)));
+        forwards.setConstantHeadingInterpolation(0);
+        backwards = new Path(new BezierLine(new Pose(DISTANCE + 72,72), new Pose(72,72)));
+        backwards.setConstantHeadingInterpolation(0);
+        follower.followPath(forwards);
     }
 
     @Override
     public void loop() {
-        CommandScheduler.getInstance().run();
+        follower.update();
 
-        telemetry.addData("x", follower.getPose().getX());
-        telemetry.addData("y", follower.getPose().getY());
-        telemetry.addData("heading", follower.getPose().getHeading());
-        telemetry.update();
+        if (!follower.isBusy()) {
+            if (forward) {
+                forward = false;
+                follower.followPath(backwards);
+            } else {
+                forward = true;
+                follower.followPath(forwards);
+            }
+        }
+
     }
 }
