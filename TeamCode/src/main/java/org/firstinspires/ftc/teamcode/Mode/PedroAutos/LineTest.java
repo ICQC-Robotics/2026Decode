@@ -16,10 +16,12 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
 public class LineTest extends CommandOpMode {
         Robot negabot;
         PathChain Path1, Path2, Path3, Path4;
+        Pose startPose = new Pose(72, 72, Math.toRadians(90));
+        Pose endPose = new Pose(72, 120, Math.toRadians(90));
 
         @Override
         public void initialize() {
-                negabot = new Robot(hardwareMap, telemetry, new Pose(72, 72, Math.toRadians(90)));
+                negabot = new Robot(hardwareMap, telemetry, startPose);
 
                 Drive d = negabot.drive;
                 Follower f = d.follower;
@@ -39,28 +41,28 @@ public class LineTest extends CommandOpMode {
                 Path1 = follower
                                 .pathBuilder()
                                 .addPath(
-                                                new BezierLine(new Pose(72.000, 72.000), new Pose(72.000, 120.000)))
+                                                new BezierLine(startPose, endPose))
                                 .setConstantHeadingInterpolation(Math.toRadians(90))
                                 .build();
 
                 Path2 = follower
                                 .pathBuilder()
                                 .addPath(
-                                                new BezierLine(new Pose(72.000, 120.000), new Pose(72.000, 72.000)))
+                                                new BezierLine(endPose, startPose))
                                 .setConstantHeadingInterpolation(Math.toRadians(90))
                                 .build();
 
                 Path3 = follower
                                 .pathBuilder()
                                 .addPath(
-                                                new BezierLine(new Pose(72.000, 72.000), new Pose(72.000, 120.000)))
+                                                new BezierLine(startPose, endPose))
                                 .setConstantHeadingInterpolation(Math.toRadians(90))
                                 .build();
 
                 Path4 = follower
                                 .pathBuilder()
                                 .addPath(
-                                                new BezierLine(new Pose(72.000, 120.000), new Pose(72.000, 72.000)))
+                                                new BezierLine(endPose, startPose))
                                 .setConstantHeadingInterpolation(Math.toRadians(90))
                                 .build();
         }
