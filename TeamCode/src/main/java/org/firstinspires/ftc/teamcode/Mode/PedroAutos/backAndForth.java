@@ -61,7 +61,7 @@ public class backAndForth extends OpMode {
         negabot = new Robot(hardwareMap, telemetry);
         follower = negabot.drive.follower;
         buildPaths(follower);
-        follower.setStartingPose(new Pose(72, 72));
+        follower.setPose(new Pose(72, 72));
     }
 
     public void start(){

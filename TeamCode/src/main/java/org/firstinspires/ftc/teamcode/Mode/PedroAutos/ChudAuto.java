@@ -84,7 +84,7 @@ public class ChudAuto extends OpMode {
         CommandScheduler.getInstance().cancelAll();
 
         if (Path1 == null || Path2 == null || Path3 == null) {
-            follower.setStartingPose(START_POSE);
+            follower.setPose(START_POSE);
             buildPaths(follower);
         }
 
