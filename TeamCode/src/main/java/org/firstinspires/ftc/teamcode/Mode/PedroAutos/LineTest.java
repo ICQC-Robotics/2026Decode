@@ -22,8 +22,9 @@ public class LineTest extends CommandOpMode {
         negabot = new Robot(hardwareMap, telemetry);
         Drive d = negabot.drive;
         Follower f = d.follower;
-        d.setStartPose(new Pose(72, 72, Math.toRadians(90)));
+
         path(f);
+        d.setStartPose(new Pose(72, 72, Math.toRadians(90)));
 
         negabot.schedule(
                 new SequentialCommandGroup(

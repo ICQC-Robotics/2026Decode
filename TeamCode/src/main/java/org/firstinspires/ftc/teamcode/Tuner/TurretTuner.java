@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Robot.Tuner;
+package org.firstinspires.ftc.teamcode.Tuner;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Robot.Tuner;
+package org.firstinspires.ftc.teamcode.Tuner;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
