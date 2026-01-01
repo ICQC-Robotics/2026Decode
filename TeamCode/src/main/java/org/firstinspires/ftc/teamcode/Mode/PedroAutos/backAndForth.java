@@ -64,6 +64,10 @@ public class backAndForth extends OpMode {
     @Override
     public void loop() {
         follower.update();
+        telemetry.addData("X", follower.getPose().getX());
+        telemetry.addData("Y", follower.getPose().getY());
+        telemetry.addData("Heading", follower.getPose().getHeading());
+        telemetry.update();
 
         if (!follower.isBusy()) {
             if (forward) {
