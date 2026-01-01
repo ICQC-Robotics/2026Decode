@@ -92,6 +92,8 @@ public class Drive extends SubsystemBase {
         return follower.getPose().getHeading();
     }
 
+    public void setStartPose(Pose p) { follower.setStartingPose(p);}
+
     public void turnInPlace(double turnPower) {
         fL.setPower(turnPower);
         bL.setPower(turnPower);
