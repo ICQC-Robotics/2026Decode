@@ -11,8 +11,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
-import org.firstinspires.ftc.teamcode.Robot.commands.AutoTracking;
 import org.firstinspires.ftc.teamcode.Robot.commands.DriveCommand;
+import org.firstinspires.ftc.teamcode.Robot.commands.PPTracking;
 import org.firstinspires.ftc.teamcode.Robot.commands.ShooterStandBy;
 
 @TeleOp(group=".")
@@ -21,15 +21,29 @@ public class Solo extends CommandOpMode {
     Robot negabot;
     private boolean shooterStandby = false;
 
+    private enum Alliance { BLUE, RED }
+    private Alliance alliance;
+
     @Override
     public void initialize() {
         g = new GamepadEx(gamepad1);
         negabot = new Robot(hardwareMap, telemetry, new Pose(0,0, 0));
         negabot.reset();
-        negabot.drive.follower.setPose(Robot.LAST_POSE);
+
+        if (gamepad1.b) alliance = Alliance.RED;
+        if (gamepad1.x) alliance = Alliance.BLUE;
+
+        Robot.ALLIANCE = (alliance == Alliance.BLUE)? Robot.Alliance.BLUE: Robot.Alliance.RED;
+        //W ternary operator i had to look up how to do it thank you
+
+        telemetry.addLine("X = blue, B = red");
+        telemetry.addData("Alliance", alliance);
+        telemetry.update();
+
+        negabot.drive.follower.setPose(Robot.LAST_POSE); //to test just set a pose
 
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g));
-        negabot.turret.setDefaultCommand(new AutoTracking(negabot.turret, negabot.vision));
+        negabot.turret.setDefaultCommand(new PPTracking(negabot.turret, negabot.drive));
 
         negabot.Action(g,
                        GamepadKeys.Button.RIGHT_BUMPER,
@@ -70,6 +84,8 @@ public class Solo extends CommandOpMode {
             negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter));
             shooterStandby = true;
         }
+
+        Robot.LAST_POSE = negabot.drive.follower.getPose().copy();
         negabot.run();
     }
 }

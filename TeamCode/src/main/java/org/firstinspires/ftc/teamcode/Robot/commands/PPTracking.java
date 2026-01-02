@@ -4,13 +4,18 @@ import com.arcrobotics.ftclib.command.CommandBase;
 
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Turret;
+import org.firstinspires.ftc.teamcode.Robot.Robot;
 
 public class PPTracking extends CommandBase {
     private final Turret turret;
     private final Drive d;
 
-    private static final double TARGET_X = 19;
-    private static final double TARGET_Y = 131;
+    private static final double DEADBAND_DEG = 1;//tune this
+    private static final double FORWARD_DEG = 135;
+
+    double TARGET_X = (Robot.ALLIANCE == Robot.Alliance.BLUE)? Robot.BLUE_TARGET_X: Robot.RED_TARGET_X;
+    double TARGET_Y = (Robot.ALLIANCE == Robot.Alliance.BLUE)? Robot.BLUE_TARGET_Y: Robot.RED_TARGET_Y;
+
     public PPTracking(Turret turret, Drive d) {
         this.turret = turret;
         this.d = d;
@@ -26,23 +31,14 @@ public class PPTracking extends CommandBase {
         double y = d.getY();
         double headingRad = d.getHeading();
 
-        // Vector from robot to target in field coords
         double dx = TARGET_X - x;
         double dy = TARGET_Y - y;
 
-        // Field-centric bearing to target (radians)
         double bearingRad = Math.atan2(dy, dx);
+        double turretAngleDeg = FORWARD_DEG + Math.toDegrees(normalizeRad(bearingRad - headingRad));
 
-        // Robot-relative turret angle (radians)
-        double turretAngleRad = normalizeRad(bearingRad - headingRad);
-
-        // Convert to degrees for the turret API
-        double turretAngleDeg = Math.toDegrees(turretAngleRad);
-
-        turret.setTargetDeg(turretAngleDeg);
-
-
-    }
+        if (Math.abs(turretAngleDeg - turret.getAngleDeg()) > DEADBAND_DEG)
+            turret.setTargetDeg(turretAngleDeg);    }
 
     private double normalizeRad(double angle) {
         while (angle > Math.PI)  angle -= 2.0 * Math.PI;
