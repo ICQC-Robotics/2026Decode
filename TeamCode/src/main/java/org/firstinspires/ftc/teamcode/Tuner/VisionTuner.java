@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name = "GetLLVals", group = "Tuning")
-public class GetLLVals extends OpMode {
+public class VisionTuner extends OpMode {
 
     private Limelight3A limelight;
 
