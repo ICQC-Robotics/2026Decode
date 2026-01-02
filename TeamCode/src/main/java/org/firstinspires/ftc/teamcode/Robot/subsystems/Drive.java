@@ -18,8 +18,8 @@ import org.firstinspires.ftc.teamcode.PP.Constants;
 import org.firstinspires.ftc.teamcode.RR.MecanumDrive;
 
 public class Drive extends SubsystemBase {
-    public final MecanumDrive mD;
-    private Pose2d p = new Pose2d(0, 0, 0);
+    //public final MecanumDrive mD;
+    //private Pose2d p = new Pose2d(0, 0, 0);
     private final DcMotorEx fR, fL, bR, bL;
     public final Follower follower;
     private final Telemetry telemetry;
@@ -49,7 +49,7 @@ public class Drive extends SubsystemBase {
         bR.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         bL.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
-        mD = new MecanumDrive(h, p);
+        //mD = new MecanumDrive(h, p);
     }
 
     public void movement(GamepadEx g) {
@@ -73,9 +73,10 @@ public class Drive extends SubsystemBase {
         bL.setPower(bLPower / max);
     }
 
-    public MecanumDrive getMecanumDrive() {
-        return mD;
-    }
+    //public MecanumDrive getMecanumDrive() {
+    //    return mD;
+    //}
+
     public DcMotorEx getFr() { return fR; }
     public DcMotorEx getFl() { return fL; }
     public DcMotorEx getBr() { return bR; }
@@ -110,7 +111,7 @@ public class Drive extends SubsystemBase {
     @Override
     public void periodic() {
         follower.update();
-        mD.localizer.update();
+        //mD.localizer.update();
 
         telemetry.addData("X", this.getX());
         telemetry.addData("Y", this.getY());
