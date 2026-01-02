@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Tuner;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -32,7 +33,7 @@ public class TurretTuner extends OpMode {
 
     @Override
     public void init() {
-        robot = new Robot(hardwareMap, telemetry);
+        robot = new Robot(hardwareMap, telemetry, new Pose(72, 72));
 
         lastP = kP;
         lastI = kI;

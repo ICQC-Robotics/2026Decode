@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Tuner;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.bylazar.configurables.annotations.Configurable;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -29,7 +30,7 @@ public class ShooterTuner extends OpMode {
     @Override
     public void init() {
         negabot = new Robot(hardwareMap,
-                telemetry
+                telemetry, new Pose(72, 72)
         );
         servo1 = hardwareMap.get(Servo.class, "servo1");
         servo3 = hardwareMap.get(Servo.class, "servo3");
