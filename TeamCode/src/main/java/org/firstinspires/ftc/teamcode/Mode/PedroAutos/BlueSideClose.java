@@ -75,14 +75,13 @@ public class BlueSideClose extends CommandOpMode {
                                 new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE);} ),
                                 new FollowPathCommand(f, Path6, true),
                                 new InstantCommand(() -> {intake.setSpeed(0);} ),
-                                new FollowPathCommand(f, Path7, true)),
+                                new FollowPathCommand(f, Path7, true),
                                 new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);} ),
                                 new WaitCommand(1000),
                                 new InstantCommand(() -> {intake.setSpeed(-1);} ),
                                 new WaitCommand(1000),
                                 new InstantCommand(() -> {intake.setSpeed(0);} ),
-                                new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE);} ),
-                                new FollowPathCommand(f, Path8, true)
+                                new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE);} ))
                 );
         }
 
