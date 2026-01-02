@@ -20,6 +20,8 @@ public class Turret extends SubsystemBase {
     private double targetDeg = 0;
     private double visionTxDeg = Double.NaN;
     private static final double TX_DEADBAND_DEG = 0.1;
+    private static final double ANGLE_OFFSET_DEG = 135.0;
+
 
     public Turret(DcMotorEx turretMotor,
                   DcMotorSimple.Direction direction,
@@ -65,7 +67,7 @@ public class Turret extends SubsystemBase {
 
     public void setTargetDeg(double deg) {
         targetDeg = clamp(deg, MIN_DEG, MAX_DEG);
-        int ticks = degToTicks(targetDeg);
+        int ticks = degToTicks(targetDeg - ANGLE_OFFSET_DEG);
         turretMotor.setTargetPosition(ticks);
         turretMotor.setPower(1);
     }
@@ -80,12 +82,12 @@ public class Turret extends SubsystemBase {
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         turretMotor.setPower(0.0);
 
-        targetDeg = 0.0;
+        targetDeg = ANGLE_OFFSET_DEG;
         visionTxDeg = Double.NaN;
     }
 
     public double getAngleDeg() {
-        return turretMotor.getCurrentPosition() / ticksPerDeg;
+        return (turretMotor.getCurrentPosition() / ticksPerDeg) + ANGLE_OFFSET_DEG;
     }
 
     public double getTargetDeg() {
