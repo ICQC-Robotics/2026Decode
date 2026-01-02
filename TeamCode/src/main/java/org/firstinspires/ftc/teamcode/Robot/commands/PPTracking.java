@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Robot.commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 
+import org.firstinspires.ftc.teamcode.PP.FieldConstants;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
@@ -13,8 +14,8 @@ public class PPTracking extends CommandBase {
     private static final double DEADBAND_DEG = 1;//tune this
     private static final double FORWARD_DEG = 135;
 
-    double TARGET_X = (Robot.ALLIANCE == Robot.Alliance.BLUE)? Robot.BLUE_TARGET_X: Robot.RED_TARGET_X;
-    double TARGET_Y = (Robot.ALLIANCE == Robot.Alliance.BLUE)? Robot.BLUE_TARGET_Y: Robot.RED_TARGET_Y;
+    double TARGET_X = (Robot.ALLIANCE == Robot.Alliance.BLUE)? FieldConstants.BLUE_GOAL_X: FieldConstants.RED_GOAL_X;
+    double TARGET_Y = (Robot.ALLIANCE == Robot.Alliance.BLUE)? FieldConstants.BLUE_GOAL_Y: FieldConstants.RED_GOAL_Y;
 
     public PPTracking(Turret turret, Drive d) {
         this.turret = turret;
