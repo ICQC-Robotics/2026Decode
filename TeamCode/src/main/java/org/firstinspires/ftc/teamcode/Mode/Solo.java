@@ -24,8 +24,9 @@ public class Solo extends CommandOpMode {
     @Override
     public void initialize() {
         g = new GamepadEx(gamepad1);
-        negabot = new Robot(hardwareMap, telemetry, new Pose(0,0));
+        negabot = new Robot(hardwareMap, telemetry, new Pose(0,0, 0));
         negabot.reset();
+        negabot.drive.follower.setPose(Robot.LAST_POSE);
 
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g));
         negabot.turret.setDefaultCommand(new AutoTracking(negabot.turret, negabot.vision));

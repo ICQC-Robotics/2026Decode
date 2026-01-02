@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
 
 @Autonomous
-public class LineTest extends CommandOpMode {
+public class BlueSideClose extends CommandOpMode {
         Robot negabot;
         PathChain Path1, Path2, Path3, Path4, Path5, Path6, Path7, Path8;
         Pose startPose = new Pose(26.241, 133.326, Math.toRadians(54));
@@ -121,6 +121,11 @@ public class LineTest extends CommandOpMode {
                         ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(71))
 
                         .build();
+        }
+
+        public void run() {
+            super.run();
+            Robot.LAST_POSE = negabot.drive.follower.getPose().copy();
         }
 }
 

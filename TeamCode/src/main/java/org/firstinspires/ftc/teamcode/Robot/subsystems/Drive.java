@@ -1,25 +1,16 @@
 package org.firstinspires.ftc.teamcode.Robot.subsystems;
 
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.acmerobotics.roadrunner.Pose2d;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.bylazar.telemetry.JoinedTelemetry;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.PP.Constants;
-import org.firstinspires.ftc.teamcode.RR.MecanumDrive;
 
 public class Drive extends SubsystemBase {
-    //public final MecanumDrive mD;
-    //private Pose2d p = new Pose2d(0, 0, 0);
     private final DcMotorEx fR, fL, bR, bL;
     public final Follower follower;
     private final Telemetry telemetry;
@@ -48,8 +39,6 @@ public class Drive extends SubsystemBase {
         fL.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         bR.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         bL.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-
-        //mD = new MecanumDrive(h, p);
     }
 
     public void movement(GamepadEx g) {
@@ -72,10 +61,6 @@ public class Drive extends SubsystemBase {
         bR.setPower(bRPower / max);
         bL.setPower(bLPower / max);
     }
-
-    //public MecanumDrive getMecanumDrive() {
-    //    return mD;
-    //}
 
     public DcMotorEx getFr() { return fR; }
     public DcMotorEx getFl() { return fL; }
@@ -111,7 +96,6 @@ public class Drive extends SubsystemBase {
     @Override
     public void periodic() {
         follower.update();
-        //mD.localizer.update();
 
         telemetry.addData("X", this.getX());
         telemetry.addData("Y", this.getY());

@@ -23,6 +23,8 @@ public class Robot {
     public Turret turret;
     public Vision vision;
     public Wait wait;
+    public static Pose LAST_POSE;
+
 
     public Robot(HardwareMap h, Telemetry t, Pose startPose) {
         drive = new Drive(
