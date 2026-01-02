@@ -28,6 +28,11 @@ public class Vision extends SubsystemBase {
 
     private static final double TX_DEADBAND_DEG = 0.3;
 
+    //ll mounting constants
+    private static final double LIMELIGHT_HEIGHT_IN = 12;
+    private static final double APRILTAG_HEIGHT_IN = 29.5;
+    private static final double LIMELIGHT_PITCH_DEG = 12;
+
     public Vision(Limelight3A vision) {
         limelight = vision;
         limelight.pipelineSwitch(0);

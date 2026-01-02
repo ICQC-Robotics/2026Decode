@@ -23,11 +23,8 @@ public class BlueSideClose extends CommandOpMode {
         Robot negabot;
         PathChain Path1, Path2, Path3, Path4, Path5, Path6, Path7, Path8;
         Pose startPose = new Pose(26.241, 133.326, Math.toRadians(54));
-        Pose endPose = new Pose(72, 120, Math.toRadians(90));
-
         final double COVER_OPEN = 0.1;
         final double COVER_CLOSE = 1.0;
-
 
         @Override
         public void initialize() {

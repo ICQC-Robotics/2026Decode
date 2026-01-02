@@ -8,6 +8,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.PP.FieldConstants;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
@@ -24,11 +25,7 @@ public class Solo extends CommandOpMode {
 
 
     private boolean poseLocked = false;
-    private static final Pose BLUE_CORNER = new Pose(137, 8.75, 90);
-    private static final Pose RED_CORNER  = new Pose(7, 8.75, 90);
-
-    private enum Alliance { BLUE, RED }
-    private Alliance alliance;
+    private Robot.Alliance currentAlliance;
 
     @Override
     public void initialize() {
@@ -37,13 +34,12 @@ public class Solo extends CommandOpMode {
         negabot.reset();
 
         //alliance selection
-        alliance = Alliance.BLUE; //default
-        if (gamepad1.b) alliance = Alliance.RED;
-        if (gamepad1.x) alliance = Alliance.BLUE;
-        Robot.ALLIANCE = (alliance == Alliance.BLUE)? Robot.Alliance.BLUE: Robot.Alliance.RED;
+        currentAlliance = Robot.Alliance.BLUE; // default
+        if (gamepad1.b) currentAlliance = Robot.Alliance.RED;
+        Robot.ALLIANCE = (currentAlliance == Robot.Alliance.BLUE)? Robot.Alliance.BLUE: Robot.Alliance.RED;
 
-        telemetry.addLine("X = blue, B = red");
-        telemetry.addData("Alliance", alliance);
+        telemetry.addLine("default = blue, B = red");
+        telemetry.addData("Current alliance:", currentAlliance);
         telemetry.update();
 
         //setting position
@@ -73,7 +69,7 @@ public class Solo extends CommandOpMode {
 
         negabot.Action(g,
                        GamepadKeys.Button.A,
-                       new AutoAim(negabot.vision,
+                       new AutoAim(negabot.drive,
                                    negabot.shooter,
                                    negabot.intake,
                                    negabot.wait
@@ -95,7 +91,7 @@ public class Solo extends CommandOpMode {
                 GamepadKeys.Button.DPAD_UP,
                 new InstantCommand(() -> {
                     if (!opModeIsActive() || Robot.LAST_POSE != null || poseLocked) return;
-                    Pose corner = (alliance == Alliance.BLUE) ? BLUE_CORNER : RED_CORNER;
+                    Pose corner = (currentAlliance == Robot.Alliance.BLUE) ? FieldConstants.BLUE_CORNER : FieldConstants.RED_CORNER;
                     negabot.drive.follower.setPose(corner);
                     poseLocked = true;
                 }),

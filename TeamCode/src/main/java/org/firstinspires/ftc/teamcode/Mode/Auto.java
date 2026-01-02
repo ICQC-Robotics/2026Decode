@@ -142,7 +142,7 @@ public class Auto extends CommandOpMode {
         negabot.schedule(
                 new SequentialCommandGroup(
                     new FollowPathCommand(follower, moveToShoot),
-                    new AutoAim(negabot.vision,
+                    new AutoAim(negabot.drive,
                                 negabot.shooter,
                                 negabot.intake,
                                 negabot.wait),

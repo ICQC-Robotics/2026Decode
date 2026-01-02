@@ -28,13 +28,6 @@ public class Robot {
     public enum Alliance { BLUE, RED }
     public static Alliance ALLIANCE;
 
-    public static final double BLUE_TARGET_X = 19;
-    public static final double BLUE_TARGET_Y = 131;
-
-    public static final double RED_TARGET_X  = 126;
-    public static final double RED_TARGET_Y  = 131;
-
-
     public Robot(HardwareMap h, Telemetry t, Pose startPose) {
         drive = new Drive(
                 h, t, startPose,
