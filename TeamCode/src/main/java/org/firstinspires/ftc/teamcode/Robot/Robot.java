@@ -76,4 +76,8 @@ public class Robot {
     public void run() {
         CommandScheduler.getInstance().run();
     }
+
+    public void reset() {
+        CommandScheduler.getInstance().reset();
+    }
 }
