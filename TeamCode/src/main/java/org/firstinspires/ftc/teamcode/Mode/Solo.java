@@ -20,6 +20,12 @@ public class Solo extends CommandOpMode {
     GamepadEx g;
     Robot negabot;
     private boolean shooterStandby = false;
+    private boolean turretTracking = false;
+
+
+    private boolean poseLocked = false;
+    private static final Pose BLUE_CORNER = new Pose(137, 8.75, 90);
+    private static final Pose RED_CORNER  = new Pose(7, 8.75, 90);
 
     private enum Alliance { BLUE, RED }
     private Alliance alliance;
@@ -30,20 +36,27 @@ public class Solo extends CommandOpMode {
         negabot = new Robot(hardwareMap, telemetry, new Pose(0,0, 0));
         negabot.reset();
 
+        //alliance selection
+        alliance = Alliance.BLUE; //default
         if (gamepad1.b) alliance = Alliance.RED;
         if (gamepad1.x) alliance = Alliance.BLUE;
-
         Robot.ALLIANCE = (alliance == Alliance.BLUE)? Robot.Alliance.BLUE: Robot.Alliance.RED;
-        //W ternary operator i had to look up how to do it thank you
 
         telemetry.addLine("X = blue, B = red");
         telemetry.addData("Alliance", alliance);
         telemetry.update();
 
-        negabot.drive.follower.setPose(Robot.LAST_POSE); //to test just set a pose
+        //setting position
+        if (Robot.LAST_POSE != null) {
+            negabot.drive.follower.setPose(Robot.LAST_POSE.copy());
+            poseLocked = true;
+        }
+        else {
+            negabot.drive.follower.setPose(new Pose(0,0, 0));
+
+        }
 
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g));
-        negabot.turret.setDefaultCommand(new PPTracking(negabot.turret, negabot.drive));
 
         negabot.Action(g,
                        GamepadKeys.Button.RIGHT_BUMPER,
@@ -77,11 +90,25 @@ public class Solo extends CommandOpMode {
                 null
         );
 
+        negabot.Action(
+                g,
+                GamepadKeys.Button.DPAD_UP,
+                new InstantCommand(() -> {
+                    if (!opModeIsActive() || Robot.LAST_POSE != null || poseLocked) return;
+                    Pose corner = (alliance == Alliance.BLUE) ? BLUE_CORNER : RED_CORNER;
+                    negabot.drive.follower.setPose(corner);
+                    poseLocked = true;
+                }),
+                null
+        );
+
 
     }
     public void run() {
-        if (!shooterStandby && opModeIsActive()) {
+        if (!shooterStandby && opModeIsActive() && !turretTracking) {
             negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter));
+            negabot.turret.setDefaultCommand(new PPTracking(negabot.turret, negabot.drive));
+            turretTracking = true;
             shooterStandby = true;
         }
 
