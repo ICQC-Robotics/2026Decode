@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.Mode.PedroAutos;
 
 import com.arcrobotics.ftclib.command.CommandOpMode;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
@@ -11,7 +13,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
+import org.firstinspires.ftc.teamcode.Robot.commands.ShooterStandBy;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
+import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.Robot.subsystems.Turret;
 
 @Autonomous
 public class BlueSideClose extends CommandOpMode {
@@ -20,22 +25,56 @@ public class BlueSideClose extends CommandOpMode {
         Pose startPose = new Pose(26.241, 133.326, Math.toRadians(54));
         Pose endPose = new Pose(72, 120, Math.toRadians(90));
 
+        final double COVER_OPEN = 0.1;
+        final double COVER_CLOSE = 1.0;
+
+
         @Override
         public void initialize() {
                 negabot = new Robot(hardwareMap, telemetry, startPose);
 
                 Drive d = negabot.drive;
                 Follower f = d.follower;
+                Turret t = negabot.turret;
+                Intake intake = negabot.intake;
 
                 path(f);
 
+                waitForStart();
                 negabot.schedule(
+                        new ShooterStandBy(negabot.shooter),
+                        new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE); }),
+                        new InstantCommand(() -> {negabot.shooter.setHoodPos(0.3); }),
                         new SequentialCommandGroup(
+                                new InstantCommand(() -> { t.setTargetDeg(0); }),
                                 new FollowPathCommand(f, Path1, true),
+                                new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);} ),
+                                new WaitCommand(1000),
+                                new InstantCommand(() -> {intake.setSpeed(-1);} ),
+                                new WaitCommand(1000),
+                                new InstantCommand(() -> {intake.setSpeed(-1);} ),
+                                new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE);} ),
                                 new FollowPathCommand(f, Path2, true),
+                                new InstantCommand(() -> {intake.setSpeed(0);} ),
+                                new InstantCommand(() -> { t.setTargetDeg(50.5); }),
+                                new InstantCommand(() -> {negabot.shooter.setHoodPos(0.1); }),
                                 new FollowPathCommand(f, Path3, true),
+                                new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);} ),
+                                new WaitCommand(1000),
+                                new InstantCommand(() -> {intake.setSpeed(-1);} ),
+                                new WaitCommand(1000),
+                                new InstantCommand(() -> {intake.setSpeed(-1);} ),
+                                new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE);} ),
                                 new FollowPathCommand(f, Path4, true),
+                                new InstantCommand(() -> { t.setTargetDeg(73.5); }),
+                                new InstantCommand(() -> {intake.setSpeed(0);} ),
                                 new FollowPathCommand(f, Path5, true),
+                                new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);} ),
+                                new WaitCommand(1000),
+                                new InstantCommand(() -> {intake.setSpeed(-1);} ),
+                                new WaitCommand(1000),
+                                new InstantCommand(() -> {intake.setSpeed(0);} ),
+                                new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE);} ),
                                 new FollowPathCommand(f, Path6, true),
                                 new FollowPathCommand(f, Path7, true))
                 );
@@ -48,7 +87,7 @@ public class BlueSideClose extends CommandOpMode {
 
                                     new Pose(58.811, 84.606)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(54), Math.toRadians(0))
+                    ).setLinearHeadingInterpolation(Math.toRadians(54), Math.toRadians(10))
 
                     .build();
 
@@ -58,7 +97,7 @@ public class BlueSideClose extends CommandOpMode {
 
                                     new Pose(21.670, 83.997)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                    ).setLinearHeadingInterpolation(Math.toRadians(10), Math.toRadians(0))
 
                     .build();
 
