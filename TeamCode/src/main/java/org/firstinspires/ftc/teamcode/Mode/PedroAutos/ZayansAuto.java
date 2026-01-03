@@ -83,7 +83,7 @@ public class ZayansAuto extends CommandOpMode {
                 new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);} ),
                 new WaitCommand(250),
                 new InstantCommand(() -> {intake.setSpeed(-1);} ),
-                new WaitCommand(750),
+                new WaitCommand(500),
                 new InstantCommand(() -> {intake.setSpeed(-1);} ),
                 new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE);} )
         );
