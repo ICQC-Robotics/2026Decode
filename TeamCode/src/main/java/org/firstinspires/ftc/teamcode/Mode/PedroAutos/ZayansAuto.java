@@ -25,13 +25,13 @@ public class ZayansAuto extends CommandOpMode {
     Robot negabot;
     PathChain pre, r1, r1b, r2, r2b, r3, r3b, gate, gateB;
     Pose startPose = new Pose(26.241, 133.326, Math.toRadians(54));
-    Pose shoot = new Pose(0, 0, Math.toRadians(0)); //TODO: ADD
-    Pose gateIntake = new Pose(0, 0, Math.toRadians(0)); //TODO: ADD
-    double row1y = 0; //TODO: ADD
-    double row2y = 0; //TODO: ADD
-    double row3y = 0; //TODO: ADD
-    double firstBallx = 0; //TODO: ADD
-    double lastBallx = 0; //TODO: ADD
+    Pose shoot = new Pose(58.49942594718714, 84.61882893226179, Math.toRadians(71)); //TODO: ADD
+    Pose gateIntake = new Pose(17.624, 88.278, Math.toRadians(-30)); //TODO: ADD
+    double row1y = 84; //TODO: ADD
+    double row2y = 60; //TODO: ADD
+    double row3y = 36; //TODO: ADD
+    double firstBallx = 42; //TODO: ADD
+    double lastBallx = 25; //TODO: ADD
     final double COVER_OPEN = 0.1;
     final double COVER_CLOSE = 1.0;
     Intake intake;
