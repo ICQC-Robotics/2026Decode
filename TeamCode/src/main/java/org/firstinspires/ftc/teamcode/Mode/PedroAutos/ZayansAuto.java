@@ -26,7 +26,7 @@ public class ZayansAuto extends CommandOpMode {
     PathChain pre, r1, r1b, r2, r2b, r3, r3b, gate, gateB;
     Pose startPose = new Pose(26.241, 133.326, Math.toRadians(54));
     Pose shoot = new Pose(58.49942594718714, 84.61882893226179, Math.toRadians(71)); //TODO: ADD
-    Pose gateIntake = new Pose(17.624, 88.278, Math.toRadians(-30)); //TODO: ADD
+    Pose gateIntake = new Pose(17.624, 62.894, Math.toRadians(-30)); //TODO: ADD
     double row1y = 84; //TODO: ADD
     double row2y = 60; //TODO: ADD
     double row3y = 36; //TODO: ADD
@@ -55,11 +55,11 @@ public class ZayansAuto extends CommandOpMode {
                 new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE); }),
                 new InstantCommand(() -> {negabot.shooter.setHoodPos(0.3); }),
                 new SequentialCommandGroup(
-                        new InstantCommand(() -> { t.setTargetDeg(0); }),
+                        new InstantCommand(() -> { t.setTargetDeg(100); }),
                         new FollowPathCommand(f, pre, true),
                         shoot(),
                         new FollowPathCommand(f, r2, true),
-                        shotPrep(r2b, 50.5, 0.1),
+                        shotPrep(r2b, 73.5, 0.1),
                         shoot(),
                         gateShot(),
                         new FollowPathCommand(f, r1, true),
