@@ -23,15 +23,18 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Turret;
 @Autonomous
 public class ZayansAuto extends CommandOpMode {
     Robot negabot;
-    PathChain pre, r1, r1b, r2, r2b, r3, r3b, gate, gateB, gateB0;
+    PathChain pre, r1, r1b, r2, r2b, r3, r3b, gate, gate1, gate2, gate3, gateB, gateB0;
     Pose startPose = new Pose(26.241, 133.326, Math.toRadians(54));
-    Pose shoot = new Pose(58.49942594718714, 84.61882893226179, Math.toRadians(71)); //TODO: ADD
-    Pose gateIntake = new Pose(17.624, 62.894, Math.toRadians(-30)); //TODO: ADD
+    Pose shoot = new Pose(58.49942594718714, 84.61882893226179, Math.toRadians(24)); //TODO: ADD
+    Pose gateIntake = new Pose(17.624, 62.894, Math.toRadians(-20)); //TODO: ADD
+    Pose gateIntake1 = new Pose(17.624, 64.894, Math.toRadians(-25));
+    Pose gateIntake2 = new Pose(17.624, 66.5, Math.toRadians(-30));
+    Pose gateIntake3 = new Pose(17.624, 68, Math.toRadians(-30));
     double row1y = 84; //TODO: ADD
-    double row2y = 60; //TODO: ADD
+    double row2y = 57; //TODO: ADD
     double row3y = 36; //TODO: ADD
     double firstBallx = 42; //TODO: ADD
-    double lastBallx = 23; //TODO: ADD
+    double lastBallx = 21; //TODO: ADD
     final double COVER_OPEN = 0.1;
     final double COVER_CLOSE = 1.0;
     Intake intake;
@@ -55,26 +58,30 @@ public class ZayansAuto extends CommandOpMode {
                 new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE); }),
                 new InstantCommand(() -> {negabot.shooter.setHoodPos(0.3); }),
                 new SequentialCommandGroup(
-                        new InstantCommand(() -> { t.setTargetDeg(100); }),
+                        new InstantCommand(() -> { t.setTargetDeg(75); }),
                         new FollowPathCommand(f, pre, true),
                         shoot(),
                         new FollowPathCommand(f, r2, true),
-                        shotPrep(r2b, 73.5, 0.1),
+                        shotPrep(r2b, 32.5, 0.1),
                         shoot(),
                         new FollowPathCommand(f, gate, true),
-                        shotPrep(gateB0, 73.5, 0.05),
+                        new WaitCommand(800),
+                        shotPrep(gateB0, 0, 0.05),
                         shoot(),
                         new FollowPathCommand(f, r1, true),
-                        shotPrep(r1b, 73.5, 0.05),
+                        shotPrep(r1b, 32.5, 0.05),
                         shoot(),
-                        new FollowPathCommand(f, gate, true),
-                        shotPrep(gateB, 73.5, 0.05),
+                        new FollowPathCommand(f, gate1, true),
+                        new WaitCommand(800),
+                        shotPrep(gateB, 32.5, 0.05),
                         shoot(),
-                        new FollowPathCommand(f, r3, true),
-                        shotPrep(r3b, 73.5, 0.05),
+                        new FollowPathCommand(f, gate2, true),
+                        new WaitCommand(800),
+                        shotPrep(gateB, 32.5, 0.05),
                         shoot(),
-                        new FollowPathCommand(f, gate, true),
-                        shotPrep(gateB, 73.5, 0.05),
+                        new FollowPathCommand(f, gate2, true),
+                        new WaitCommand(800),
+                        shotPrep(gateB, 32.5, 0.05),
                         shoot())
         );
     }
@@ -164,6 +171,30 @@ public class ZayansAuto extends CommandOpMode {
                                 new Pose(gateIntake.getX(), gateIntake.getY())
                         )
                 ).setLinearHeadingInterpolation(shoot.getHeading(), gateIntake.getHeading())
+
+                .build();
+        gate1 = follower.pathBuilder().addPath(
+                        new BezierCurve(
+                                new Pose(shoot.getX(), shoot.getY()),
+                                new Pose(gateIntake1.getX(), gateIntake1.getY())
+                        )
+                ).setLinearHeadingInterpolation(shoot.getHeading(), gateIntake1.getHeading())
+
+                .build();
+        gate2 = follower.pathBuilder().addPath(
+                        new BezierCurve(
+                                new Pose(shoot.getX(), shoot.getY()),
+                                new Pose(gateIntake2.getX(), gateIntake2.getY())
+                        )
+                ).setLinearHeadingInterpolation(shoot.getHeading(), gateIntake2.getHeading())
+
+                .build();
+        gate3 = follower.pathBuilder().addPath(
+                        new BezierCurve(
+                                new Pose(shoot.getX(), shoot.getY()),
+                                new Pose(gateIntake3.getX(), gateIntake3.getY())
+                        )
+                ).setLinearHeadingInterpolation(shoot.getHeading(), gateIntake3.getHeading())
 
                 .build();
 
