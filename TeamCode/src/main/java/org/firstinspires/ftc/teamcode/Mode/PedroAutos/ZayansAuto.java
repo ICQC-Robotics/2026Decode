@@ -31,7 +31,7 @@ public class ZayansAuto extends CommandOpMode {
     double row2y = 60; //TODO: ADD
     double row3y = 36; //TODO: ADD
     double firstBallx = 42; //TODO: ADD
-    double lastBallx = 25; //TODO: ADD
+    double lastBallx = 27; //TODO: ADD
     final double COVER_OPEN = 0.1;
     final double COVER_CLOSE = 1.0;
     Intake intake;
@@ -81,9 +81,9 @@ public class ZayansAuto extends CommandOpMode {
     public Command shoot(){
         return new SequentialCommandGroup(
                 new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);} ),
-                new WaitCommand(1000),
+                new WaitCommand(250),
                 new InstantCommand(() -> {intake.setSpeed(-1);} ),
-                new WaitCommand(1000),
+                new WaitCommand(750),
                 new InstantCommand(() -> {intake.setSpeed(-1);} ),
                 new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE);} )
         );
