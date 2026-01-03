@@ -25,16 +25,16 @@ public class ZayansAuto extends CommandOpMode {
     Robot negabot;
     PathChain pre, r1, r1b, r2, r2b, r3, r3b, gate, gate1, gate2, gate3, gateB, gateB0;
     Pose startPose = new Pose(26.241, 133.326, Math.toRadians(54));
-    Pose shoot = new Pose(58.49942594718714, 84.61882893226179, Math.toRadians(24)); //TODO: ADD
-    Pose gateIntake = new Pose(17.624, 62.894, Math.toRadians(-20)); //TODO: ADD
+    Pose shoot = new Pose(58.49942594718714, 84.61882893226179, Math.toRadians(24));
+    Pose gateIntake = new Pose(17.624, 62.894, Math.toRadians(-20));
     Pose gateIntake1 = new Pose(17.624, 64.894, Math.toRadians(-25));
     Pose gateIntake2 = new Pose(17.624, 66.5, Math.toRadians(-30));
     Pose gateIntake3 = new Pose(17.624, 68, Math.toRadians(-30));
-    double row1y = 84; //TODO: ADD
-    double row2y = 57; //TODO: ADD
-    double row3y = 36; //TODO: ADD
-    double firstBallx = 42; //TODO: ADD
-    double lastBallx = 21; //TODO: ADD
+    double row1y = 84;
+    double row2y = 57;
+    double row3y = 36;
+    double firstBallx = 42;
+    double lastBallx = 21;
     final double COVER_OPEN = 0.1;
     final double COVER_CLOSE = 1.0;
     Intake intake;
@@ -59,36 +59,37 @@ public class ZayansAuto extends CommandOpMode {
                 new InstantCommand(() -> {negabot.shooter.setHoodPos(0.3); }),
                 new SequentialCommandGroup(
                         new InstantCommand(() -> { t.setTargetDeg(75); }),
-                        new FollowPathCommand(f, pre, true),
+                        new ParallelCommandGroup(
+                                new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);} ),
+                                new FollowPathCommand(f, pre, true)
+                        ),
                         shoot(),
                         new FollowPathCommand(f, r2, true),
                         shotPrep(r2b, 32.5, 0.1),
                         shoot(),
                         new FollowPathCommand(f, gate, true),
-                        new WaitCommand(800),
+                        new WaitCommand(1000),
                         shotPrep(gateB0, 0, 0.05),
                         shoot(),
                         new FollowPathCommand(f, r1, true),
                         shotPrep(r1b, 32.5, 0.05),
                         shoot(),
                         new FollowPathCommand(f, gate1, true),
-                        new WaitCommand(800),
+                        new WaitCommand(1000),
                         shotPrep(gateB, 32.5, 0.05),
                         shoot(),
                         new FollowPathCommand(f, gate2, true),
-                        new WaitCommand(800),
+                        new WaitCommand(1000),
                         shotPrep(gateB, 32.5, 0.05),
                         shoot(),
                         new FollowPathCommand(f, gate2, true),
-                        new WaitCommand(800),
+                        new WaitCommand(1000),
                         shotPrep(gateB, 32.5, 0.05),
                         shoot())
         );
     }
     public Command shoot(){
         return new SequentialCommandGroup(
-                new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);} ),
-                new WaitCommand(250),
                 new InstantCommand(() -> {intake.setSpeed(-1);} ),
                 new WaitCommand(500),
                 new InstantCommand(() -> {intake.setSpeed(-1);} ),
@@ -100,7 +101,8 @@ public class ZayansAuto extends CommandOpMode {
                 new FollowPathCommand(f, path, true),
                 new InstantCommand(() -> {intake.setSpeed(0);} ),
                 new InstantCommand(() -> { t.setTargetDeg(turretAngle); }),
-                new InstantCommand(() -> {negabot.shooter.setHoodPos(hoodPos); })
+                new InstantCommand(() -> {negabot.shooter.setHoodPos(hoodPos); }),
+                new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);} )
         );
     }
     public void path(Follower follower) {
