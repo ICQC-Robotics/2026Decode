@@ -24,6 +24,7 @@ public class Robot {
     public Vision vision;
     public Wait wait;
     public static Pose LAST_POSE;
+    public static double LAST_TURRET_DEG;
 
     public enum Alliance { BLUE, RED }
     public static Alliance ALLIANCE;

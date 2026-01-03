@@ -219,6 +219,7 @@ public class ZayansAuto extends CommandOpMode {
     public void run() {
         super.run();
         Robot.LAST_POSE = negabot.drive.follower.getPose().copy();
+        Robot.LAST_TURRET_DEG = negabot.turret.getAngleDeg();
     }
 }
 

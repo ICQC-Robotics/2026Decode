@@ -20,8 +20,7 @@ public class Turret extends SubsystemBase {
     private double targetDeg = 0;
     private double visionTxDeg = Double.NaN;
     private static final double TX_DEADBAND_DEG = 0.1;
-    private static final double ANGLE_OFFSET_DEG = 135.0;
-
+    private double angleOffsetDeg = 135.0;
 
     public Turret(DcMotorEx turretMotor,
                   DcMotorSimple.Direction direction,
@@ -67,7 +66,7 @@ public class Turret extends SubsystemBase {
 
     public void setTargetDeg(double deg) {
         targetDeg = clamp(deg, MIN_DEG, MAX_DEG);
-        int ticks = degToTicks(targetDeg - ANGLE_OFFSET_DEG);
+        int ticks = degToTicks(targetDeg - angleOffsetDeg);
         turretMotor.setTargetPosition(ticks);
         turretMotor.setPower(1);
     }
@@ -82,12 +81,12 @@ public class Turret extends SubsystemBase {
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         turretMotor.setPower(0.0);
 
-        targetDeg = ANGLE_OFFSET_DEG;
+        targetDeg = angleOffsetDeg;
         visionTxDeg = Double.NaN;
     }
 
     public double getAngleDeg() {
-        return (turretMotor.getCurrentPosition() / ticksPerDeg) + ANGLE_OFFSET_DEG;
+        return (turretMotor.getCurrentPosition() / ticksPerDeg) + angleOffsetDeg;
     }
 
     public double getTargetDeg() {
@@ -122,5 +121,11 @@ public class Turret extends SubsystemBase {
         if (v < lo) return lo;
         if (v > hi) return hi;
         return v;
+    }
+
+    public void restoreAngleDeg(double savedAngleDeg) {
+        angleOffsetDeg = savedAngleDeg - (turretMotor.getCurrentPosition() / ticksPerDeg);
+        targetDeg = savedAngleDeg;
+        setTargetDeg(savedAngleDeg);
     }
 }

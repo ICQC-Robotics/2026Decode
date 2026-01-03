@@ -20,9 +20,9 @@ import org.firstinspires.ftc.teamcode.Robot.commands.ShooterStandBy;
 public class Solo extends CommandOpMode {
     GamepadEx g;
     Robot negabot;
+
     private boolean shooterStandby = false;
     private boolean turretTracking = false;
-
 
     private boolean poseLocked = false;
     private Robot.Alliance currentAlliance;
@@ -34,7 +34,7 @@ public class Solo extends CommandOpMode {
         negabot.reset();
 
         //alliance selection
-        currentAlliance = Robot.Alliance.BLUE; // default
+        currentAlliance = Robot.Alliance.BLUE;
         if (gamepad1.b) currentAlliance = Robot.Alliance.RED;
         Robot.ALLIANCE = (currentAlliance == Robot.Alliance.BLUE)? Robot.Alliance.BLUE: Robot.Alliance.RED;
 
@@ -53,6 +53,7 @@ public class Solo extends CommandOpMode {
         }
 
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g));
+        negabot.turret.restoreAngleDeg(Robot.LAST_TURRET_DEG);
 
         negabot.Action(g,
                        GamepadKeys.Button.RIGHT_BUMPER,
