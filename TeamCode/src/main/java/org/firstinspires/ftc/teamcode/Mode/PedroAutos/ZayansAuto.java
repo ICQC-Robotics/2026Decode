@@ -110,7 +110,7 @@ public class ZayansAuto extends CommandOpMode {
                                 new Pose(shoot.getX(), shoot.getY()),
                                 new Pose(lastBallx, row1y)
                         )
-                ).setLinearHeadingInterpolation(shoot.getHeading(), Math.toRadians(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
 
                 .build();
 
