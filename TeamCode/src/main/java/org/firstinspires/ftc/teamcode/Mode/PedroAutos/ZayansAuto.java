@@ -114,8 +114,8 @@ public class ZayansAuto extends CommandOpMode {
         r1 = follower.pathBuilder().addPath(
                         new BezierCurve(
                                 new Pose(shoot.getX(), shoot.getY()),
-                                new Pose(row1y, firstBallx),
-                                new Pose(row1y, lastBallx)
+                                new Pose(firstBallx, row1y),
+                                new Pose(lastBallx, row1y)
                         )
                 ).setLinearHeadingInterpolation(shoot.getHeading(), Math.toRadians(0))
 
@@ -123,7 +123,7 @@ public class ZayansAuto extends CommandOpMode {
 
         r1b = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(row1y, lastBallx),
+                                new Pose(lastBallx, row1y),
                                 new Pose(shoot.getX(), shoot.getY())
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), shoot.getHeading())
@@ -132,8 +132,8 @@ public class ZayansAuto extends CommandOpMode {
         r2 = follower.pathBuilder().addPath(
                         new BezierCurve(
                                 new Pose(shoot.getX(), shoot.getY()),
-                                new Pose(row2y, firstBallx),
-                                new Pose(row2y, lastBallx)
+                                new Pose(firstBallx, row2y),
+                                new Pose(lastBallx, row2y)
                         )
                 ).setLinearHeadingInterpolation(shoot.getHeading(), Math.toRadians(0))
 
@@ -141,7 +141,7 @@ public class ZayansAuto extends CommandOpMode {
 
         r2b = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(row2y, lastBallx),
+                                new Pose(lastBallx, row2y),
                                 new Pose(shoot.getX(), shoot.getY())
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), shoot.getHeading())
@@ -150,8 +150,8 @@ public class ZayansAuto extends CommandOpMode {
         r3 = follower.pathBuilder().addPath(
                         new BezierCurve(
                                 new Pose(shoot.getX(), shoot.getY()),
-                                new Pose(row3y, firstBallx),
-                                new Pose(row3y, lastBallx)
+                                new Pose(firstBallx, row3y),
+                                new Pose(lastBallx, row3y)
                         )
                 ).setLinearHeadingInterpolation(shoot.getHeading(), Math.toRadians(0))
 
@@ -159,7 +159,7 @@ public class ZayansAuto extends CommandOpMode {
 
         r3b = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(row3y, lastBallx),
+                                new Pose(lastBallx, row3y),
                                 new Pose(shoot.getX(), shoot.getY())
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), shoot.getHeading())
