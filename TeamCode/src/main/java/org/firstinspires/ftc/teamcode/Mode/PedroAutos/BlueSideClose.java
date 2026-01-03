@@ -167,9 +167,10 @@ public class BlueSideClose extends CommandOpMode {
 
         }
 
-        public void run() {
-            super.run();
-            Robot.LAST_POSE = negabot.drive.follower.getPose().copy();
-        }
+    public void run() {
+        super.run();
+        Robot.LAST_POSE = negabot.drive.follower.getPose().copy();
+        Robot.LAST_TURRET_DEG = negabot.turret.getAngleDeg();
+    }
 }
 

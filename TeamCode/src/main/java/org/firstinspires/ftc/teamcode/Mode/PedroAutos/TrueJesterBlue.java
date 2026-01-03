@@ -95,4 +95,9 @@ public class TrueJesterBlue extends CommandOpMode {
                 .build();
     }
 
+    public void run() {
+        super.run();
+        Robot.LAST_POSE = negabot.drive.follower.getPose().copy();
+        Robot.LAST_TURRET_DEG = negabot.turret.getAngleDeg();
+    }
 }
