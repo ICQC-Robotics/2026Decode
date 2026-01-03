@@ -31,7 +31,7 @@ public class ZayansAuto extends CommandOpMode {
     double row2y = 60; //TODO: ADD
     double row3y = 36; //TODO: ADD
     double firstBallx = 42; //TODO: ADD
-    double lastBallx = 27; //TODO: ADD
+    double lastBallx = 23; //TODO: ADD
     final double COVER_OPEN = 0.1;
     final double COVER_CLOSE = 1.0;
     Intake intake;
