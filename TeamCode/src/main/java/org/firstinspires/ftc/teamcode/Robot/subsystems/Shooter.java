@@ -11,6 +11,7 @@ public class Shooter extends SubsystemBase {
     private final DcMotorEx rightShooter, leftShooter;
     public final Servo leftCover, rightCover, hood;
     private final PIDFCoefficients pidf;
+    private double targetVelocity;
 
     public Shooter(DcMotorEx rightShooter, DcMotorSimple.Direction rightDir,
                    DcMotorEx leftShooter, DcMotorSimple.Direction leftDir,
@@ -38,6 +39,10 @@ public class Shooter extends SubsystemBase {
 
         this.setHoodPos(.5); //TODO: find default hood angle pos
         this.setMagazineCover(1); // TODO: change accordingly to new cover
+        targetVelocity = 0;
+    }
+    public double getTargetVelocity(){
+        return targetVelocity;
     }
 
     public void setPIDF(double p, double i, double d, double f) {
@@ -65,7 +70,7 @@ public class Shooter extends SubsystemBase {
 
         rightShooter.setVelocity(ticksPerSec);
         leftShooter.setVelocity(ticksPerSec);
-
+        targetVelocity = rpm;
     }
 
     public double getVelocity() {
