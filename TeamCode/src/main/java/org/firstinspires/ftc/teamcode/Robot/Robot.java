@@ -25,11 +25,13 @@ public class Robot {
     public Wait wait;
     public static Pose LAST_POSE;
     public static double LAST_TURRET_DEG;
+    Telemetry t;
 
     public enum Alliance { BLUE, RED }
     public static Alliance ALLIANCE;
 
     public Robot(HardwareMap h, Telemetry t, Pose startPose) {
+        this.t = t;
         drive = new Drive(
                 h, t, startPose,
                 h.get(DcMotorEx.class, "fR"), DcMotorSimple.Direction.FORWARD,
@@ -81,6 +83,7 @@ public class Robot {
 
     public void run() {
         CommandScheduler.getInstance().run();
+        t.update();
     }
 
     public void reset() {

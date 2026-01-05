@@ -97,6 +97,5 @@ public class Turret extends SubsystemBase {
     @Override
     public void periodic() {
         telemetry.addData("Turret Pos", this.getAngleDeg());
-        telemetry.update();
     }
 }
