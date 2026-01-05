@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 public class Turret extends SubsystemBase {
 
     public static final double MIN_DEG = 0;
@@ -21,12 +23,15 @@ public class Turret extends SubsystemBase {
     private double visionTxDeg = Double.NaN;
     private static final double TX_DEADBAND_DEG = 0.1;
 
-    public Turret(DcMotorEx turretMotor,
+    private final Telemetry telemetry;
+
+    public Turret(DcMotorEx turretMotor, Telemetry t,
                   DcMotorSimple.Direction direction,
                   PIDFCoefficients pidf) {
 
         this.turretMotor = turretMotor;
         this.pidf = pidf;
+        telemetry = t;
 
         turretMotor.setDirection(direction);
         turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -87,5 +92,11 @@ public class Turret extends SubsystemBase {
 
     public void restoreAngleDeg(double savedAngleDeg) {
         setTargetDeg(savedAngleDeg);
+    }
+
+    @Override
+    public void periodic() {
+        telemetry.addData("Turret Pos", turretMotor.getCurrentPosition());
+        telemetry.update();
     }
 }
