@@ -57,7 +57,6 @@ public class Robot {
 
         turret = new Turret(
                 h.get(DcMotorEx.class, "turret"),
-                t,
                 DcMotorSimple.Direction.REVERSE,
                 new PIDFCoefficients(12, 0, 0, 0)
         );
