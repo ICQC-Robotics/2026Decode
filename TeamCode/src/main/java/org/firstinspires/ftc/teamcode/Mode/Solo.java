@@ -53,7 +53,7 @@ public class Solo extends CommandOpMode {
         }
 
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g));
-        negabot.turret.restoreAngleDeg(Robot.LAST_TURRET_DEG);
+       // negabot.turret.restoreAngleDeg(Robot.LAST_TURRET_DEG);
 
         negabot.Action(g,
                        GamepadKeys.Button.RIGHT_BUMPER,

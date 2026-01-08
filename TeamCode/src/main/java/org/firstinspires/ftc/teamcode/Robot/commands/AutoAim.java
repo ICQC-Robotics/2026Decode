@@ -39,7 +39,7 @@ public class AutoAim extends SequentialCommandGroup {
     private static final double MIN_DIST = 36;
     private static final double MAX_DIST = 130;
     public static final double MIN_V = 3100;
-    public static final double MAX_V = 4800;
+    public static final double MAX_V = 4600;
 
     private double spinUpRPM = MIN_V;
     public AutoAim(Drive drive, Shooter shooter, Intake intake, Wait wait) {
@@ -81,8 +81,8 @@ public class AutoAim extends SequentialCommandGroup {
 
                 new SequentialCommandGroup(
                         new InstantCommand(() -> shooter.setMagazineCover(Positions.OPEN_COVER.getPos()), shooter),
-                        //new WaitCommand(wait, 1),
-                        new InstantCommand(() -> intake.setSpeed(-0.75), intake),
+                        new WaitCommand(wait, 0.5),
+                        new InstantCommand(() -> intake.setSpeed(-1), intake),
 
                         new CommandBase() {
                             {
@@ -137,8 +137,8 @@ public class AutoAim extends SequentialCommandGroup {
     }
 
     private double setHood(double distanceIn) {
-        double hoodNear = 0.4;
-        double hoodFar  = 0;
+        double hoodNear = 0.3;
+        double hoodFar  = 0.05;
 
         double t = (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
         if (t < 0) t = 0;

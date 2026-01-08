@@ -24,22 +24,51 @@ public class PPTracking extends CommandBase {
     }
     @Override
     public void initialize() {
+        Robot.LAST_TURRET_DEG = 135;
         turret.holdCurrentAngle();
+
     }
     @Override
     public void execute() {
-        double x = d.getX();
-        double y = d.getY();
-        double headingRad = d.getHeading();
+        turret.setTargetDeg(turretAngleDeg(d.getX(), d.getY(), TARGET_X, TARGET_Y, d.getHeading()));
+    }
 
-        double dx = TARGET_X - x;
-        double dy = TARGET_Y - y;
+    public static double turretAngleDeg(double x, double y,
+                                        double targetX, double targetY,
+                                        double headingRad) {
 
-        double bearingRad = Math.atan2(dy, dx);
-        double turretAngleDeg = FORWARD_DEG + Math.toDegrees(normalizeRad(bearingRad - headingRad));
+        double dx = targetX - x;
+        double dy = targetY - y;
 
-        if (Math.abs(turretAngleDeg - turret.getAngleDeg()) > DEADBAND_DEG)
-            turret.setTargetDeg(turretAngleDeg);    }
+        // Field/global bearing to target: 0=right, 90=up, +CCW
+        double bearingDeg = Math.toDegrees(Math.atan2(dy, dx));
+
+        // Robot heading in same convention
+        double headingDeg = Math.toDegrees(headingRad);
+
+        // Required turret deflection relative to robot forward:
+        // + = target is to robot's left, - = to robot's right
+        double deflectionDeg = wrap180(bearingDeg - headingDeg);
+
+        // Turret mapping:
+        // 135 = straight forward, and increasing turret angle turns RIGHT (CW)
+        // so: right deflection (negative) -> turret angle increases
+        double turretDeg = wrap360(135.0 - deflectionDeg - 1);
+
+        return turretDeg;
+    }
+
+    static double wrap360(double a) {
+        a %= 360.0;
+        if (a < 0) a += 360.0;
+        return a;
+    }
+
+    static double wrap180(double a) {
+        a = (a + 180.0) % 360.0;
+        if (a < 0) a += 360.0;
+        return a - 180.0;
+    }
 
     private double normalizeRad(double angle) {
         while (angle > Math.PI)  angle -= 2.0 * Math.PI;

@@ -32,7 +32,7 @@ public class Turret extends SubsystemBase {
         turretMotor.setDirection(direction);
         turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotor.setTargetPosition(0);
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         turretMotor.setPower(0.0);
@@ -41,6 +41,47 @@ public class Turret extends SubsystemBase {
 
         this.setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
         this.setTargetDeg(clamp(getAngleDeg(), MIN_DEG, MAX_DEG));
+    }
+
+    public void resetEncoder(){
+        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turretMotor.setTargetPosition(0);
+        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        turretMotor.setPower(0.0);
+
+        //ticksPerDeg = (537.7 * GEAR_RATIO) / 360.0;
+
+        this.setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
+        this.setTargetDeg(clamp(getAngleDeg(), MIN_DEG, MAX_DEG));
+    }
+
+    public void setCurrentAsZeroButStartAtAngleDeg(double startupAngleDeg) {
+        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turretMotor.setTargetPosition(0);
+        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        turretMotor.setPower(0.0);
+
+        // ticks is now 0, so angleOffsetDeg becomes the startup angle in your global system
+        angleOffsetDeg = clamp(startupAngleDeg, MIN_DEG, MAX_DEG);
+
+        targetDeg = angleOffsetDeg;
+        visionTxDeg = Double.NaN;
+
+        setTargetDeg(targetDeg);
+    }
+
+
+    public void assumeCurrentAngleDeg(double angleDeg) {
+        double clamped = clamp(angleDeg, MIN_DEG, MAX_DEG);
+
+        // Keep the SAME global coordinate system (135 is still forward).
+        // We are only anchoring encoder ticks to that coordinate system.
+        angleOffsetDeg = clamped - (turretMotor.getCurrentPosition() / ticksPerDeg);
+
+        // Hold this angle so it doesn't jump
+        targetDeg = clamped;
+        turretMotor.setTargetPosition(degToTicks(targetDeg - angleOffsetDeg));
+        turretMotor.setPower(1);
     }
 
     public void setPIDF(double p, double i, double d, double f) {

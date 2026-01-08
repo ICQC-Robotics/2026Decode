@@ -40,6 +40,8 @@ public class BlueSideClose extends CommandOpMode {
                 Turret t = negabot.turret;
                 Intake intake = negabot.intake;
 
+                t.resetEncoder();
+
 
 
                 path(f);
