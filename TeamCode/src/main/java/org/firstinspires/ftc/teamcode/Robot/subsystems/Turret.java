@@ -34,7 +34,7 @@ public class Turret extends SubsystemBase {
 
         //turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotor.setTargetPosition(0);
-        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        turretMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         turretMotor.setPower(0.0);
 
         ticksPerDeg = (537.7 * GEAR_RATIO) / 360.0;
@@ -46,7 +46,7 @@ public class Turret extends SubsystemBase {
     public void resetEncoder(){
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotor.setTargetPosition(0);
-        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        turretMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         turretMotor.setPower(0.0);
 
         //ticksPerDeg = (537.7 * GEAR_RATIO) / 360.0;
@@ -58,7 +58,7 @@ public class Turret extends SubsystemBase {
     public void setCurrentAsZeroButStartAtAngleDeg(double startupAngleDeg) {
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotor.setTargetPosition(0);
-        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        turretMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         turretMotor.setPower(0.0);
 
         // ticks is now 0, so angleOffsetDeg becomes the startup angle in your global system
@@ -91,7 +91,7 @@ public class Turret extends SubsystemBase {
         this.pidf.f = f;
 
         turretMotor.setPIDFCoefficients(
-                DcMotor.RunMode.RUN_TO_POSITION,
+                DcMotor.RunMode.RUN_USING_ENCODER,
                 new PIDFCoefficients(p, i, d, f)
         );
         turretMotor.setTargetPositionTolerance((int) (1.0 * ticksPerDeg));
@@ -119,7 +119,7 @@ public class Turret extends SubsystemBase {
     public void setCurrentAsZero() {
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotor.setTargetPosition(0);
-        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        turretMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         turretMotor.setPower(0.0);
 
         targetDeg = angleOffsetDeg;
