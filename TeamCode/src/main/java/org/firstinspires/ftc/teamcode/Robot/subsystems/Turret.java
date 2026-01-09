@@ -4,7 +4,7 @@ import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.util.Range;
 
 public class Turret extends SubsystemBase {
 
@@ -13,83 +13,51 @@ public class Turret extends SubsystemBase {
     public static final double GEAR_RATIO = 2.9047619048;
 
     private final DcMotorEx turretMotor;
-    private final PIDFCoefficients pidf;
+
+    private double kP = 0.02;
+    private double kD = 0.001;
+    private double kF = 0.05;
 
     private final double ticksPerDeg;
 
     private double targetDeg = 0;
     private double visionTxDeg = Double.NaN;
     private static final double TX_DEADBAND_DEG = 0.1;
+
     private double angleOffsetDeg = 135.0;
 
+    private double lastError = 0;
+    private long lastTimeNs = 0;
+
+    private static final double MAX_POWER = 0.6;
+
     public Turret(DcMotorEx turretMotor,
-                  DcMotorSimple.Direction direction,
-                  PIDFCoefficients pidf) {
+                  DcMotorSimple.Direction direction) {
 
         this.turretMotor = turretMotor;
-        this.pidf = pidf;
 
         turretMotor.setDirection(direction);
         turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        //turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turretMotor.setTargetPosition(0);
-        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        turretMotor.setPower(0.0);
+        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turretMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         ticksPerDeg = (537.7 * GEAR_RATIO) / 360.0;
 
-        this.setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
-        this.setTargetDeg(clamp(getAngleDeg(), MIN_DEG, MAX_DEG));
+        targetDeg = clamp(getAngleDeg(), MIN_DEG, MAX_DEG);
     }
 
-    public void resetEncoder(){
-        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turretMotor.setTargetPosition(0);
-        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        turretMotor.setPower(0.0);
-
-        //ticksPerDeg = (537.7 * GEAR_RATIO) / 360.0;
-
-        this.setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
-        this.setTargetDeg(clamp(getAngleDeg(), MIN_DEG, MAX_DEG));
+    public void setPIDF(double p, double d, double f) {
+        this.kP = p;
+        this.kD = d;
+        this.kF = f;
     }
 
-    public void setCurrentAsZeroButStartAtAngleDeg(double startupAngleDeg) {
-        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turretMotor.setTargetPosition(0);
-        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        turretMotor.setPower(0.0);
-
-        // ticks is now 0, so angleOffsetDeg becomes the startup angle in your global system
-        angleOffsetDeg = clamp(startupAngleDeg, MIN_DEG, MAX_DEG);
-
-        targetDeg = angleOffsetDeg;
-        visionTxDeg = Double.NaN;
-
-        setTargetDeg(targetDeg);
+    public void setTargetDeg(double deg) {
+        targetDeg = clamp(deg, MIN_DEG, MAX_DEG);
     }
 
-
-    public void assumeCurrentAngleDeg(double angleDeg) {
-        double clamped = clamp(angleDeg, MIN_DEG, MAX_DEG);
-
-        // Keep the SAME global coordinate system (135 is still forward).
-        // We are only anchoring encoder ticks to that coordinate system.
-        angleOffsetDeg = clamped - (turretMotor.getCurrentPosition() / ticksPerDeg);
-
-        // Hold this angle so it doesn't jump
-        targetDeg = clamped;
-        turretMotor.setTargetPosition(degToTicks(targetDeg - angleOffsetDeg));
-        turretMotor.setPower(1);
-    }
-
-    public void setPIDF(double p, double i, double d, double f) {
-        turretMotor.setPIDFCoefficients(
-                DcMotor.RunMode.RUN_TO_POSITION,
-                new PIDFCoefficients(p, i, d, f)
-        );
-        turretMotor.setTargetPositionTolerance((int) (1.0 * ticksPerDeg));
+    public void holdCurrentAngle() {
+        setTargetDeg(getAngleDeg());
     }
 
     public void setVisionTxDeg(double txDeg) {
@@ -100,30 +68,8 @@ public class Turret extends SubsystemBase {
         visionTxDeg = Double.NaN;
     }
 
-    public void setTargetDeg(double deg) {
-        targetDeg = clamp(deg, MIN_DEG, MAX_DEG);
-        int ticks = degToTicks(targetDeg - angleOffsetDeg);
-        turretMotor.setTargetPosition(ticks);
-        turretMotor.setPower(1);
-    }
-
-    public void holdCurrentAngle() {
-        setTargetDeg(getAngleDeg());
-    }
-
-    public void setCurrentAsZero() {
-        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turretMotor.setTargetPosition(0);
-        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        turretMotor.setPower(0.0);
-
-        targetDeg = angleOffsetDeg;
-        visionTxDeg = Double.NaN;
-    }
-
     public double getAngleDeg() {
         return (-turretMotor.getCurrentPosition() / ticksPerDeg) + angleOffsetDeg;
-        //return (turretMotor.getCurrentPosition() / ticksPerDeg) + angleOffsetDeg;
     }
 
     public double getTargetDeg() {
@@ -134,36 +80,47 @@ public class Turret extends SubsystemBase {
         return Math.abs(targetDeg - getAngleDeg()) <= toleranceDeg;
     }
 
+    public void setCurrentAsZeroButStartAtAngleDeg(double startupAngleDeg) {
+        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turretMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        angleOffsetDeg = clamp(startupAngleDeg, MIN_DEG, MAX_DEG);
+        targetDeg = angleOffsetDeg;
+
+        lastError = 0;
+        lastTimeNs = 0;
+    }
+
     @Override
     public void periodic() {
         if (!Double.isNaN(visionTxDeg)) {
-
-            double tx = visionTxDeg;
-            if (Math.abs(tx) < TX_DEADBAND_DEG) tx = 0;
-
-            double current = getAngleDeg();
-            double desired = current + tx;
-
-            desired = clamp(desired, MIN_DEG, MAX_DEG);
-            setTargetDeg(desired);
+            double tx = Math.abs(visionTxDeg) < TX_DEADBAND_DEG ? 0 : visionTxDeg;
+            setTargetDeg(getAngleDeg() + tx);
             visionTxDeg = Double.NaN;
         }
-    }
 
-    private int degToTicks(double deg) {
-        return (int) Math.round(-deg * ticksPerDeg);
-        //return (int) Math.round(deg * ticksPerDeg);
+        double currentDeg = getAngleDeg();
+        double error = targetDeg - currentDeg;
+
+        long now = System.nanoTime();
+        double dt = (lastTimeNs == 0) ? 0 : (now - lastTimeNs) * 1e-9;
+        lastTimeNs = now;
+
+        double derivative = (dt > 0) ? (error - lastError) / dt : 0;
+        lastError = error;
+
+        double output =
+                kP * error +
+                        kD * derivative +
+                        kF * Math.signum(error);
+
+        output = Range.clip(output, -MAX_POWER, MAX_POWER);
+        turretMotor.setPower(output);
     }
 
     private static double clamp(double v, double lo, double hi) {
         if (v < lo) return lo;
         if (v > hi) return hi;
         return v;
-    }
-
-    public void restoreAngleDeg(double savedAngleDeg) {
-        angleOffsetDeg = savedAngleDeg - (turretMotor.getCurrentPosition() / ticksPerDeg);
-        targetDeg = savedAngleDeg;
-        setTargetDeg(savedAngleDeg);
     }
 }
