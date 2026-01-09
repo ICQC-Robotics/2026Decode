@@ -52,13 +52,13 @@ public class Robot {
                 h.get(Servo.class, "servo0"),
                 h.get(Servo.class, "servo2"),
                 h.get(Servo.class, "servo1"),
-                new PIDFCoefficients(6.6, 0.0, 0.005, 10)
+                new PIDFCoefficients(0.5, 0.0, 0.005, 15)
         );
 
         turret = new Turret(
                 h.get(DcMotorEx.class, "turret"),
                 DcMotorSimple.Direction.REVERSE,
-                new PIDFCoefficients(12, 0, 0, 0)
+                new PIDFCoefficients(10, 0, 0, 0)
         );
 
         vision = new Vision(

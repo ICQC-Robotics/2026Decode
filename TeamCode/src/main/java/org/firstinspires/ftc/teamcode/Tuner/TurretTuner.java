@@ -5,7 +5,6 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 
@@ -14,9 +13,10 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 @TeleOp(name = "Turret Tuner")
 public class TurretTuner extends OpMode {
 
-    public static double kP = 0.02;
-    public static double kD = 0.001;
-    public static double kF = 0.05;
+    public static double kP = 15.0;
+    public static double kI = 0.0;
+    public static double kD = 0.5;
+    public static double kF = 0.1;
 
     public static double targetDeg = 135.0;
     public static double toleranceDeg = 1.0;
@@ -30,19 +30,20 @@ public class TurretTuner extends OpMode {
 
     @Override
     public void loop() {
+        if (targetDeg < 0) targetDeg = 0;
+        if (targetDeg > 270) targetDeg = 270;
+        if (kD < 0) kD = 0;
+        if (kF < 0) kF = 0;
 
-        targetDeg = Range.clip(targetDeg, 0, 270);
-        kD = Math.max(0, kD);
-        kF = Math.max(0, kF);
-
-        robot.turret.setPIDF(kP, kD, kF);
+        robot.turret.setPIDF(kP, kI, kD, kF);
         robot.turret.setTargetDeg(targetDeg);
 
         double current = robot.turret.getAngleDeg();
+        double error = targetDeg - current;
 
         telemetry.addData("Target (deg)", targetDeg);
         telemetry.addData("Current (deg)", current);
-        telemetry.addData("Error (deg)", targetDeg - current);
+        telemetry.addData("Error (deg)", error);
         telemetry.addData("At Target", robot.turret.atTarget(toleranceDeg));
 
         telemetry.addData("kP", kP);

@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.Robot.commands.PPTracking;
 import org.firstinspires.ftc.teamcode.Robot.commands.ShooterStandBy;
 
 @TeleOp(group=".")
-public class Solo extends CommandOpMode {
+public class SoloRed extends CommandOpMode {
     GamepadEx g;
     Robot negabot;
 
@@ -25,7 +25,8 @@ public class Solo extends CommandOpMode {
     private boolean turretTracking = false;
 
     private boolean poseLocked = false;
-    private Robot.Alliance currentAlliance;
+
+    private Robot.Alliance alliance = Robot.Alliance.RED;
 
     @Override
     public void initialize() {
@@ -33,14 +34,6 @@ public class Solo extends CommandOpMode {
         negabot = new Robot(hardwareMap, telemetry, new Pose(0,0, 0));
         negabot.reset();
 
-        //alliance selection
-        currentAlliance = Robot.Alliance.BLUE;
-        if (gamepad1.b) currentAlliance = Robot.Alliance.RED;
-        Robot.ALLIANCE = (currentAlliance == Robot.Alliance.BLUE)? Robot.Alliance.BLUE: Robot.Alliance.RED;
-
-        telemetry.addLine("default = blue, B = red");
-        telemetry.addData("Current alliance:", currentAlliance);
-        telemetry.update();
 
         //setting position
         if (Robot.LAST_POSE != null) {
@@ -92,7 +85,7 @@ public class Solo extends CommandOpMode {
                 GamepadKeys.Button.DPAD_UP,
                 new InstantCommand(() -> {
                     if (!opModeIsActive() || Robot.LAST_POSE != null || poseLocked) return;
-                    Pose corner = (currentAlliance == Robot.Alliance.BLUE) ? FieldConstants.BLUE_CORNER : FieldConstants.RED_CORNER;
+                    Pose corner = FieldConstants.BLUE_CORNER;
                     negabot.drive.follower.setPose(corner);
                     poseLocked = true;
                 }),
@@ -106,7 +99,7 @@ public class Solo extends CommandOpMode {
     public void run() {
         if (!shooterStandby && opModeIsActive() && !turretTracking) {
             negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter));
-            negabot.turret.setDefaultCommand(new PPTracking(negabot.turret, negabot.drive));
+            negabot.turret.setDefaultCommand(new PPTracking(negabot.turret, negabot.drive, alliance));
             turretTracking = true;
             shooterStandby = true;
         }

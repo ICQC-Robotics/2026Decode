@@ -36,10 +36,10 @@ public class AutoAim extends SequentialCommandGroup {
     private static final double BUMP_FAR  = 0.07;
 
     //linear interp vals
-    private static final double MIN_DIST = 36;
+    private static final double MIN_DIST = 30;
     private static final double MAX_DIST = 130;
-    public static final double MIN_V = 3100;
-    public static final double MAX_V = 4600;
+    public static final double MIN_V = 3400;
+    public static final double MAX_V = 4150;
 
     private double spinUpRPM = MIN_V;
     public AutoAim(Drive drive, Shooter shooter, Intake intake, Wait wait) {
@@ -137,13 +137,14 @@ public class AutoAim extends SequentialCommandGroup {
     }
 
     private double setHood(double distanceIn) {
-        double hoodNear = 0.3;
-        double hoodFar  = 0.05;
+        double hoodNear = 0.4;
+        double hoodFar  = 0.1;
+
+        if (distanceIn > 75) return hoodFar;
 
         double t = (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
         if (t < 0) t = 0;
         if (t > 1) t = 1;
-        if (distanceIn > 100) return .15;
 
         return hoodNear + t * (hoodFar - hoodNear);
     }

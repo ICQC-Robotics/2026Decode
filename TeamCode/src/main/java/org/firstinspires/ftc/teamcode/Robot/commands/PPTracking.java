@@ -11,22 +11,30 @@ public class PPTracking extends CommandBase {
     private final Turret turret;
     private final Drive d;
 
+    private Robot.Alliance alliance;
+
+    //70in: 3700 0.1
+    //30in: 3400 0.4
     private static final double DEADBAND_DEG = 1;//tune this
     private static final double FORWARD_DEG = 135;
 
-    double TARGET_X = (Robot.ALLIANCE == Robot.Alliance.BLUE)? FieldConstants.BLUE_GOAL_X: FieldConstants.RED_GOAL_X;
-    double TARGET_Y = (Robot.ALLIANCE == Robot.Alliance.BLUE)? FieldConstants.BLUE_GOAL_Y: FieldConstants.RED_GOAL_Y;
+    double TARGET_X = FieldConstants.BLUE_GOAL_X;
+    double TARGET_Y = FieldConstants.BLUE_GOAL_Y;
 
-    public PPTracking(Turret turret, Drive d) {
+    public PPTracking(Turret turret, Drive d, Robot.Alliance alliance) {
         this.turret = turret;
         this.d = d;
+        this.alliance = alliance;
         addRequirements(turret);
     }
     @Override
     public void initialize() {
         Robot.LAST_TURRET_DEG = 135;
         turret.holdCurrentAngle();
-
+        if (alliance == Robot.Alliance.RED) {
+            TARGET_X = FieldConstants.RED_GOAL_X;
+            TARGET_Y = FieldConstants.RED_GOAL_Y;
+        }
     }
     @Override
     public void execute() {
