@@ -98,7 +98,7 @@ public class SoloBlue extends CommandOpMode {
     //this is so then these default commands are activated on run
     public void run() {
         if (!shooterStandby && opModeIsActive() && !turretTracking) {
-            negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter));
+            negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, negabot.drive));
             negabot.turret.setDefaultCommand(new PPTracking(negabot.turret, negabot.drive, alliance));
             turretTracking = true;
             shooterStandby = true;
