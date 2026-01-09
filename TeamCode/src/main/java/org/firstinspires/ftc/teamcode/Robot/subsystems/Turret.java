@@ -85,11 +85,6 @@ public class Turret extends SubsystemBase {
     }
 
     public void setPIDF(double p, double i, double d, double f) {
-        this.pidf.p = p;
-        this.pidf.i = i;
-        this.pidf.d = d;
-        this.pidf.f = f;
-
         turretMotor.setPIDFCoefficients(
                 DcMotor.RunMode.RUN_TO_POSITION,
                 new PIDFCoefficients(p, i, d, f)
@@ -127,7 +122,8 @@ public class Turret extends SubsystemBase {
     }
 
     public double getAngleDeg() {
-        return (turretMotor.getCurrentPosition() / ticksPerDeg) + angleOffsetDeg;
+        return (-turretMotor.getCurrentPosition() / ticksPerDeg) + angleOffsetDeg;
+        //return (turretMotor.getCurrentPosition() / ticksPerDeg) + angleOffsetDeg;
     }
 
     public double getTargetDeg() {
@@ -155,7 +151,8 @@ public class Turret extends SubsystemBase {
     }
 
     private int degToTicks(double deg) {
-        return (int) Math.round(deg * ticksPerDeg);
+        return (int) Math.round(-deg * ticksPerDeg);
+        //return (int) Math.round(deg * ticksPerDeg);
     }
 
     private static double clamp(double v, double lo, double hi) {

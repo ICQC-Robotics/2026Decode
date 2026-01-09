@@ -26,8 +26,6 @@ public class TurretTuner extends OpMode {
     @Override
     public void init() {
         robot = new Robot(hardwareMap, telemetry, new Pose(72, 72));
-        robot.turret.setPIDF(kP, kI, kD, kF);
-        robot.turret.setTargetDeg(targetDeg);
     }
 
     @Override
