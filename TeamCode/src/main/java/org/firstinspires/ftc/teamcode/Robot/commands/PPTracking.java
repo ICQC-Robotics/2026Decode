@@ -61,7 +61,7 @@ public class PPTracking extends CommandBase {
         // Turret mapping:
         // 135 = straight forward, and increasing turret angle turns RIGHT (CW)
         // so: right deflection (negative) -> turret angle increases
-        double turretDeg = wrap360(135.0 - deflectionDeg - 1);
+        double turretDeg = wrap360(135.0 - deflectionDeg );
 
         return turretDeg;
     }

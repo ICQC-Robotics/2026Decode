@@ -34,6 +34,8 @@ public class SoloBlue extends CommandOpMode {
         negabot = new Robot(hardwareMap, telemetry, new Pose(0,0, 0));
         negabot.reset();
 
+        Robot.ALLIANCE = Robot.Alliance.BLUE;
+
 
         //setting position
         if (Robot.LAST_POSE != null) {

@@ -29,7 +29,7 @@ public class AutoAim extends SequentialCommandGroup {
         }
     }
 
-    private static final double RPM_TOLERANCE = 150; //TODO: change if needed
+    private static final double RPM_TOLERANCE = 200; //TODO: change if needed
     private static final double FEED_TIME_S = 1;
 
     private static final double BUMP_NEAR = 0.02;
@@ -137,7 +137,7 @@ public class AutoAim extends SequentialCommandGroup {
     }
 
     private double setHood(double distanceIn) {
-        double hoodNear = 0.4;
+        double hoodNear = 0.3;
         double hoodFar  = 0.1;
 
         if (distanceIn > 75) return hoodFar;

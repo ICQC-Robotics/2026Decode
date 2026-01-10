@@ -68,7 +68,7 @@ public class ShooterStandBy extends CommandBase {
 
     @SuppressWarnings("unused")
     private double setHood(double distanceIn) {
-        double hoodNear = 0.4;
+        double hoodNear = 0.3;
         double hoodFar  = 0.1;
 
         double t = (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
