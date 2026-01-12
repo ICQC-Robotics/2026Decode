@@ -12,6 +12,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoImplEx;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.*;
@@ -23,6 +24,7 @@ public class Robot {
     public Turret turret;
     public Vision vision;
     public Wait wait;
+    public Indicator indicator;
     public static Pose LAST_POSE;
     public static double LAST_TURRET_DEG;
     Telemetry t;
@@ -63,6 +65,11 @@ public class Robot {
 
         vision = new Vision(
                 h.get(Limelight3A.class, "ll")
+        );
+
+        indicator = new Indicator(
+                h.get(ServoImplEx.class, "servo3"),
+                h.get(ServoImplEx.class, "servo4")
         );
 
         wait = new Wait();
