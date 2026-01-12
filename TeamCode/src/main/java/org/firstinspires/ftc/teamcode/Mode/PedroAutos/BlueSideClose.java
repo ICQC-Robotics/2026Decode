@@ -48,28 +48,28 @@ public class BlueSideClose extends CommandOpMode {
 
                 waitForStart();
                 negabot.schedule(
-                        new InstantCommand(() -> { negabot.shooter.setVelocity(3900);}),
+                        new InstantCommand(() -> { negabot.shooter.setVelocity(3750);}),
                         new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE); }),
                         new InstantCommand(() -> {negabot.shooter.setHoodPos(0.15); }),
                         new SequentialCommandGroup(
-                                shotPrep(f, Path1, 0, 0.35),
+                                shotPrep(f, Path1, 0, 0.3),
                                 new WaitCommand(1000),
                                 shoot(),
                                 new FollowPathCommand(f, Path2, true),
                                 new WaitCommand(1000),
-                                shotPrep(f, Path3, 50.5, 0.1),
+                                shotPrep(f, Path3, 50.5, 0.15),
                                 shoot(),
                                 new FollowPathCommand(f, Path4, true),
                                 new WaitCommand(1000),
-                                shotPrep(f, Path5, 71, 0.1),
+                                shotPrep(f, Path5, 71, 0.15),
                                 shoot(),
                                 new FollowPathCommand(f, Path6, true),
                                 new FollowPathCommand(f, Path7, true),
                                 new WaitCommand(1000),
-                                shotPrep(f, Path8, 73, 0.1),
+                                shotPrep(f, Path8, 72.5, 0.15),
                                 shoot(),
                                 new FollowPathCommand(f, Path9, true),
-                                shotPrep(f, Path10, 73, 0.1),
+                                shotPrep(f, Path10, 72.5, 0.15),
                                 shoot(),
                                 new InstantCommand(() -> {negabot.turret.setTargetDeg(135); })
                         )
@@ -158,7 +158,7 @@ public class BlueSideClose extends CommandOpMode {
                             new BezierLine(
                                     new Pose(58.811, 84.606),
 
-                                    new Pose(21.009, 84.327)
+                                    new Pose(21.009, 86.327)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(10), Math.toRadians(0))
 
@@ -178,7 +178,7 @@ public class BlueSideClose extends CommandOpMode {
                             new BezierCurve(
                                     new Pose(58.857, 84.813),
                                     new Pose(61.800, 55.034),
-                                    new Pose(19.108, 60.266)
+                                    new Pose(17.108, 62.266)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(54), Math.toRadians(0))
 
@@ -186,7 +186,7 @@ public class BlueSideClose extends CommandOpMode {
 
             Path5 = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(19.108, 60.266),
+                                    new Pose(17.108, 62.266),
                                     new Pose(52.366, 67.788),
                                     new Pose(58.890, 84.600)
                             )
@@ -227,8 +227,8 @@ public class BlueSideClose extends CommandOpMode {
                             new BezierCurve(
                                     new Pose(58.499, 84.619),
                                     new Pose(0.288, 35.425),
-                                    new Pose(10.200, 21.994),
-                                    new Pose(8.579, 9.362)
+                                    new Pose(27.200, 21.994),
+                                    new Pose(27.579, 9.362)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(72), Math.toRadians(90))
 
@@ -236,7 +236,7 @@ public class BlueSideClose extends CommandOpMode {
 
             Path10 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(8.579, 9.362),
+                                    new Pose(17.579, 9.362),
 
                                     new Pose(58.394, 84.308)
                             )

@@ -99,12 +99,36 @@ public class SoloBlue extends CommandOpMode {
 
     //this is so then these default commands are activated on run
     public void run() {
+        PPTracking ppTracking = new PPTracking(negabot.turret, negabot.drive, alliance);
         if (!shooterStandby && opModeIsActive() && !turretTracking) {
             negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, negabot.drive));
-            negabot.turret.setDefaultCommand(new PPTracking(negabot.turret, negabot.drive, alliance));
+            negabot.turret.setDefaultCommand(ppTracking);
             turretTracking = true;
             shooterStandby = true;
         }
+
+        negabot.Action(
+                g,
+                GamepadKeys.Button.DPAD_RIGHT,
+                new InstantCommand(() -> {
+                    ppTracking.incDeg();  // adds +1 degree
+                    telemetry.addData("Offset", ppTracking.offset);
+                    telemetry.update();
+                }),
+                null
+        );
+
+// Decrease offset with DPAD_LEFT
+        negabot.Action(
+                g,
+                GamepadKeys.Button.DPAD_LEFT,
+                new InstantCommand(() -> {
+                    ppTracking.decDeg();  // subtracts 1 degree
+                    telemetry.addData("Offset", ppTracking.offset);
+                    telemetry.update();
+                }),
+                null
+        );
 
         Robot.LAST_POSE = negabot.drive.follower.getPose().copy();
         negabot.run();

@@ -21,46 +21,18 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Turret;
 
 @Autonomous
 public class RedSideClose extends CommandOpMode {
-    // Mirror over vertical line x = 72 => x' = 144 - x
-    private static final double MIRROR_X = 72.0;
-
-    // Turret: 0 = left, 135 = forward, 270 = right
-    // Mirroring left/right => angle' = 270 - angle
-    private static double mirrorTurretDeg(double deg) {
-        return 270.0 - deg;
-    }
-
-    // Field heading (0° = +X/right, CCW positive): mirror across vertical axis => heading' = 180° - heading
-    private static double normalizeDeg(double deg) {
-        deg %= 360.0;
-        if (deg <= -180.0) deg += 360.0;
-        if (deg > 180.0) deg -= 360.0;
-        return deg;
-    }
-
-    private static double mirrorHeadingDeg(double deg) {
-        return normalizeDeg(180.0 - deg);
-    }
-
-    private static double mh(double deg) { // mirror heading in degrees -> radians
-        return Math.toRadians(mirrorHeadingDeg(deg));
-    }
-
-    private static double mx(double x) {   // mirror x over MIRROR_X
-        return 2.0 * MIRROR_X - x;
-    }
-
     Robot negabot;
+    PathChain Path1, Path2, Path3, Path4, Path5, Path6, Path7, Path8, Path9, Path10, GatePath, GateBack, GatePath1, HitGate;
 
-    PathChain Path1, Path2, Path3, Path4, Path5, Path6, Path7, Path8, Path9, Path10,
-            GatePath, GateBack, GatePath1, HitGate;
+    // Mirrored over x = 72  => x' = 144 - x
+    // Heading mirrored (field heading) => heading' = 180 - heading
+    Pose startPose = new Pose(117.759, 133.326, Math.toRadians(126));
 
-    Pose startPose = new Pose(mx(26.241), 133.326, mh(54));
+    // Mirrored: x only, y same, heading -20 -> -160
+    Pose gateIntake  = new Pose(130.000, 60, Math.toRadians(-160));
+    Pose gateIntake1 = new Pose(127.698, 65, Math.toRadians(-160));
 
-    Pose gateIntake  = new Pose(mx(14),     60, mh(-20));
-    Pose gateIntake1 = new Pose(mx(16.302), 65, mh(-20));
-
-    final double COVER_OPEN  = 0.1;
+    final double COVER_OPEN = 0.1;
     final double COVER_CLOSE = 1.0;
 
     @Override
@@ -77,210 +49,236 @@ public class RedSideClose extends CommandOpMode {
         path(f);
 
         waitForStart();
-
         negabot.schedule(
-                new InstantCommand(() -> { negabot.shooter.setVelocity(3900); }),
-                new InstantCommand(() -> { negabot.shooter.setMagazineCover(COVER_CLOSE); }),
-                new InstantCommand(() -> { negabot.shooter.setHoodPos(0.15); }),
-
+                new InstantCommand(() -> { negabot.shooter.setVelocity(3950);}),
+                new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE); }),
+                new InstantCommand(() -> {negabot.shooter.setHoodPos(0.15); }),
                 new SequentialCommandGroup(
-                        shotPrep(f, Path1, 0,    0.35),
+                        // turret: 0 -> 270
+                        shotPrep(f, Path1, 270.0, 0.3),
                         new WaitCommand(1000),
                         shoot(),
 
                         new FollowPathCommand(f, Path2, true),
                         new WaitCommand(1000),
 
-                        shotPrep(f, Path3, 50.5, 0.1),
+                        // turret: 50.5 -> 219.5
+                        shotPrep(f, Path3, 221.5, 0.1),
                         shoot(),
 
                         new FollowPathCommand(f, Path4, true),
                         new WaitCommand(1000),
 
-                        shotPrep(f, Path5, 71,   0.1),
+                        // turret: 71 -> 199
+                        shotPrep(f, Path5, 200.0, 0.1),
                         shoot(),
 
                         new FollowPathCommand(f, Path6, true),
                         new FollowPathCommand(f, Path7, true),
                         new WaitCommand(1000),
 
-                        shotPrep(f, Path8, 73,   0.1),
+                        // turret: 73 -> 197
+                        shotPrep(f, Path8, 197.0, 0.15),
                         shoot(),
 
                         new FollowPathCommand(f, Path9, true),
 
-                        shotPrep(f, Path10, 73,  0.1),
+                        shotPrep(f, Path10, 197.0, 0.15),
                         shoot(),
 
-                        // forward stays forward under mirror
-                        new InstantCommand(() -> { negabot.turret.setTargetDeg(mirrorTurretDeg(135)); })
+                        // 135 (forward) mirrors to 135
+                        new InstantCommand(() -> {negabot.turret.setTargetDeg(135); })
                 )
+                        /*
+                        new SequentialCommandGroup(
+                                new InstantCommand(() -> { t.setTargetDeg(270); }),
+                                new FollowPathCommand(f, Path1, true),
+                                new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);} ),
+                                new WaitCommand(1000),
+                                new InstantCommand(() -> {intake.setSpeed(-1);} ),
+                                new WaitCommand(1000),
+                                new InstantCommand(() -> {intake.setSpeed(-1);} ),
+                                new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE);} ),
+                                new FollowPathCommand(f, Path2, true),
+                                new InstantCommand(() -> {intake.setSpeed(0);} ),
+                                new InstantCommand(() -> { t.setTargetDeg(219.5); }),
+                                new InstantCommand(() -> {negabot.shooter.setHoodPos(0.1); }),
+                                new FollowPathCommand(f, Path3, true),
+                                new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);} ),
+                                new WaitCommand(1000),
+                                new InstantCommand(() -> {intake.setSpeed(-1);} ),
+                                new WaitCommand(1000),
+                                new InstantCommand(() -> {intake.setSpeed(-1);} ),
+                                new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE);} ),
+                                new FollowPathCommand(f, Path4, true),
+                                new InstantCommand(() -> { t.setTargetDeg(196.5); }),
+                                new InstantCommand(() -> {negabot.shooter.setHoodPos(0.05); }),
+                                new InstantCommand(() -> {intake.setSpeed(0);} ),
+                                new FollowPathCommand(f, Path5, true),
+                                new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);} ),
+                                new WaitCommand(1000),
+                                new InstantCommand(() -> {intake.setSpeed(-1);} ),
+                                new WaitCommand(1000),
+                                new InstantCommand(() -> {intake.setSpeed(-1);} ),
+                                new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE);} ),
+                                new FollowPathCommand(f, Path6, true),
+                                new InstantCommand(() -> {intake.setSpeed(0);} ),
+                                new FollowPathCommand(f, Path7, true),
+                                new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);} ),
+                                new WaitCommand(1000),
+                                new InstantCommand(() -> {intake.setSpeed(-1);} ),
+                                new WaitCommand(1000),
+                                new InstantCommand(() -> {intake.setSpeed(0);} ),
+                                new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE);} ))
+                         */
         );
     }
 
-    public Command shoot() {
+    public Command shoot(){
         return new SequentialCommandGroup(
-                new InstantCommand(() -> { negabot.intake.setSpeed(-1); }),
+                new InstantCommand(() -> {negabot.intake.setSpeed(-1);} ),
                 new WaitCommand(500),
-                new InstantCommand(() -> { negabot.intake.setSpeed(-1); }),
-                new InstantCommand(() -> { negabot.shooter.setMagazineCover(COVER_CLOSE); })
+                new InstantCommand(() -> {negabot.intake.setSpeed(-1);} ),
+                new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE);} )
         );
     }
 
-    public Command shotPrep(Follower f, PathChain path, double turretAngleDeg, double hoodPos) {
-        final double mirroredTurretDeg = mirrorTurretDeg(turretAngleDeg);
-
+    public Command shotPrep(Follower f, PathChain path, double turretAngle, double hoodPos){
         return new ParallelCommandGroup(
                 new FollowPathCommand(f, path, true),
-                new InstantCommand(() -> { negabot.intake.setSpeed(0); }),
+                new InstantCommand(() -> {negabot.intake.setSpeed(0);} ),
                 new SequentialCommandGroup(
                         new WaitCommand(500),
-                        new InstantCommand(() -> { negabot.shooter.setMagazineCover(COVER_OPEN); })
+                        new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);} )
                 ),
-                new InstantCommand(() -> { negabot.turret.setTargetDeg(mirroredTurretDeg); }),
-                new InstantCommand(() -> { negabot.shooter.setHoodPos(hoodPos); })
+                new InstantCommand(() -> { negabot.turret.setTargetDeg(turretAngle); }),
+                new InstantCommand(() -> {negabot.shooter.setHoodPos(hoodPos); })
         );
     }
 
     public void path(Follower follower) {
-
         Path1 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(mx(26.241), 132.326),
-                                new Pose(mx(58.811), 84.606)
+                                new Pose(117.759, 132.326),
+                                new Pose(85.189, 84.606)
                         )
-                )
-                .setLinearHeadingInterpolation(mh(54), mh(10))
+                ).setLinearHeadingInterpolation(Math.toRadians(126), Math.toRadians(170))
                 .build();
 
         Path2 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(mx(58.811), 84.606),
-                                new Pose(mx(21.009), 84.327)
+                                new Pose(85.189, 84.606),
+                                new Pose(123.991, 86.327)
                         )
-                )
-                .setLinearHeadingInterpolation(mh(10), mh(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(170), Math.toRadians(180))
                 .build();
 
         Path3 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(mx(21.009), 84.327),
-                                new Pose(mx(58.857), 84.813)
+                                new Pose(123.991, 84.327),
+                                new Pose(85.143, 84.813)
                         )
-                )
-                .setLinearHeadingInterpolation(mh(0), mh(54))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(126))
                 .build();
 
         Path4 = follower.pathBuilder().addPath(
                         new BezierCurve(
-                                new Pose(mx(58.857), 84.813),
-                                new Pose(mx(61.800), 55.034),
-                                new Pose(mx(19.108), 60.266)
+                                new Pose(85.143, 84.813),
+                                new Pose(82.200, 55.034),
+                                new Pose(125.892, 62.266)
                         )
-                )
-                .setLinearHeadingInterpolation(mh(54), mh(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(126), Math.toRadians(180))
                 .build();
 
         Path5 = follower.pathBuilder().addPath(
                         new BezierCurve(
-                                new Pose(mx(19.108), 60.266),
-                                new Pose(mx(52.366), 67.788),
-                                new Pose(mx(58.890), 84.600)
+                                new Pose(125.892, 62.266),
+                                new Pose(91.634, 67.788),
+                                new Pose(85.110, 84.600)
                         )
-                )
-                .setLinearHeadingInterpolation(mh(0), mh(71))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(109))
                 .build();
 
         Path6 = follower.pathBuilder().addPath(
                         new BezierCurve(
-                                new Pose(mx(58.890), 84.600),
-                                new Pose(mx(71.483), 31.948),
-                                new Pose(mx(16.789), 35.886)
+                                new Pose(85.110, 84.600),
+                                new Pose(72.517, 31.948),
+                                new Pose(127.211, 35.886)
                         )
-                )
-                .setLinearHeadingInterpolation(mh(71), mh(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(109), Math.toRadians(180))
                 .build();
 
         Path7 = follower.pathBuilder().addPath(
                         new BezierCurve(
-                                new Pose(mx(16.789), 35.886),
-                                new Pose(mx(38.064), 72.593),
-                                new Pose(mx(19.000), 69.408)
+                                new Pose(127.211, 35.886),
+                                new Pose(105.936, 72.593),
+                                new Pose(126.000, 69.408)
                         )
-                )
-                .setLinearHeadingInterpolation(mh(0), mh(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
 
         Path8 = follower.pathBuilder().addPath(
                         new BezierCurve(
-                                new Pose(mx(19.000), 69.408),
-                                new Pose(mx(47.001), 76.199),
-                                new Pose(mx(58.499), 84.619)
+                                new Pose(126.000, 69.408),
+                                new Pose(96.999, 76.199),
+                                new Pose(85.501, 84.619)
                         )
-                )
-                .setLinearHeadingInterpolation(mh(0), mh(71))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(109))
                 .build();
 
         Path9 = follower.pathBuilder().addPath(
                         new BezierCurve(
-                                new Pose(mx(58.499), 84.619),
-                                new Pose(mx(0.288),  35.425),
-                                new Pose(mx(10.200), 21.994),
-                                new Pose(mx(8.579),  9.362)
+                                new Pose(85.501, 84.619),
+                                new Pose(143.712, 35.425),
+                                new Pose(126.800, 21.994),
+                                new Pose(120.421, 9.362)
                         )
-                )
-                .setLinearHeadingInterpolation(mh(72), mh(90))
+                ).setLinearHeadingInterpolation(Math.toRadians(108), Math.toRadians(90))
                 .build();
 
         Path10 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(mx(8.579),  9.362),
-                                new Pose(mx(58.394), 84.308)
+                                new Pose(120.421, 9.362),
+                                new Pose(85.606, 84.308)
                         )
-                )
-                .setLinearHeadingInterpolation(mh(90), mh(72))
+                ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(108))
                 .build();
 
         GatePath = follower.pathBuilder().addPath(
                         new BezierCurve(
-                                new Pose(mx(53.766), 88.326),
-                                new Pose(mx(39.925), 67.000),
+                                new Pose(90.234, 88.326),
+                                new Pose(104.075, 67.000),
                                 new Pose(gateIntake.getX(), gateIntake.getY())
                         )
-                )
-                .setLinearHeadingInterpolation(mh(71), mh(-30))
+                ).setLinearHeadingInterpolation(Math.toRadians(109), Math.toRadians(-150))
                 .build();
 
         GateBack = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(gateIntake.getX(), gateIntake.getY()),
-                                new Pose(mx(58.85695), 84.81285)
+                                new Pose(85.14305, 84.81285)
                         )
-                )
-                .setLinearHeadingInterpolation(gateIntake.getHeading(), mh(71))
+                ).setLinearHeadingInterpolation(gateIntake.getHeading(), Math.toRadians(109))
                 .build();
 
         GatePath1 = follower.pathBuilder().addPath(
                         new BezierCurve(
-                                new Pose(mx(53.766), 88.326),
-                                new Pose(mx(39.925), 67.000),
+                                new Pose(90.234, 88.326),
+                                new Pose(104.075, 67.000),
                                 new Pose(gateIntake1.getX(), gateIntake1.getY())
                         )
-                )
-                .setLinearHeadingInterpolation(mh(71), mh(-30))
+                ).setLinearHeadingInterpolation(Math.toRadians(109), Math.toRadians(-150))
                 .build();
 
         HitGate = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(mx(19.108), 60.266),
-                                new Pose(mx(15.809), 70.234)
+                                new Pose(124.892, 60.266),
+                                new Pose(128.191, 70.234)
                         )
-                )
-                .setLinearHeadingInterpolation(mh(0), mh(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
     }
 
-    @Override
     public void run() {
         super.run();
         Robot.LAST_POSE = negabot.drive.follower.getPose().copy();

@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.Mode;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.pedropathing.geometry.Pose;
@@ -17,18 +19,16 @@ import org.firstinspires.ftc.teamcode.Robot.commands.PPTracking;
 import org.firstinspires.ftc.teamcode.Robot.commands.ShooterStandBy;
 
 @TeleOp(group=".")
-public class SoloRed extends CommandOpMode {
+public class SoloBlueFar extends CommandOpMode {
     GamepadEx g;
     Robot negabot;
 
     private boolean shooterStandby = false;
     private boolean turretTracking = false;
 
-
-
     private boolean poseLocked = false;
 
-    private Robot.Alliance alliance = Robot.Alliance.RED;
+    private Robot.Alliance alliance = Robot.Alliance.BLUE;
 
     @Override
     public void initialize() {
@@ -36,7 +36,7 @@ public class SoloRed extends CommandOpMode {
         negabot = new Robot(hardwareMap, telemetry, new Pose(0,0, 0));
         negabot.reset();
 
-        Robot.ALLIANCE = Robot.Alliance.RED;
+        Robot.ALLIANCE = Robot.Alliance.BLUE;
 
 
         //setting position
@@ -66,25 +66,33 @@ public class SoloRed extends CommandOpMode {
 
 
         negabot.Action(g,
-                       GamepadKeys.Button.A,
-                       new AutoAim(negabot.drive,
-                                   negabot.shooter,
-                                   negabot.intake,
-                                   negabot.wait
-                       ),
-                       null
+                        GamepadKeys.Button.A,
+
+                        new SequentialCommandGroup(
+                                new InstantCommand(() -> {
+                                    negabot.shooter.setMagazineCover(AutoAim.Positions.OPEN_COVER.getPos());
+                                }),
+                                new WaitCommand(500),
+                                new AutoIntake(negabot.intake, negabot.wait).accept(),
+                                new WaitCommand(500),
+                                new AutoIntake(negabot.intake, negabot.wait).finish(),
+                            new InstantCommand(() -> {
+                                negabot.shooter.setMagazineCover(AutoAim.Positions.CLOSED_COVER.getPos());
+                            })
+
+                        ),
+                null
+
         );
 
         negabot.Action(
                 g,
                 GamepadKeys.Button.Y,
                 new InstantCommand(() -> {
-
+                    CommandScheduler.getInstance().cancelAll();
                 }),
                 null
         );
-
-
 
         negabot.Action(
                 g,
@@ -103,39 +111,17 @@ public class SoloRed extends CommandOpMode {
 
     //this is so then these default commands are activated on run
     public void run() {
-        PPTracking ppTracking = new PPTracking(negabot.turret, negabot.drive, alliance);
-
         if (!shooterStandby && opModeIsActive() && !turretTracking) {
-            negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, negabot.drive));
-            negabot.turret.setDefaultCommand(ppTracking);
-            turretTracking = true;
-            shooterStandby = true;
+          //  negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, negabot.drive));
+            //negabot.turret.setDefaultCommand(new PPTracking(negabot.turret, negabot.drive, alliance));
+            //  turretTracking = true;
+           // shooterStandby = true;
         }
 
-        negabot.Action(
-                g,
-                GamepadKeys.Button.DPAD_RIGHT,
-                new InstantCommand(() -> {
-                    ppTracking.incDeg();  // adds +1 degree
-                    telemetry.addData("Offset", ppTracking.offset);
-                    telemetry.update();
-                }),
-                null
-        );
-
-// Decrease offset with DPAD_LEFT
-        negabot.Action(
-                g,
-                GamepadKeys.Button.DPAD_LEFT,
-                new InstantCommand(() -> {
-                    ppTracking.decDeg();  // subtracts 1 degree
-                    telemetry.addData("Offset", ppTracking.offset);
-                    telemetry.update();
-                }),
-                null
-        );
-
         Robot.LAST_POSE = negabot.drive.follower.getPose().copy();
+        negabot.shooter.setVelocity(5000);
+        negabot.turret.setTargetDeg(10);
+        negabot.shooter.setHoodPos(0.2);
         negabot.run();
     }
 }
