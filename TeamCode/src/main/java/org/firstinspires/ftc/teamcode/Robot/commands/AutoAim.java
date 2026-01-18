@@ -29,7 +29,7 @@ public class AutoAim extends SequentialCommandGroup {
         }
     }
 
-    private static final double RPM_TOLERANCE = 200; //TODO: change if needed
+    private static final double RPM_TOLERANCE = 50; //TODO: change if needed
     private static final double FEED_TIME_S = 1;
 
     private static final double BUMP_NEAR = 0.02;
@@ -97,9 +97,9 @@ public class AutoAim extends SequentialCommandGroup {
                             @Override
                             public void execute() {
                                 double d = calculateDistanceIn(drive);
-                                double rpm = clamp(calculateRpm(d), MIN_V, MAX_V);
+                                double rpm = calculateRpm(d);
 
-                                double hood = clamp(setHood(d) + calculateCoverIncrease(d), 0.0, 1.0);
+                                double hood = clamp(setHood(d) - calculateCoverIncrease(d), 0.0, 0.5);
                                 shooter.setHoodPos(hood);
                                 shooter.setVelocity(rpm);
                             }
@@ -133,12 +133,17 @@ public class AutoAim extends SequentialCommandGroup {
     public double calculateRpm(double distanceIn) {
         if (distanceIn < MIN_DIST) distanceIn = MIN_DIST;
         if (distanceIn > MAX_DIST) distanceIn = MAX_DIST;
+        if (distanceIn > 120) {
+            return 5400;
+        }
         return MIN_V + (MAX_V - MIN_V) * (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
+
+
     }
 
     private double setHood(double distanceIn) {
         double hoodNear = 0.2;
-        double hoodFar  = 0.1;
+        double hoodFar  = 0.01;
 
         if (distanceIn > 75) return hoodFar;
 
@@ -153,6 +158,10 @@ public class AutoAim extends SequentialCommandGroup {
         double t = (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
         if (t < 0) t = 0;
         if (t > 1) t = 1;
+        if (distanceIn>120)
+        {
+            return 0.09;
+        }
         return BUMP_NEAR + t * (BUMP_FAR - BUMP_NEAR);
     }
 

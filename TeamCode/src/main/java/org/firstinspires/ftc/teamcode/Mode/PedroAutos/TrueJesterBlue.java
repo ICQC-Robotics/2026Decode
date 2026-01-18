@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
 public class TrueJesterBlue extends CommandOpMode {
     Robot negabot;
     PathChain Path1, Path2, Path3, Path4, Path5, Path6, Path7, Path8;
-    Pose startPose = new Pose(26.241, 133.326, Math.toRadians(54));
+    Pose startPose = new Pose(55, 10, Math.toRadians(0));
     final double COVER_OPEN = 0.1;
     final double COVER_CLOSE = 1.0;
 
@@ -38,13 +38,15 @@ public class TrueJesterBlue extends CommandOpMode {
         Turret t = negabot.turret;
         Intake intake = negabot.intake;
 
+        t.resetEncoder();
+
         path(f);
 
         waitForStart();
         negabot.schedule(
-                new InstantCommand(() -> { negabot.shooter.setVelocity(5000);}),
+                new InstantCommand(() -> { negabot.shooter.setVelocity(4700);}),
                 new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE); }),
-                new InstantCommand(() -> {negabot.shooter.setHoodPos(0.1); }),
+                new InstantCommand(() -> {negabot.shooter.setHoodPos(0.06); }),
                 new SequentialCommandGroup(
                         new InstantCommand(() -> {negabot.turret.setTargetDeg(15); }),
                         new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN); }),
@@ -59,8 +61,9 @@ public class TrueJesterBlue extends CommandOpMode {
     public Command shoot(){
         return new SequentialCommandGroup(
                 new InstantCommand(() -> {negabot.intake.setSpeed(-1);} ),
+                new InstantCommand(() -> {negabot.shooter.setHoodPos(0.01); }),
                 new WaitCommand(500),
-                new InstantCommand(() -> {negabot.intake.setSpeed(-1);} ),
+                new InstantCommand(() -> {negabot.intake.setSpeed(0);} ),
                 new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE);} )
         );
     }

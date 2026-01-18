@@ -27,15 +27,15 @@ public class ZayansAuto extends CommandOpMode {
     PathChain pre, r1, r1b, r2, r2b, r3, r3b, gate, gate1, gate2, gate3, gateB, gateB0, gateB1;
     Pose startPose = new Pose(26.241, 133.326, Math.toRadians(54));
     Pose shoot = new Pose(58.49942594718714, 84.61882893226179, Math.toRadians(24));
-    Pose gateIntake = new Pose(16.624, 64.5, Math.toRadians(-25));
-    Pose gateIntake1 = new Pose(16, 64, Math.toRadians(-25));
-    Pose gateIntake2 = new Pose(15.624, 62, Math.toRadians(-25));
-    Pose gateIntake3 = new Pose(15, 62, Math.toRadians(-25));
+    Pose gateIntake = new Pose(16.624, 63.5, Math.toRadians(-25));
+    Pose gateIntake1 = new Pose(16, 63, Math.toRadians(-25));
+    Pose gateIntake2 = new Pose(15.624, 63, Math.toRadians(-20));
+    Pose gateIntake3 = new Pose(15, 61, Math.toRadians(-25));
     double row1y = 85;
     double row2y = 59;
-    double row3y = 33;
+    double row3y = 35;
     double firstBallx = 42;
-    double lastBallx = 22;
+    double lastBallx = 20;
     final double COVER_OPEN = 0.1;
     final double COVER_CLOSE = 1.0;
     Intake intake;
@@ -51,39 +51,41 @@ public class ZayansAuto extends CommandOpMode {
         t = negabot.turret;
         intake = negabot.intake;
 
+        t.resetEncoder();
+
         path(f);
 
         waitForStart();
         negabot.schedule(
-                new InstantCommand(() -> {negabot.shooter.setVelocity(4000);}),
+                new InstantCommand(() -> {negabot.shooter.setVelocity(3700);}),
                 new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE); }),
                 new InstantCommand(() -> {negabot.shooter.setHoodPos(0.2); }),
                 new SequentialCommandGroup(
                         new InstantCommand(() -> { t.setTargetDeg(15); }),
                         new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);} ),
                         new FollowPathCommand(f, pre, true),
-                        new WaitCommand(600),
+                        //new WaitCommand(600),
                         shoot(),
                         new FollowPathCommand(f, r2, true),
                         shotPrep(r2b, 18, 0.1),
                         shoot(),
                         new FollowPathCommand(f, gate, true),
                         new WaitCommand(1000),
-                        shotPrep(gateB, 17, 0.1),
+                        shotPrep(gateB, 23, 0.01),
                         shoot(),
                         new FollowPathCommand(f, r1, true),
-                        shotPrep(r1b, 18, 0.1),
+                        shotPrep(r1b, 18, 0.01),
                         shoot(),
                         new FollowPathCommand(f, gate1, true),
                         new WaitCommand(1000),
-                        shotPrep(gateB, 17, 0.1),
+                        shotPrep(gateB, 23, 0.01),
                         shoot(),
                         new FollowPathCommand(f, r3, true),
-                        shotPrep(r3b, 18, 0.1),
+                        shotPrep(r3b, 23, 0.01),
                         shoot(),
                         new FollowPathCommand(f, gate2, true),
                         new WaitCommand(1000),
-                        shotPrep(gateB1, 17, 0.1),
+                        shotPrep(gateB1, 23, 0.01),
                         shoot()
 
                         /*
@@ -131,12 +133,11 @@ public class ZayansAuto extends CommandOpMode {
                 .build();
 
         r1 = follower.pathBuilder().addPath(
-                        new BezierCurve(
-                                new Pose(41, 100),
-                                new Pose(39.708, 80.352),
+                        new BezierLine(
+                                new Pose(shoot.getX(), shoot.getY()),
                                 new Pose(lastBallx, row1y)
                         )
-                ).setLinearHeadingInterpolation(shoot.getHeading(), Math.toRadians(0))
+                ).setLinearHeadingInterpolation(0, Math.toRadians(0))
 
                 .build();
 
@@ -151,7 +152,7 @@ public class ZayansAuto extends CommandOpMode {
         r2 = follower.pathBuilder().addPath(
                         new BezierCurve(
                                 new Pose(shoot.getX(), shoot.getY()),
-                                new Pose(firstBallx, row2y),
+                                new Pose(54, 54.490605427974955),
                                 new Pose((lastBallx)-2, row2y)
                         )
                 ).setLinearHeadingInterpolation(shoot.getHeading(), Math.toRadians(0), 0.4)
@@ -169,7 +170,7 @@ public class ZayansAuto extends CommandOpMode {
         r3 = follower.pathBuilder().addPath(
                         new BezierCurve(
                                 new Pose(shoot.getX(), shoot.getY()),
-                                new Pose(firstBallx, row3y),
+                                new Pose(47.4021101992966, 26.24736225087926),
                                 new Pose(lastBallx, row3y)
                         )
                 ).setLinearHeadingInterpolation(shoot.getHeading(), Math.toRadians(0), 0.4)
