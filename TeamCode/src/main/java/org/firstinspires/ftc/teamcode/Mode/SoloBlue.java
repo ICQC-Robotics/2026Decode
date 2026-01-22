@@ -23,7 +23,6 @@ public class SoloBlue extends CommandOpMode {
 
     private boolean shooterStandby = false;
     private boolean turretTracking = false;
-
     private boolean poseLocked = false;
 
     private Robot.Alliance alliance = Robot.Alliance.BLUE;
@@ -48,7 +47,6 @@ public class SoloBlue extends CommandOpMode {
         }
 
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g));
-       // negabot.turret.restoreAngleDeg(Robot.LAST_TURRET_DEG);
 
         negabot.Action(g,
                        GamepadKeys.Button.RIGHT_BUMPER,

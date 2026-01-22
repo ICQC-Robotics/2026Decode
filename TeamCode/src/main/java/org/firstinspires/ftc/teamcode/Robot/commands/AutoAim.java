@@ -55,7 +55,6 @@ public class AutoAim extends SequentialCommandGroup {
                 new InstantCommand(() -> {
                     shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
                     double d = calculateDistanceIn(drive);
-                    shooter.setHoodPos(setHood(d));
 
                 }, shooter),
 
@@ -69,7 +68,6 @@ public class AutoAim extends SequentialCommandGroup {
                         double d = calculateDistanceIn(drive);
                         spinUpRPM = clamp(calculateRpm(d), MIN_V, MAX_V);
 
-                        shooter.setHoodPos(setHood(d));
                         shooter.setVelocity(spinUpRPM);
                     }
 
@@ -99,8 +97,6 @@ public class AutoAim extends SequentialCommandGroup {
                                 double d = calculateDistanceIn(drive);
                                 double rpm = calculateRpm(d);
 
-                                double hood = clamp(setHood(d) - calculateCoverIncrease(d), 0.0, 0.5);
-                                shooter.setHoodPos(hood);
                                 shooter.setVelocity(rpm);
                             }
 
@@ -139,19 +135,6 @@ public class AutoAim extends SequentialCommandGroup {
         return MIN_V + (MAX_V - MIN_V) * (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
 
 
-    }
-
-    private double setHood(double distanceIn) {
-        double hoodNear = 0.2;
-        double hoodFar  = 0.01;
-
-        if (distanceIn > 75) return hoodFar;
-
-        double t = (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
-        if (t < 0) t = 0;
-        if (t > 1) t = 1;
-
-        return hoodNear + t * (hoodFar - hoodNear);
     }
 
     private double calculateCoverIncrease(double distanceIn) {

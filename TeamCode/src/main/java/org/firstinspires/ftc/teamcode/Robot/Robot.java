@@ -22,9 +22,7 @@ public class Robot {
     public Intake intake;
     public Shooter shooter;
     public Turret turret;
-    public Vision vision;
     public Wait wait;
-    public Indicator indicator;
     public static Pose LAST_POSE;
     public static double LAST_TURRET_DEG;
     Telemetry t;
@@ -63,9 +61,6 @@ public class Robot {
                 new PIDFCoefficients(10, 0, 0, 0)
         );
 
-        vision = new Vision(
-                h.get(Limelight3A.class, "ll")
-        );
 /*
         indicator = new Indicator(
                 h.get(ServoImplEx.class, "servo3"),

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Mode;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -15,42 +16,26 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.DriveCommand;
-import org.firstinspires.ftc.teamcode.Robot.commands.PPTracking;
-import org.firstinspires.ftc.teamcode.Robot.commands.ShooterStandBy;
 
 @TeleOp(group=".")
-public class SoloBlueFar extends CommandOpMode {
+public class SoloBasic extends CommandOpMode {
     GamepadEx g;
     Robot negabot;
 
     private boolean shooterStandby = false;
-    private boolean turretTracking = false;
-
-    private boolean poseLocked = false;
-
-    private Robot.Alliance alliance = Robot.Alliance.BLUE;
+    private double turretTargetDeg;
+    private static final double TURRET_STEP_DEG = .067; //TODO: adjust if needed
+    private double targetRpm = 5000;
 
     @Override
     public void initialize() {
         g = new GamepadEx(gamepad1);
         negabot = new Robot(hardwareMap, telemetry, new Pose(0,0, 0));
         negabot.reset();
+        turretTargetDeg = negabot.turret.getAngleDeg();
 
-        Robot.ALLIANCE = Robot.Alliance.BLUE;
-
-
-        //setting position
-        if (Robot.LAST_POSE != null) {
-            negabot.drive.follower.setPose(Robot.LAST_POSE.copy());
-            poseLocked = true;
-        }
-        else {
-            negabot.drive.follower.setPose(new Pose(0,0, 0));
-
-        }
 
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g));
-       // negabot.turret.restoreAngleDeg(Robot.LAST_TURRET_DEG);
 
         negabot.Action(g,
                        GamepadKeys.Button.RIGHT_BUMPER,
@@ -64,11 +49,14 @@ public class SoloBlueFar extends CommandOpMode {
                 new AutoIntake(negabot.intake, negabot.wait).finish()
         );
 
-
+        //shoot close-mid
         negabot.Action(g,
                         GamepadKeys.Button.A,
 
                         new SequentialCommandGroup(
+                                new InstantCommand(() -> {
+                                    targetRpm = 4000;
+                                }),
                                 new InstantCommand(() -> {
                                     negabot.shooter.setMagazineCover(AutoAim.Positions.OPEN_COVER.getPos());
                                 }),
@@ -85,43 +73,46 @@ public class SoloBlueFar extends CommandOpMode {
 
         );
 
-        negabot.Action(
-                g,
-                GamepadKeys.Button.Y,
-                new InstantCommand(() -> {
-                    CommandScheduler.getInstance().cancelAll();
-                }),
+        //shoot far
+        negabot.Action(g,
+                GamepadKeys.Button.B,
+
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> {
+                            targetRpm = 6000;
+                        }),
+
+                        new InstantCommand(() -> {
+                            negabot.shooter.setMagazineCover(AutoAim.Positions.OPEN_COVER.getPos());
+                        }),
+                        new WaitCommand(500),
+                        new AutoIntake(negabot.intake, negabot.wait).accept(),
+                        new WaitCommand(500),
+                        new AutoIntake(negabot.intake, negabot.wait).finish(),
+                        new InstantCommand(() -> {
+                            negabot.shooter.setMagazineCover(AutoAim.Positions.CLOSED_COVER.getPos());
+                        })
+
+                ),
                 null
+
         );
 
-        negabot.Action(
-                g,
-                GamepadKeys.Button.DPAD_UP,
-                new InstantCommand(() -> {
-                    if (!opModeIsActive() || Robot.LAST_POSE != null || poseLocked) return;
-                    Pose corner = FieldConstants.BLUE_CORNER;
-                    negabot.drive.follower.setPose(corner);
-                    poseLocked = true;
-                }),
-                null
-        );
+        g.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
+                .whileHeld(new RunCommand(() -> {
+                    turretTargetDeg += TURRET_STEP_DEG;
+                    negabot.turret.setTargetDeg(turretTargetDeg);
+                }, negabot.turret));
 
-
+        g.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
+                .whileHeld(new RunCommand(() -> {
+                    turretTargetDeg -= TURRET_STEP_DEG;
+                    negabot.turret.setTargetDeg(turretTargetDeg);
+                }, negabot.turret));
     }
 
-    //this is so then these default commands are activated on run
     public void run() {
-        if (!shooterStandby && opModeIsActive() && !turretTracking) {
-          //  negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, negabot.drive));
-            //negabot.turret.setDefaultCommand(new PPTracking(negabot.turret, negabot.drive, alliance));
-            //  turretTracking = true;
-           // shooterStandby = true;
-        }
-
-        Robot.LAST_POSE = negabot.drive.follower.getPose().copy();
-        negabot.shooter.setVelocity(5000);
-        negabot.turret.setTargetDeg(10);
-        negabot.shooter.setHoodPos(0.2);
+        negabot.shooter.setVelocity(targetRpm);
         negabot.run();
     }
 }
