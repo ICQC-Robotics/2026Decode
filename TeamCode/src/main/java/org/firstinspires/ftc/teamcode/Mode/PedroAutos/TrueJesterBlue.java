@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Mode.PedroAutos;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.pedropathing.follower.Follower;
@@ -24,19 +25,25 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
 public class TrueJesterBlue extends CommandOpMode {
     Robot negabot;
     PathChain Path1, Path2, Path3, Path4, Path5, Path6, Path7, Path8;
-    Pose startPose = new Pose(55, 10, Math.toRadians(0));
+    Pose startPose = new Pose(57.05219206680585, 7.098121085594997, Math.toRadians(0));
     final double COVER_OPEN = 0.1;
     final double COVER_CLOSE = 1.0;
+
+    Drive d;
+    Follower f;
+    Turret t;
+
+    Intake intake;
 
 
     @Override
     public void initialize() {
         negabot = new Robot(hardwareMap, telemetry, startPose);
 
-        Drive d = negabot.drive;
-        Follower f = d.follower;
-        Turret t = negabot.turret;
-        Intake intake = negabot.intake;
+         d = negabot.drive;
+         f = d.follower;
+         t = negabot.turret;
+         intake = negabot.intake;
 
         t.resetEncoder();
 
@@ -44,15 +51,20 @@ public class TrueJesterBlue extends CommandOpMode {
 
         waitForStart();
         negabot.schedule(
-                new InstantCommand(() -> { negabot.shooter.setVelocity(4700);}),
+                new InstantCommand(() -> { negabot.shooter.setVelocity(4250);}),
                 new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE); }),
                 new InstantCommand(() -> {negabot.shooter.setHoodPos(0.06); }),
                 new SequentialCommandGroup(
-                        new InstantCommand(() -> {negabot.turret.setTargetDeg(15); }),
+                        new InstantCommand(() -> {negabot.turret.setTargetDeg(20); }),
                         new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN); }),
-                        new WaitCommand(5000),
+                        new WaitCommand(2000),
+                        shoot(),
+                        new InstantCommand(() -> {negabot.intake.setSpeed(-1); }),
+                        new FollowPathCommand(f, Path1, true),
+                        new FollowPathCommand(f, Path2, true),
+                        new FollowPathCommand(f, Path3, true),
+                        shotPrep(Path4, 20, 0.1),
                         shoot()
-                       // new FollowPathCommand(f, Path1, true)
                 )
         );
 
@@ -67,13 +79,57 @@ public class TrueJesterBlue extends CommandOpMode {
                 new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE);} )
         );
     }
+    public Command shotPrep(PathChain path, double turretAngle, double hoodPos){
+        return new ParallelCommandGroup(
+
+                new FollowPathCommand(f, path, true),
+                new InstantCommand(() -> {intake.setSpeed(0);} ),
+                new SequentialCommandGroup(
+                        new WaitCommand(500),
+                        new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);}
+                        )),
+                new InstantCommand(() -> { t.setTargetDeg(turretAngle); }),
+                new InstantCommand(() -> {negabot.shooter.setHoodPos(hoodPos); })
+
+        );
+    }
 
     public void path(Follower follower) {
         Path1 = follower.pathBuilder().addPath(
+                        new BezierLine(
+                                new Pose(57.052, 7.098),
+
+                                new Pose(9.320, 12.626)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+
+                .build();
+
+        Path2 = follower.pathBuilder().addPath(
                         new BezierCurve(
-                                new Pose(56.992, 7.173),
-                                new Pose(68.942, 38.521),
-                                new Pose(14.384, 35.545)
+                                new Pose(9.320, 12.626),
+                                new Pose(26.329, 13.675),
+                                new Pose(23.497, 7.497)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+
+                .build();
+
+        Path3 = follower.pathBuilder().addPath(
+                        new BezierLine(
+                                new Pose(23.497, 7.497),
+
+                                new Pose(9.217, 7.802)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+
+                .build();
+
+        Path4 = follower.pathBuilder().addPath(
+                        new BezierLine(
+                                new Pose(9.217, 7.802),
+
+                                new Pose(57.044, 7.328)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
 

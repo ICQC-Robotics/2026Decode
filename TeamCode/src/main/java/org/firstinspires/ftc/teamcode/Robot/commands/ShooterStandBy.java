@@ -60,11 +60,17 @@ public class ShooterStandBy extends CommandBase {
     }
 
     // linear interp
-    private double calculateRpm(double distanceIn) {
+    public double calculateRpm(double distanceIn) {
         if (distanceIn < MIN_DIST) distanceIn = MIN_DIST;
         if (distanceIn > MAX_DIST) distanceIn = MAX_DIST;
+        if (distanceIn > 120) {
+            return 4800;
+        }
         return MIN_V + (MAX_V - MIN_V) * (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
+
+
     }
+
 
     @SuppressWarnings("unused")
     private double setHood(double distanceIn) {

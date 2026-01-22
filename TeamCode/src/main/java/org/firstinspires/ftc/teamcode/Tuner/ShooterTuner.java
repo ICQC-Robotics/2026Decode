@@ -41,10 +41,14 @@ public class ShooterTuner extends OpMode {
     @Override
     public void loop() {
         LLResult result = limelight.getLatestResult();
+
         double distance = (29.5 - 12) / Math.tan(Math.toRadians(12 + result.getTy()));
 
-        negabot.shooter.setPIDF(kP, kI, kD, kF);
         negabot.shooter.setVelocity(targetRPM);
+
+        // IMPORTANT: bang-bang shooter needs periodic() to run
+        negabot.shooter.periodic();
+
         negabot.intake.setSpeed(-1);
         servo1.setPosition(s1);
         servo3.setPosition(0.47);
@@ -53,6 +57,6 @@ public class ShooterTuner extends OpMode {
         telemetry.addData("Target RPM", targetRPM);
         telemetry.addData("Actual RPM", negabot.shooter.getVelocity());
         telemetry.update();
-
     }
+
 }

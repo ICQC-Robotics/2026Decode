@@ -66,12 +66,12 @@ public class Robot {
         vision = new Vision(
                 h.get(Limelight3A.class, "ll")
         );
-
+/*
         indicator = new Indicator(
                 h.get(ServoImplEx.class, "servo3"),
                 h.get(ServoImplEx.class, "servo4")
         );
-
+*/
         wait = new Wait();
     }
 
