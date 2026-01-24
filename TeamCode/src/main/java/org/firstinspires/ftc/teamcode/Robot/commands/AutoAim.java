@@ -29,11 +29,8 @@ public class AutoAim extends SequentialCommandGroup {
         }
     }
 
-    private static final double RPM_TOLERANCE = 50; //TODO: change if needed
+    private static final double RPM_TOLERANCE = 50;
     private static final double FEED_TIME_S = 1;
-
-    private static final double BUMP_NEAR = 0.02;
-    private static final double BUMP_FAR  = 0.07;
 
     //linear interp vals
     private static final double MIN_DIST = 30;
@@ -135,17 +132,6 @@ public class AutoAim extends SequentialCommandGroup {
         return MIN_V + (MAX_V - MIN_V) * (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
 
 
-    }
-
-    private double calculateCoverIncrease(double distanceIn) {
-        double t = (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
-        if (t < 0) t = 0;
-        if (t > 1) t = 1;
-        if (distanceIn>120)
-        {
-            return 0.09;
-        }
-        return BUMP_NEAR + t * (BUMP_FAR - BUMP_NEAR);
     }
 
     private static double clamp(double v, double lo, double hi) {
