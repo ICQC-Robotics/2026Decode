@@ -29,17 +29,17 @@ public class AutoAim extends SequentialCommandGroup {
         }
     }
 
-    private static final double RPM_TOLERANCE = 50; //TODO: change if needed
+    private static final double RPM_TOLERANCE = 25; //TODO: change if needed
     private static final double FEED_TIME_S = 1;
 
     private static final double BUMP_NEAR = 0.02;
     private static final double BUMP_FAR  = 0.07;
 
     //linear interp vals
-    private static final double MIN_DIST = 30;
-    private static final double MAX_DIST = 130;
-    public static final double MIN_V = 3350;
-    public static final double MAX_V = 4050;
+    private static final double MIN_DIST = 20;
+    private static final double MAX_DIST = 150;
+    public static final double MIN_V = 2820;
+    public static final double MAX_V = 4300;
 
     private double spinUpRPM = MIN_V;
     public AutoAim(Drive drive, Shooter shooter, Intake intake, Wait wait) {
@@ -133,9 +133,7 @@ public class AutoAim extends SequentialCommandGroup {
     public double calculateRpm(double distanceIn) {
         if (distanceIn < MIN_DIST) distanceIn = MIN_DIST;
         if (distanceIn > MAX_DIST) distanceIn = MAX_DIST;
-        if (distanceIn > 120) {
-            return 5400;
-        }
+
         return MIN_V + (MAX_V - MIN_V) * (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
 
 

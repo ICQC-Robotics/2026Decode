@@ -60,7 +60,7 @@ public class Robot {
         turret = new Turret(
                 h.get(DcMotorEx.class, "turret"),
                 DcMotorSimple.Direction.REVERSE,
-                new PIDFCoefficients(10, 0, 0, 0)
+                new PIDFCoefficients(13, 0, 0, 0)
         );
 
         vision = new Vision(

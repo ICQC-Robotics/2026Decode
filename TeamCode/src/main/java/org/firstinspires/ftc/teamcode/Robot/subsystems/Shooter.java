@@ -24,8 +24,8 @@ public class Shooter extends SubsystemBase {
     private double rpmTolerance = 0; // tune this (50-150 is common)
 
     // Motor powers used by bang-bang
-    private double fullPower = 0.9;      // power when under speed
-    private double offPower  = 0.0;      // power when over speed (set to 0.0 for pure bang-bang)
+    private double fullPower = 0.95;      // power when under speed
+    private double offPower  = 0.05;      // power when over speed (set to 0.0 for pure bang-bang)
 
     // Optional: a small hold power can reduce drop-off oscillation (not "pure" bang-bang, but practical)
     // Example: 0.05 - 0.15

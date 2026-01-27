@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
 @Autonomous
 public class TrueJesterBlue extends CommandOpMode {
     Robot negabot;
-    PathChain Path1, Path2, Path3, Path4, Path5, Path6, Path7, Path8;
+    PathChain Path1, Path2, Path3, Path4, Path5, Path6, Path7, Path8, Path9, Path10;
     Pose startPose = new Pose(57.05219206680585, 7.098121085594997, Math.toRadians(0));
     final double COVER_OPEN = 0.1;
     final double COVER_CLOSE = 1.0;
@@ -51,20 +51,36 @@ public class TrueJesterBlue extends CommandOpMode {
 
         waitForStart();
         negabot.schedule(
-                new InstantCommand(() -> { negabot.shooter.setVelocity(4250);}),
+                new InstantCommand(() -> { negabot.shooter.setVelocity(4150);}),
                 new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE); }),
                 new InstantCommand(() -> {negabot.shooter.setHoodPos(0.06); }),
                 new SequentialCommandGroup(
                         new InstantCommand(() -> {negabot.turret.setTargetDeg(20); }),
                         new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN); }),
-                        new WaitCommand(2000),
+                        new WaitCommand(2500),
                         shoot(),
                         new InstantCommand(() -> {negabot.intake.setSpeed(-1); }),
                         new FollowPathCommand(f, Path1, true),
-                        new FollowPathCommand(f, Path2, true),
+                        new FollowPathCommand(f, Path2),
                         new FollowPathCommand(f, Path3, true),
-                        shotPrep(Path4, 20, 0.1),
+                        new WaitCommand(500),
+                        shotPrep(Path4, 18, 0.1),
+                        new WaitCommand(1000),
+                        shoot(),
+                        new InstantCommand(() -> {negabot.intake.setSpeed(-1); }),
+                        new FollowPathCommand(f, Path5, true),
+                        new FollowPathCommand(f, Path6, true),
+                        shotPrep(Path7, 18, 0.1),
+                        new WaitCommand(1000),
+                        shoot(),
+                        new InstantCommand(() -> {negabot.intake.setSpeed(-1); }),
+                        new FollowPathCommand(f, Path8, true),
+                        new FollowPathCommand(f, Path9, true),
+                        shotPrep(Path10, 18, 0.1),
+                        new WaitCommand(1000),
                         shoot()
+
+
                 )
         );
 
@@ -109,7 +125,7 @@ public class TrueJesterBlue extends CommandOpMode {
                         new BezierCurve(
                                 new Pose(9.320, 12.626),
                                 new Pose(26.329, 13.675),
-                                new Pose(23.497, 7.497)
+                                new Pose(23.497, 8.248)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
 
@@ -117,9 +133,9 @@ public class TrueJesterBlue extends CommandOpMode {
 
         Path3 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(23.497, 7.497),
+                                new Pose(23.497, 8.248),
 
-                                new Pose(9.217, 7.802)
+                                new Pose(9.217, 8.403)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
 
@@ -127,9 +143,69 @@ public class TrueJesterBlue extends CommandOpMode {
 
         Path4 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(9.217, 7.802),
+                                new Pose(9.217, 8.403),
 
-                                new Pose(57.044, 7.328)
+                                new Pose(60.501, 13.190)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+
+                .build();
+
+        Path5 = follower.pathBuilder().addPath(
+                        new BezierLine(
+                                new Pose(60.501, 13.190),
+
+                                new Pose(43.230, 35.649)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+
+                .build();
+
+        Path6 = follower.pathBuilder().addPath(
+                        new BezierLine(
+                                new Pose(43.230, 35.649),
+
+                                new Pose(11.762, 36.142)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+
+                .build();
+
+        Path7 = follower.pathBuilder().addPath(
+                        new BezierLine(
+                                new Pose(11.762, 36.142),
+
+                                new Pose(60.568, 13.315)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+
+                .build();
+
+        Path9 = follower.pathBuilder().addPath(
+                        new BezierLine(
+                                new Pose(60.568, 13.315),
+
+                                new Pose(46.756, 59.956)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+
+                .build();
+
+        Path8 = follower.pathBuilder().addPath(
+                        new BezierLine(
+                                new Pose(46.756, 59.956),
+
+                                new Pose(11.447, 59.720)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+
+                .build();
+
+        Path10 = follower.pathBuilder().addPath(
+                        new BezierLine(
+                                new Pose(11.447, 59.720),
+
+                                new Pose(60.418, 13.196)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
 

@@ -10,7 +10,7 @@ public class Turret extends SubsystemBase {
 
     public static final double MIN_DEG = 0;
     public static final double MAX_DEG = 270;
-    public static final double GEAR_RATIO = 2.775875;
+    public static final double GEAR_RATIO = 2.77272727;
 
     private final DcMotorEx turretMotor;
     private final PIDFCoefficients pidf;

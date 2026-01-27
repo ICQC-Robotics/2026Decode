@@ -18,6 +18,9 @@ public class PPTracking extends CommandBase {
     private static final double DEADBAND_DEG = 1;//tune this
     private static final double FORWARD_DEG = 135;
 
+    //  turret is mounted forward from robot center
+    private static final double TURRET_FORWARD_OFFSET_IN = 2.25;
+
     public double offset = 0;
 
     double TARGET_X = FieldConstants.BLUE_GOAL_X;
@@ -29,6 +32,7 @@ public class PPTracking extends CommandBase {
         this.alliance = alliance;
         addRequirements(turret);
     }
+
     @Override
     public void initialize() {
         Robot.LAST_TURRET_DEG = 135;
@@ -38,17 +42,24 @@ public class PPTracking extends CommandBase {
             TARGET_Y = FieldConstants.RED_GOAL_Y;
         }
     }
+
     @Override
     public void execute() {
-        turret.setTargetDeg(turretAngleDeg(d.getX(), d.getY(), TARGET_X, TARGET_Y, d.getHeading()));
+        turret.setTargetDeg(
+                turretAngleDeg(d.getX(), d.getY(), TARGET_X, TARGET_Y, d.getHeading())
+        );
     }
 
     public double turretAngleDeg(double x, double y,
-                                        double targetX, double targetY,
-                                        double headingRad) {
+                                 double targetX, double targetY,
+                                 double headingRad) {
 
-        double dx = targetX - x;
-        double dy = targetY - y;
+        //shift origin from robot center -> turret position (field coords)
+        double turretX = x + TURRET_FORWARD_OFFSET_IN * Math.cos(headingRad);
+        double turretY = y + TURRET_FORWARD_OFFSET_IN * Math.sin(headingRad);
+
+        double dx = targetX - turretX;
+        double dy = targetY - turretY;
 
         // Field/global bearing to target: 0=right, 90=up, +CCW
         double bearingDeg = Math.toDegrees(Math.atan2(dy, dx));
@@ -74,15 +85,8 @@ public class PPTracking extends CommandBase {
         return a;
     }
 
-    public void incDeg()
-    {
-        offset++;
-    }
-    public void decDeg()
-    {
-        offset--;
-    }
-
+    public void incDeg() { offset++; }
+    public void decDeg() { offset--; }
 
     static double wrap180(double a) {
         a = (a + 180.0) % 360.0;
@@ -95,6 +99,5 @@ public class PPTracking extends CommandBase {
         while (angle < -Math.PI) angle += 2.0 * Math.PI;
         return angle;
     }
-
 }
 

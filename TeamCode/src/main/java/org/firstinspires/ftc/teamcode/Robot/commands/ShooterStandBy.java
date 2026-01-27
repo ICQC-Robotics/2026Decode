@@ -18,8 +18,8 @@ public class ShooterStandBy extends CommandBase {
     private final Drive drive;
 
     // Match AutoAim's mapping window
-    private static final double MIN_DIST = 30;
-    private static final double MAX_DIST = 130;
+    private static final double MIN_DIST = 20;
+    private static final double MAX_DIST = 150;
 
     // Use AutoAim's published velocity bounds so you only tune in one place.
     private static final double MIN_V = AutoAim.MIN_V;
@@ -63,9 +63,7 @@ public class ShooterStandBy extends CommandBase {
     public double calculateRpm(double distanceIn) {
         if (distanceIn < MIN_DIST) distanceIn = MIN_DIST;
         if (distanceIn > MAX_DIST) distanceIn = MAX_DIST;
-        if (distanceIn > 120) {
-            return 4800;
-        }
+
         return MIN_V + (MAX_V - MIN_V) * (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
 
 
