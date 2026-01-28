@@ -50,8 +50,8 @@ public class ShooterTuner extends OpMode {
         negabot.shooter.periodic();
 
         negabot.intake.setSpeed(-1);
-        servo1.setPosition(s1);
-        servo3.setPosition(0.47);
+      //  servo1.setPosition(s1);
+       // servo3.setPosition(0.47);
 
         telemetry.addData("distance", distance);
         telemetry.addData("Target RPM", targetRPM);

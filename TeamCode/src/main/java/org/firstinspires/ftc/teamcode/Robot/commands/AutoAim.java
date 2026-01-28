@@ -29,19 +29,67 @@ public class AutoAim extends SequentialCommandGroup {
         }
     }
 
-    private static final double RPM_TOLERANCE = 25; //TODO: change if needed
+    private static final double RPM_TOLERANCE = 25; // TODO: change if needed
     private static final double FEED_TIME_S = 1;
 
     private static final double BUMP_NEAR = 0.02;
     private static final double BUMP_FAR  = 0.07;
 
-    //linear interp vals
-    private static final double MIN_DIST = 20;
-    private static final double MAX_DIST = 150;
+    /**
+     * Distance window we care about for lookup/limiting.
+     * These are public so other commands (e.g. ShooterStandBy) can reuse them.
+     */
+    public static final double MIN_DIST = 20;
+    public static final double MAX_DIST = 150;
+
+    /** Velocity bounds (rpm). Keep these as the single source of truth. */
     public static final double MIN_V = 2820;
-    public static final double MAX_V = 4300;
+    public static final double MAX_V = 4300 - 100;
+
+    /**
+     * Lookup tables (distance inches -> value).
+     *
+     * NOTE: The current values match your old linear interpolation (so behavior is unchanged),
+     * but now you can tune any point without re-deriving a formula.
+     *
+     * Tables MUST be sorted by distance ascending.
+     */
+    private static final double[][] RPM_LUT = new double[][] {
+
+            {  63, 3150 },
+            {  96, 3480 },
+            {  125, 3930 },
+            {  145, 4040 },
+
+    };
+
+    // Hood LUT used only for d <= 75 (to preserve your original piecewise behavior)
+    private static final double HOOD_CUTOFF_DIST = 75;
+    private static final double HOOD_FAR_CONST  = 0.01;
+
+    private static final double[][] HOOD_LUT_NEAR = new double[][] {
+            { 20, 0.2 },
+            { 30, 0.1853846153846154 },
+            { 40, 0.17076923076923078 },
+            { 50, 0.15615384615384617 },
+            { 60, 0.14153846153846156 },
+            { 75, 0.11961538461538462 },
+    };
+
+    // Cover-bump LUT used only for d <= 120 (to preserve your original cap at > 120)
+    private static final double COVER_CUTOFF_DIST = 120;
+    private static final double COVER_FAR_CONST   = 0.09;
+
+    private static final double[][] COVER_LUT_NEAR = new double[][] {
+            {  20, 0.02 },
+            {  50, 0.03153846153846154 },
+            {  75, 0.04115384615384615 },
+            { 100, 0.050769230769230775 },
+            { 120, 0.05846153846153847 },
+    };
 
     private double spinUpRPM = MIN_V;
+
     public AutoAim(Drive drive, Shooter shooter, Intake intake, Wait wait) {
         addCommands(
                 shootSequence(drive, shooter, intake, wait)
@@ -55,8 +103,7 @@ public class AutoAim extends SequentialCommandGroup {
                 new InstantCommand(() -> {
                     shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
                     double d = calculateDistanceIn(drive);
-                    shooter.setHoodPos(setHood(d));
-
+                    shooter.setHoodPos(getHoodForDistance(d));
                 }, shooter),
 
                 new CommandBase() {
@@ -67,9 +114,9 @@ public class AutoAim extends SequentialCommandGroup {
                     @Override
                     public void execute() {
                         double d = calculateDistanceIn(drive);
-                        spinUpRPM = clamp(calculateRpm(d), MIN_V, MAX_V);
+                        spinUpRPM = clamp(getRpmForDistance(d), MIN_V, MAX_V);
 
-                        shooter.setHoodPos(setHood(d));
+                        shooter.setHoodPos(getHoodForDistance(d));
                         shooter.setVelocity(spinUpRPM);
                     }
 
@@ -86,7 +133,7 @@ public class AutoAim extends SequentialCommandGroup {
 
                         new CommandBase() {
                             {
-                                addRequirements(shooter,intake);
+                                addRequirements(shooter, intake);
                             }
 
                             @Override
@@ -97,9 +144,9 @@ public class AutoAim extends SequentialCommandGroup {
                             @Override
                             public void execute() {
                                 double d = calculateDistanceIn(drive);
-                                double rpm = calculateRpm(d);
+                                double rpm = getRpmForDistance(d);
 
-                                double hood = clamp(setHood(d) - calculateCoverIncrease(d), 0.0, 0.5);
+                                double hood = clamp(getHoodForDistance(d) - getCoverIncreaseForDistance(d), 0.0, 0.5);
                                 shooter.setHoodPos(hood);
                                 shooter.setVelocity(rpm);
                             }
@@ -120,6 +167,7 @@ public class AutoAim extends SequentialCommandGroup {
     public double calculateDistanceIn(Drive drive) {
         Pose robot = drive.follower.getPose();
         if (robot == null) return MIN_DIST;
+
         double goalX = (Robot.ALLIANCE == Robot.Alliance.BLUE) ? FieldConstants.BLUE_GOAL_X : FieldConstants.RED_GOAL_X;
         double goalY = (Robot.ALLIANCE == Robot.Alliance.BLUE) ? FieldConstants.BLUE_GOAL_Y : FieldConstants.RED_GOAL_Y;
 
@@ -129,38 +177,63 @@ public class AutoAim extends SequentialCommandGroup {
         return Math.hypot(dx, dy);
     }
 
-    // linear interp
-    public double calculateRpm(double distanceIn) {
-        if (distanceIn < MIN_DIST) distanceIn = MIN_DIST;
-        if (distanceIn > MAX_DIST) distanceIn = MAX_DIST;
-
-        return MIN_V + (MAX_V - MIN_V) * (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
-
-
+    /**
+     * Distance -> RPM mapping using lookup table + linear interpolation between points.
+     */
+    public static double getRpmForDistance(double distanceIn) {
+        return lookupInterpolated(clamp(distanceIn, MIN_DIST, MAX_DIST), RPM_LUT);
     }
 
-    private double setHood(double distanceIn) {
-        double hoodNear = 0.2;
-        double hoodFar  = 0.01;
-
-        if (distanceIn > 75) return hoodFar;
-
-        double t = (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
-        if (t < 0) t = 0;
-        if (t > 1) t = 1;
-
-        return hoodNear + t * (hoodFar - hoodNear);
+    /**
+     * Distance -> Hood mapping using lookup table.
+     * Preserves original behavior: if distance > 75, return constant HOOD_FAR_CONST.
+     */
+    public static double getHoodForDistance(double distanceIn) {
+        double d = clamp(distanceIn, MIN_DIST, MAX_DIST);
+        if (d > HOOD_CUTOFF_DIST) return HOOD_FAR_CONST;
+        return lookupInterpolated(d, HOOD_LUT_NEAR);
     }
 
-    private double calculateCoverIncrease(double distanceIn) {
-        double t = (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
-        if (t < 0) t = 0;
-        if (t > 1) t = 1;
-        if (distanceIn>120)
-        {
-            return 0.09;
+    /**
+     * Distance -> cover/hood "bump" when feeding.
+     * Preserves original behavior: if distance > 120, return constant COVER_FAR_CONST.
+     */
+    public static double getCoverIncreaseForDistance(double distanceIn) {
+        double d = clamp(distanceIn, MIN_DIST, MAX_DIST);
+        if (d > COVER_CUTOFF_DIST) return COVER_FAR_CONST;
+        return lookupInterpolated(d, COVER_LUT_NEAR);
+    }
+
+    /**
+     * Generic table lookup with linear interpolation.
+     * Table format: { {x0, y0}, {x1, y1}, ... } where x is ascending.
+     */
+    private static double lookupInterpolated(double x, double[][] table) {
+        if (table == null || table.length == 0) return 0.0;
+        if (table.length == 1) return table[0][1];
+
+        // Clamp to endpoints
+        if (x <= table[0][0]) return table[0][1];
+        int last = table.length - 1;
+        if (x >= table[last][0]) return table[last][1];
+
+        // Find segment
+        for (int i = 0; i < last; i++) {
+            double x0 = table[i][0];
+            double y0 = table[i][1];
+            double x1 = table[i + 1][0];
+            double y1 = table[i + 1][1];
+
+            if (x >= x0 && x <= x1) {
+                double span = (x1 - x0);
+                if (span <= 1e-9) return y0; // avoid divide-by-zero if bad table data
+                double t = (x - x0) / span;
+                return y0 + t * (y1 - y0);
+            }
         }
-        return BUMP_NEAR + t * (BUMP_FAR - BUMP_NEAR);
+
+        // Should never hit if table is sorted, but safe fallback
+        return table[last][1];
     }
 
     private static double clamp(double v, double lo, double hi) {

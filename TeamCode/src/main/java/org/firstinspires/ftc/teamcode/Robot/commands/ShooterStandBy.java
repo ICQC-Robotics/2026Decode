@@ -10,16 +10,12 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Shooter;
 
 /**
  * Standby spin-up that continuously recomputes shooter velocity
- * from current robot pose, using the same distance->RPM mapping as AutoAim.
+ * from current robot pose, using AutoAim's distance->RPM lookup table.
  */
 public class ShooterStandBy extends CommandBase {
 
     private final Shooter shooter;
     private final Drive drive;
-
-    // Match AutoAim's mapping window
-    private static final double MIN_DIST = 20;
-    private static final double MAX_DIST = 150;
 
     // Use AutoAim's published velocity bounds so you only tune in one place.
     private static final double MIN_V = AutoAim.MIN_V;
@@ -34,10 +30,10 @@ public class ShooterStandBy extends CommandBase {
     @Override
     public void execute() {
         double d = calculateDistanceIn(drive);
-        double rpm = clamp(calculateRpm(d), MIN_V, MAX_V);
+        double rpm = clamp(AutoAim.getRpmForDistance(d), MIN_V, MAX_V);
 
         // If you also want standby to track hood like AutoAim, uncomment:
-        // shooter.setHoodPos(setHood(d));
+        // shooter.setHoodPos(AutoAim.getHoodForDistance(d));
 
         shooter.setVelocity(rpm);
     }
@@ -49,7 +45,7 @@ public class ShooterStandBy extends CommandBase {
 
     private double calculateDistanceIn(Drive drive) {
         Pose robot = drive.follower.getPose();
-        if (robot == null) return MIN_DIST;
+        if (robot == null) return AutoAim.MIN_DIST;
 
         double goalX = (Robot.ALLIANCE == Robot.Alliance.BLUE) ? FieldConstants.BLUE_GOAL_X : FieldConstants.RED_GOAL_X;
         double goalY = (Robot.ALLIANCE == Robot.Alliance.BLUE) ? FieldConstants.BLUE_GOAL_Y : FieldConstants.RED_GOAL_Y;
@@ -57,28 +53,6 @@ public class ShooterStandBy extends CommandBase {
         double dx = goalX - robot.getX();
         double dy = goalY - robot.getY();
         return Math.hypot(dx, dy);
-    }
-
-    // linear interp
-    public double calculateRpm(double distanceIn) {
-        if (distanceIn < MIN_DIST) distanceIn = MIN_DIST;
-        if (distanceIn > MAX_DIST) distanceIn = MAX_DIST;
-
-        return MIN_V + (MAX_V - MIN_V) * (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
-
-
-    }
-
-
-    @SuppressWarnings("unused")
-    private double setHood(double distanceIn) {
-        double hoodNear = 0.3;
-        double hoodFar  = 0.1;
-
-        double t = (distanceIn - MIN_DIST) / (MAX_DIST - MIN_DIST);
-        if (t < 0) t = 0;
-        if (t > 1) t = 1;
-        return hoodNear + t * (hoodFar - hoodNear);
     }
 
     private static double clamp(double v, double lo, double hi) {
