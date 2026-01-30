@@ -53,7 +53,6 @@ public class Robot {
                 h.get(DcMotorEx.class, "shooter2"), DcMotorSimple.Direction.REVERSE,
                 h.get(Servo.class, "servo0"),
                 h.get(Servo.class, "servo2"),
-                h.get(Servo.class, "servo1"),
                 new PIDFCoefficients(6, 0.0, 0.005, 13.5)
         );
 

@@ -59,7 +59,6 @@ public class ZayansAuto extends CommandOpMode {
         negabot.schedule(
                 new InstantCommand(() -> {negabot.shooter.setVelocity(3700);}),
                 new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE); }),
-                new InstantCommand(() -> {negabot.shooter.setHoodPos(0.2); }),
                 new SequentialCommandGroup(
                         new InstantCommand(() -> { t.setTargetDeg(15); }),
                         new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);} ),
@@ -118,8 +117,7 @@ public class ZayansAuto extends CommandOpMode {
                         new WaitCommand(500),
                         new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);}
                         )),
-                new InstantCommand(() -> { t.setTargetDeg(turretAngle); }),
-                new InstantCommand(() -> {negabot.shooter.setHoodPos(hoodPos); })
+                new InstantCommand(() -> { t.setTargetDeg(turretAngle); })
 
         );
     }

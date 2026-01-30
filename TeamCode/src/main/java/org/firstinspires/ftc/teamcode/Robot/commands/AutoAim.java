@@ -65,29 +65,10 @@ public class AutoAim extends SequentialCommandGroup {
     };
 
     // Hood LUT used only for d <= 75 (to preserve your original piecewise behavior)
-    private static final double HOOD_CUTOFF_DIST = 75;
-    private static final double HOOD_FAR_CONST  = 0.01;
 
-    private static final double[][] HOOD_LUT_NEAR = new double[][] {
-            { 20, 0.2 },
-            { 30, 0.1853846153846154 },
-            { 40, 0.17076923076923078 },
-            { 50, 0.15615384615384617 },
-            { 60, 0.14153846153846156 },
-            { 75, 0.11961538461538462 },
-    };
 
     // Cover-bump LUT used only for d <= 120 (to preserve your original cap at > 120)
-    private static final double COVER_CUTOFF_DIST = 120;
-    private static final double COVER_FAR_CONST   = 0.09;
 
-    private static final double[][] COVER_LUT_NEAR = new double[][] {
-            {  20, 0.02 },
-            {  50, 0.03153846153846154 },
-            {  75, 0.04115384615384615 },
-            { 100, 0.050769230769230775 },
-            { 120, 0.05846153846153847 },
-    };
 
     private double spinUpRPM = MIN_V;
 
@@ -104,7 +85,6 @@ public class AutoAim extends SequentialCommandGroup {
                 new InstantCommand(() -> {
                     shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
                     double d = calculateDistanceIn(drive);
-                    shooter.setHoodPos(getHoodForDistance(d));
                 }, shooter),
 
                 new CommandBase() {
@@ -117,7 +97,6 @@ public class AutoAim extends SequentialCommandGroup {
                         double d = calculateDistanceIn(drive);
                         spinUpRPM = clamp(getRpmForDistance(d), MIN_V, MAX_V);
 
-                        shooter.setHoodPos(getHoodForDistance(d));
                         shooter.setVelocity(spinUpRPM);
                     }
 
@@ -147,8 +126,7 @@ public class AutoAim extends SequentialCommandGroup {
                                 double d = calculateDistanceIn(drive);
                                 double rpm = getRpmForDistance(d);
 
-                                double hood = clamp(getHoodForDistance(d) - getCoverIncreaseForDistance(d), 0.0, 0.5);
-                                shooter.setHoodPos(hood);
+
                                 shooter.setVelocity(rpm);
                             }
 
@@ -185,25 +163,8 @@ public class AutoAim extends SequentialCommandGroup {
         return lookupInterpolated(clamp(distanceIn, MIN_DIST, MAX_DIST), RPM_LUT);
     }
 
-    /**
-     * Distance -> Hood mapping using lookup table.
-     * Preserves original behavior: if distance > 75, return constant HOOD_FAR_CONST.
-     */
-    public static double getHoodForDistance(double distanceIn) {
-        double d = clamp(distanceIn, MIN_DIST, MAX_DIST);
-        if (d > HOOD_CUTOFF_DIST) return HOOD_FAR_CONST;
-        return lookupInterpolated(d, HOOD_LUT_NEAR);
-    }
 
-    /**
-     * Distance -> cover/hood "bump" when feeding.
-     * Preserves original behavior: if distance > 120, return constant COVER_FAR_CONST.
-     */
-    public static double getCoverIncreaseForDistance(double distanceIn) {
-        double d = clamp(distanceIn, MIN_DIST, MAX_DIST);
-        if (d > COVER_CUTOFF_DIST) return COVER_FAR_CONST;
-        return lookupInterpolated(d, COVER_LUT_NEAR);
-    }
+
 
     /**
      * Generic table lookup with linear interpolation.

@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Shooter extends SubsystemBase {
 
     private final DcMotorEx rightShooter, leftShooter;
-    public final Servo leftCover, rightCover, hood;
+    public final Servo leftCover, rightCover;
     private final PIDFCoefficients pidf; // not used in bang-bang, but kept in case you want PID later
 
     private double targetVelocityRPM;
@@ -35,14 +35,13 @@ public class Shooter extends SubsystemBase {
     public Shooter(
             DcMotorEx rightShooter, DcMotorSimple.Direction rightDir,
             DcMotorEx leftShooter, DcMotorSimple.Direction leftDir,
-            Servo leftCover, Servo rightCover, Servo hood,
+            Servo leftCover, Servo rightCover,
             PIDFCoefficients pidf
     ) {
         this.rightShooter = rightShooter;
         this.leftShooter = leftShooter;
         this.leftCover = leftCover;
         this.rightCover = rightCover;
-        this.hood = hood;
         this.pidf = pidf;
 
         this.rightShooter.setDirection(rightDir);
@@ -58,7 +57,6 @@ public class Shooter extends SubsystemBase {
         // PIDF setup is not used for bang-bang, but leaving it here doesn’t hurt
         this.setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
 
-        this.setHoodPos(.5);          // TODO: find default hood angle pos
         this.setMagazineCover(1);     // TODO: change accordingly to new cover
         targetVelocityRPM = 0;
     }
@@ -82,9 +80,7 @@ public class Shooter extends SubsystemBase {
         rightCover.setPosition(1 - pos);
     }
 
-    public void setHoodPos(double pos) {
-        hood.setPosition(pos);
-    }
+
 
     /**
      * Sets target RPM for bang-bang control.

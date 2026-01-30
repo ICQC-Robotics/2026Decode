@@ -121,7 +121,6 @@ public class SoloBlueFar extends CommandOpMode {
         Robot.LAST_POSE = negabot.drive.follower.getPose().copy();
         negabot.shooter.setVelocity(5000);
         negabot.turret.setTargetDeg(10);
-        negabot.shooter.setHoodPos(0.2);
         negabot.run();
     }
 }

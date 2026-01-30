@@ -52,7 +52,6 @@ public class RedSideClose extends CommandOpMode {
         negabot.schedule(
                 new InstantCommand(() -> { negabot.shooter.setVelocity(3950);}),
                 new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE); }),
-                new InstantCommand(() -> {negabot.shooter.setHoodPos(0.15); }),
                 new SequentialCommandGroup(
                         // turret: 0 -> 270
                         shotPrep(f, Path1, 270.0, 0.3),
@@ -151,8 +150,7 @@ public class RedSideClose extends CommandOpMode {
                         new WaitCommand(500),
                         new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);} )
                 ),
-                new InstantCommand(() -> { negabot.turret.setTargetDeg(turretAngle); }),
-                new InstantCommand(() -> {negabot.shooter.setHoodPos(hoodPos); })
+                new InstantCommand(() -> { negabot.turret.setTargetDeg(turretAngle); })
         );
     }
 
