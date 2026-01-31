@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Turret;
 @Autonomous
 public class BlueSideClose extends CommandOpMode {
         Robot negabot;
-        PathChain Path1, Path2, Path3, Path4, Path5, Path6, Path7, Path8, Path9, Path10, Path11, GatePath, GateBack, GatePath1, HitGate;
+        PathChain Path1, Path2, Path3, Path4, Path5, Path6, Path7, Path8, Path9, Path10, Path11, Path12, Path13, Path14, GatePath, GateBack, GatePath1, HitGate;
         Pose startPose = new Pose(26.241, 133.326, Math.toRadians(54));
 
         Pose gateIntake = new Pose(14, 60, Math.toRadians(-20));
@@ -48,7 +48,7 @@ public class BlueSideClose extends CommandOpMode {
 
                 waitForStart();
                 negabot.schedule(
-                        new InstantCommand(() -> { negabot.shooter.setVelocity(3470);}),
+                        new InstantCommand(() -> { negabot.shooter.setVelocity(3450);}),
                         new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE); }),
                         new SequentialCommandGroup(
                                 shotPrep(f, Path1, 50, 0.3),
@@ -56,7 +56,7 @@ public class BlueSideClose extends CommandOpMode {
                                 shoot(),
                                 new FollowPathCommand(f, Path2, true),
                                 new FollowPathCommand(f, Path3, true),
-                                new WaitCommand(1000),
+
                                 new FollowPathCommand(f, Path4, true),
                                 new FollowPathCommand(f, Path5, true),
                                 new WaitCommand(500),
@@ -64,14 +64,19 @@ public class BlueSideClose extends CommandOpMode {
                                 new WaitCommand(500),
                                 shoot(),
                                 new FollowPathCommand(f, Path7, true),
-                                new WaitCommand(1000),
+
                                 shotPrep(f, Path8, 52, 0.15),
                                 new WaitCommand(500),
                                 shoot(),
                                 new FollowPathCommand(f, Path9, true),
                                 new FollowPathCommand(f, Path10, true),
-                                new WaitCommand(1000),
+
                                 shotPrep(f, Path11, 55, 0.15),
+                                new WaitCommand(500),
+                                shoot(),
+                                new FollowPathCommand(f, Path12, true),
+                                new FollowPathCommand(f, Path13, true),
+                                shotPrep(f, Path14, 52, 0.15),
                                 new WaitCommand(500),
                                 shoot()
 
@@ -253,6 +258,36 @@ public class BlueSideClose extends CommandOpMode {
                                     new Pose(58.473, 84.777)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(54))
+
+                    .build();
+
+            Path12 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(58.473, 84.777),
+
+                                    new Pose(12.500, 32.450)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(54), Math.toRadians(90))
+
+                    .build();
+
+            Path13 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(11.500, 32.450),
+
+                                    new Pose(12.400, 11.300)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(90))
+
+                    .build();
+
+            Path14 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(11.400, 11.300),
+
+                                    new Pose(58.550, 85.000)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(54))
 
                     .build();
         }
