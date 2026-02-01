@@ -56,28 +56,33 @@ public class TrueJesterBlue extends CommandOpMode {
                 new SequentialCommandGroup(
                         new InstantCommand(() -> {negabot.turret.setTargetDeg(20); }),
                         new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN); }),
-                        new WaitCommand(2500),
+                        new WaitCommand(3000),
                         shoot(),
                         new InstantCommand(() -> {negabot.intake.setSpeed(-1); }),
                         new FollowPathCommand(f, Path1, true),
                         new FollowPathCommand(f, Path2),
                         new FollowPathCommand(f, Path3, true),
-                        new WaitCommand(500),
                         shotPrep(Path4, 15, 0.1),
                         new WaitCommand(1000),
                         shoot(),
+                        //WAIT COMMAND FOR OTHER TEAM AUTO
+                        new WaitCommand(4000),
+                        //WAIT COMMAND FOR OTHER TEAM AUTO
                         new InstantCommand(() -> {negabot.intake.setSpeed(-1); }),
-                        new FollowPathCommand(f, Path5, true),
-                        new FollowPathCommand(f, Path6, true),
-                        shotPrep(Path7, 15, 0.1),
-                        new WaitCommand(1000),
+                        new FollowPathCommand(f, Path1, true),
+                        new FollowPathCommand(f, Path2),
+                        new FollowPathCommand(f, Path3, true),
+                        shotPrep(Path4, 15, 0.1),
+                        new WaitCommand(500),
                         shoot(),
                         new InstantCommand(() -> {negabot.intake.setSpeed(-1); }),
-                        new FollowPathCommand(f, Path8, true),
-                        new FollowPathCommand(f, Path9, true),
-                        shotPrep(Path10, 15, 0.1),
-                        new WaitCommand(1000),
+                        new FollowPathCommand(f, Path1, true),
+                        new FollowPathCommand(f, Path2),
+                        new FollowPathCommand(f, Path3, true),
+                        shotPrep(Path4, 15, 0.1),
+                        new WaitCommand(500),
                         shoot()
+
 
 
                 )
@@ -142,7 +147,7 @@ public class TrueJesterBlue extends CommandOpMode {
                         new BezierLine(
                                 new Pose(9.217, 8.403),
 
-                                new Pose(60.501, 13.190)
+                                new Pose(57.501, 13.190)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
 

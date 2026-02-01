@@ -48,7 +48,7 @@ public class BlueSideClose extends CommandOpMode {
 
                 waitForStart();
                 negabot.schedule(
-                        new InstantCommand(() -> { negabot.shooter.setVelocity(3450);}),
+                        new InstantCommand(() -> { negabot.shooter.setVelocity(3430);}),
                         new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE); }),
                         new SequentialCommandGroup(
                                 shotPrep(f, Path1, 50, 0.3),
@@ -213,7 +213,7 @@ public class BlueSideClose extends CommandOpMode {
                             new BezierLine(
                                     new Pose(28.457, 71.502),
 
-                                    new Pose(18.590, 69.760)
+                                    new Pose(20.558, 70.063)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
 
@@ -221,7 +221,7 @@ public class BlueSideClose extends CommandOpMode {
 
             Path8 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(18.590, 69.760),
+                                    new Pose(20.558, 70.063),
 
                                     new Pose(58.633, 84.777)
                             )
