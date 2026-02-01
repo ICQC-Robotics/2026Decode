@@ -29,7 +29,7 @@ public class SoloBlue extends CommandOpMode {
 
     private Robot.Alliance alliance = Robot.Alliance.BLUE;
 
-    // <-- add this
+    // make this a field so your DPAD buttons can access it
     private PPTracking ppTracking;
 
     @Override
@@ -51,9 +51,6 @@ public class SoloBlue extends CommandOpMode {
 
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g));
 
-        // <-- create once (NOT as default)
-        ppTracking = new PPTracking(negabot.turret, negabot.drive, alliance);
-
         negabot.Action(g,
                 GamepadKeys.Button.RIGHT_BUMPER,
                 new AutoIntake(negabot.intake, negabot.wait).accept(),
@@ -64,23 +61,6 @@ public class SoloBlue extends CommandOpMode {
                 GamepadKeys.Button.LEFT_BUMPER,
                 new AutoIntake(negabot.intake, negabot.wait).reject(),
                 new AutoIntake(negabot.intake, negabot.wait).finish()
-        );
-
-        // <-- A: tracking -> autoaim -> tracking off (sequential)
-        negabot.Action(
-                g,
-                GamepadKeys.Button.A,
-                new SequentialCommandGroup(
-                        new InstantCommand(() -> CommandScheduler.getInstance().schedule(ppTracking)),
-                        new AutoAim(
-                                negabot.drive,
-                                negabot.shooter,
-                                negabot.intake,
-                                negabot.wait
-                        ),
-                        new InstantCommand(() -> CommandScheduler.getInstance().cancel(ppTracking))
-                ),
-                null
         );
 
         negabot.Action(
@@ -103,17 +83,59 @@ public class SoloBlue extends CommandOpMode {
                 }),
                 null
         );
+
+        // create PPTracking ONCE (do not set as default)
+        ppTracking = new PPTracking(negabot.turret, negabot.drive, alliance);
+
+        // A: start tracking -> autoaim -> stop tracking
+        negabot.Action(
+                g,
+                GamepadKeys.Button.A,
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> CommandScheduler.getInstance().schedule(ppTracking)),
+                        new AutoAim(negabot.drive, negabot.shooter, negabot.intake, negabot.wait),
+                        new InstantCommand(() -> CommandScheduler.getInstance().cancel(ppTracking))
+                ),
+                null
+        );
+        // Keep your DPAD offset buttons here exactly like before
+        negabot.Action(
+                g,
+                GamepadKeys.Button.DPAD_RIGHT,
+                new InstantCommand(() -> {
+                    ppTracking.incDeg();  // adds +1 degree
+                    telemetry.addData("Offset", ppTracking.offset);
+                    telemetry.update();
+                }),
+                null
+        );
+
+        negabot.Action(
+                g,
+                GamepadKeys.Button.DPAD_LEFT,
+                new InstantCommand(() -> {
+                    ppTracking.decDeg();  // subtracts 1 degree
+                    telemetry.addData("Offset", ppTracking.offset);
+                    telemetry.update();
+                }),
+                null
+        );
     }
 
     //this is so then these default commands are activated on run
     public void run() {
-        if (!shooterStandby && opModeIsActive()) {
+
+        if (!shooterStandby && opModeIsActive() && !turretTracking) {
             negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, negabot.drive));
+
+            // IMPORTANT: do NOT set PPTracking as default anymore
+            // negabot.turret.setDefaultCommand(ppTracking);
+
+            turretTracking = true;
             shooterStandby = true;
         }
 
-        // REMOVE this if you previously had turret default tracking here:
-        // negabot.turret.setDefaultCommand(ppTracking);
+
 
         Robot.LAST_POSE = negabot.drive.follower.getPose().copy();
         negabot.run();
