@@ -87,6 +87,7 @@ public class PPTracking extends CommandBase {
 
     public void incDeg() { offset = offset + 3; }
     public void decDeg() { offset = offset - 3; }
+    public void resetDegOffset() { offset = 0; }
 
     static double wrap180(double a) {
         a = (a + 180.0) % 360.0;

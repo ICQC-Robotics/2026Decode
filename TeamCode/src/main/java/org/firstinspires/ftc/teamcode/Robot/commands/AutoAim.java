@@ -58,8 +58,9 @@ public class AutoAim extends SequentialCommandGroup {
 
             {  63, 3150 },
             {  96, 3480 },
-            {  125, 3980 },
-            {  130, 4150 },
+            {  125, 3930 },
+            {  130, 4110 },
+            {  140, 4180 },
             {  145, 4200 },
 
     };

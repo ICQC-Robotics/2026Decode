@@ -27,6 +27,8 @@ public class SoloBlue extends CommandOpMode {
 
     private boolean poseLocked = false;
 
+    private Pose blueReset = new Pose(26.241, 133.326, Math.toRadians(54));
+
     private Robot.Alliance alliance = Robot.Alliance.BLUE;
 
     // make this a field so your DPAD buttons can access it
@@ -65,7 +67,7 @@ public class SoloBlue extends CommandOpMode {
 
         negabot.Action(
                 g,
-                GamepadKeys.Button.Y,
+                GamepadKeys.Button.X,
                 new InstantCommand(() -> {
                     CommandScheduler.getInstance().cancelAll();
                 }),
@@ -74,13 +76,14 @@ public class SoloBlue extends CommandOpMode {
 
         negabot.Action(
                 g,
-                GamepadKeys.Button.DPAD_UP,
+                GamepadKeys.Button.Y,
                 new InstantCommand(() -> {
-                    if (!opModeIsActive() || Robot.LAST_POSE != null || poseLocked) return;
-                    Pose corner = FieldConstants.BLUE_CORNER;
+                    Pose corner = blueReset;
                     negabot.drive.follower.setPose(corner);
                     poseLocked = true;
+                    ppTracking.resetDegOffset();
                 }),
+
                 null
         );
 
