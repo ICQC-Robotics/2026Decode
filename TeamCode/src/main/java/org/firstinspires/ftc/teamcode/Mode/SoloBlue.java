@@ -65,6 +65,8 @@ public class SoloBlue extends CommandOpMode {
                 new AutoIntake(negabot.intake, negabot.wait).finish()
         );
 
+        /*
+
         negabot.Action(
                 g,
                 GamepadKeys.Button.X,
@@ -73,7 +75,7 @@ public class SoloBlue extends CommandOpMode {
                 }),
                 null
         );
-
+*/
         negabot.Action(
                 g,
                 GamepadKeys.Button.Y,
