@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Mode;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.pedropathing.geometry.Pose;
@@ -24,11 +25,14 @@ public class SoloRed extends CommandOpMode {
     private boolean shooterStandby = false;
     private boolean turretTracking = false;
 
-
-
     private boolean poseLocked = false;
 
+    private Pose redReset = new Pose(117.759, 133.326, Math.toRadians(126));
+
     private Robot.Alliance alliance = Robot.Alliance.RED;
+
+    // make this a field so your DPAD buttons can access it
+    private PPTracking ppTracking;
 
     @Override
     public void initialize() {
@@ -36,8 +40,7 @@ public class SoloRed extends CommandOpMode {
         negabot = new Robot(hardwareMap, telemetry, new Pose(0,0, 0));
         negabot.reset();
 
-        Robot.ALLIANCE = Robot.Alliance.RED;
-
+        Robot.ALLIANCE = Robot.Alliance.BLUE;
 
         //setting position
         if (Robot.LAST_POSE != null) {
@@ -46,16 +49,14 @@ public class SoloRed extends CommandOpMode {
         }
         else {
             negabot.drive.follower.setPose(new Pose(0,0, 0));
-
         }
 
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g));
-       // negabot.turret.restoreAngleDeg(Robot.LAST_TURRET_DEG);
 
         negabot.Action(g,
-                       GamepadKeys.Button.RIGHT_BUMPER,
-                       new AutoIntake(negabot.intake, negabot.wait).accept(),
-                       new AutoIntake(negabot.intake, negabot.wait).finish()
+                GamepadKeys.Button.RIGHT_BUMPER,
+                new AutoIntake(negabot.intake, negabot.wait).accept(),
+                new AutoIntake(negabot.intake, negabot.wait).finish()
         );
 
         negabot.Action(g,
@@ -64,54 +65,45 @@ public class SoloRed extends CommandOpMode {
                 new AutoIntake(negabot.intake, negabot.wait).finish()
         );
 
+        /*
 
-        negabot.Action(g,
-                       GamepadKeys.Button.A,
-                       new AutoAim(negabot.drive,
-                                   negabot.shooter,
-                                   negabot.intake,
-                                   negabot.wait
-                       ),
-                       null
+        negabot.Action(
+                g,
+                GamepadKeys.Button.X,
+                new InstantCommand(() -> {
+                    CommandScheduler.getInstance().cancelAll();
+                }),
+                null
         );
-
+*/
         negabot.Action(
                 g,
                 GamepadKeys.Button.Y,
                 new InstantCommand(() -> {
-
-                }),
-                null
-        );
-
-
-
-        negabot.Action(
-                g,
-                GamepadKeys.Button.DPAD_UP,
-                new InstantCommand(() -> {
-                    if (!opModeIsActive() || Robot.LAST_POSE != null || poseLocked) return;
-                    Pose corner = FieldConstants.BLUE_CORNER;
+                    Pose corner = redReset;
                     negabot.drive.follower.setPose(corner);
                     poseLocked = true;
+                    ppTracking.resetDegOffset();
                 }),
+
                 null
         );
 
+        // create PPTracking ONCE (do not set as default)
+        ppTracking = new PPTracking(negabot.turret, negabot.drive, alliance);
 
-    }
-
-    //this is so then these default commands are activated on run
-    public void run() {
-        PPTracking ppTracking = new PPTracking(negabot.turret, negabot.drive, alliance);
-
-        if (!shooterStandby && opModeIsActive() && !turretTracking) {
-            negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, negabot.drive));
-            negabot.turret.setDefaultCommand(ppTracking);
-            turretTracking = true;
-            shooterStandby = true;
-        }
-
+        // A: start tracking -> autoaim -> stop tracking
+        negabot.Action(
+                g,
+                GamepadKeys.Button.A,
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> CommandScheduler.getInstance().schedule(ppTracking)),
+                        new AutoAim(negabot.drive, negabot.shooter, negabot.intake, negabot.wait),
+                        new InstantCommand(() -> CommandScheduler.getInstance().cancel(ppTracking))
+                ),
+                null
+        );
+        // Keep your DPAD offset buttons here exactly like before
         negabot.Action(
                 g,
                 GamepadKeys.Button.DPAD_RIGHT,
@@ -123,7 +115,6 @@ public class SoloRed extends CommandOpMode {
                 null
         );
 
-// Decrease offset with DPAD_LEFT
         negabot.Action(
                 g,
                 GamepadKeys.Button.DPAD_LEFT,
@@ -134,11 +125,24 @@ public class SoloRed extends CommandOpMode {
                 }),
                 null
         );
+    }
+
+    //this is so then these default commands are activated on run
+    public void run() {
+
+        if (!shooterStandby && opModeIsActive() && !turretTracking) {
+            negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, negabot.drive));
+
+            // IMPORTANT: do NOT set PPTracking as default anymore
+            // negabot.turret.setDefaultCommand(ppTracking);
+
+            turretTracking = true;
+            shooterStandby = true;
+        }
+
+
 
         Robot.LAST_POSE = negabot.drive.follower.getPose().copy();
         negabot.run();
     }
 }
-
-
-

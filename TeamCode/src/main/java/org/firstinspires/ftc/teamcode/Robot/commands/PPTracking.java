@@ -19,7 +19,7 @@ public class PPTracking extends CommandBase {
     private static final double FORWARD_DEG = 135;
 
     //  turret is mounted forward from robot center
-    private static final double TURRET_FORWARD_OFFSET_IN = 2.25;
+    private static final double TURRET_FORWARD_OFFSET_IN = 3;
 
     public double offset = 0;
 

@@ -8,7 +8,7 @@ public final class FieldConstants {
 
     //goals!!
     public static final double BLUE_GOAL_X = 0.0;
-    public static final double BLUE_GOAL_Y = 141.0;
+    public static final double BLUE_GOAL_Y = 144.0;
 
     public static final double RED_GOAL_X  = 144.0;
     public static final double RED_GOAL_Y  = 144.0;

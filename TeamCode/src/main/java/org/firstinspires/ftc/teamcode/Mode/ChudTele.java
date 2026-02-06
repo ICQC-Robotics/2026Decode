@@ -15,11 +15,9 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.DriveCommand;
-import org.firstinspires.ftc.teamcode.Robot.commands.PPTracking;
-import org.firstinspires.ftc.teamcode.Robot.commands.ShooterStandBy;
 
 @TeleOp(group=".")
-public class SoloBlueFar extends CommandOpMode {
+public class ChudTele extends CommandOpMode {
     GamepadEx g;
     Robot negabot;
 
@@ -119,8 +117,8 @@ public class SoloBlueFar extends CommandOpMode {
         }
 
         Robot.LAST_POSE = negabot.drive.follower.getPose().copy();
-        negabot.shooter.setVelocity(5000);
-        negabot.turret.setTargetDeg(10);
+        negabot.shooter.setVelocity(3300);
+       // negabot.turret.setTargetDeg(10);
         negabot.run();
     }
 }
