@@ -149,14 +149,23 @@ public class AutoAim extends SequentialCommandGroup {
         Pose robot = drive.follower.getPose();
         if (robot == null) return MIN_DIST;
 
-        double goalX = (Robot.ALLIANCE == Robot.Alliance.BLUE) ? FieldConstants.BLUE_GOAL_X : FieldConstants.RED_GOAL_X;
-        double goalY = (Robot.ALLIANCE == Robot.Alliance.BLUE) ? FieldConstants.BLUE_GOAL_Y : FieldConstants.RED_GOAL_Y;
+        double goalX;
+        double goalY;
+
+        if (Robot.ALLIANCE == Robot.Alliance.BLUE) {
+            goalX = FieldConstants.BLUE_GOAL_X;
+            goalY = FieldConstants.BLUE_GOAL_Y;
+        } else {
+            goalX = FieldConstants.RED_GOAL_X;
+            goalY = FieldConstants.RED_GOAL_Y;
+        }
 
         double dx = goalX - robot.getX();
         double dy = goalY - robot.getY();
 
         return Math.hypot(dx, dy);
     }
+
 
     /**
      * Distance -> RPM mapping using lookup table + linear interpolation between points.

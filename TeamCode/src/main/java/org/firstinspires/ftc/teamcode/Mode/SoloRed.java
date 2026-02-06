@@ -40,7 +40,7 @@ public class SoloRed extends CommandOpMode {
         negabot = new Robot(hardwareMap, telemetry, new Pose(0,0, 0));
         negabot.reset();
 
-        Robot.ALLIANCE = Robot.Alliance.BLUE;
+        Robot.ALLIANCE = Robot.Alliance.RED;
 
         //setting position
         if (Robot.LAST_POSE != null) {
