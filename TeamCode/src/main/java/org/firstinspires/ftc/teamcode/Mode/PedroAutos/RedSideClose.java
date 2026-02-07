@@ -162,14 +162,14 @@ public class RedSideClose extends CommandOpMode {
         Path6 = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(mirrorX(22.315), 84.098),
-                                new Pose(mirrorX(28.457), 71.502)
+                                new Pose(mirrorX(32.457), 71.502)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
 
         Path7 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(mirrorX(28.457), 71.502),
+                                new Pose(mirrorX(32.457), 71.502),
                                 new Pose(mirrorX(23.558), 70.063)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
