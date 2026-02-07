@@ -151,6 +151,10 @@ public class Shooter extends SubsystemBase {
             rightShooter.setPower(offPower);
             leftShooter.setPower(offPower);
         }
+        else {
+            rightShooter.setVelocity(targetVelocityRPM);
+            leftShooter.setVelocity(targetVelocityRPM);
+        }
         // else: inside tolerance band -> keep last power state (prevents rapid toggling)
     }
 }

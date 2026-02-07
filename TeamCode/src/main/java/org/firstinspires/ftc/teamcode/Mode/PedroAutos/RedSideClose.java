@@ -30,7 +30,7 @@ public class RedSideClose extends CommandOpMode {
     // Mirrored across x = 72:
     // x' = 144 - x
     // heading' = 180° - heading
-    Pose startPose = new Pose(117.759, 133.326, Math.toRadians(126));
+    Pose startPose = new Pose(117.759, 132.326, Math.toRadians(126));
 
     Pose gateIntake  = new Pose(mirrorX(14),     60, mirrorHeadingRad(Math.toRadians(-20)));
     Pose gateIntake1 = new Pose(mirrorX(16.302), 65, mirrorHeadingRad(Math.toRadians(-20)));
@@ -120,7 +120,7 @@ public class RedSideClose extends CommandOpMode {
 
         Path1 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(mirrorX(26.241), 133.326),
+                                new Pose(mirrorX(26.241), 132.326),
                                 new Pose(mirrorX(58.510), 84.907)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(126), Math.toRadians(126))
@@ -129,22 +129,22 @@ public class RedSideClose extends CommandOpMode {
         Path2 = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(mirrorX(58.510), 84.907),
-                                new Pose(mirrorX(42.239), 62.530)
+                                new Pose(mirrorX(46.239), 62.530)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(126), Math.toRadians(180))
                 .build();
 
         Path3 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(mirrorX(42.239), 62.530),
-                                new Pose(mirrorX(15.670), 61.568)
+                                new Pose(mirrorX(46.239), 62.530),
+                                new Pose(mirrorX(18.670), 61.568)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
 
         Path4 = follower.pathBuilder().addPath(
                         new BezierCurve(
-                                new Pose(mirrorX(15.670), 61.568),
+                                new Pose(mirrorX(18.670), 61.568),
                                 new Pose(mirrorX(47.700), 68.846),
                                 new Pose(mirrorX(58.447), 84.841)
                         )
@@ -154,14 +154,14 @@ public class RedSideClose extends CommandOpMode {
         Path5 = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(mirrorX(58.447), 84.841),
-                                new Pose(mirrorX(20.315), 84.098)
+                                new Pose(mirrorX(22.315), 84.098)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
 
         Path6 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(mirrorX(20.315), 84.098),
+                                new Pose(mirrorX(22.315), 84.098),
                                 new Pose(mirrorX(28.457), 71.502)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -170,14 +170,14 @@ public class RedSideClose extends CommandOpMode {
         Path7 = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(mirrorX(28.457), 71.502),
-                                new Pose(mirrorX(20.558), 70.063)
+                                new Pose(mirrorX(23.558), 70.063)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
 
         Path8 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(mirrorX(20.558), 70.063),
+                                new Pose(mirrorX(23.558), 70.063),
                                 new Pose(mirrorX(58.633), 84.777)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(126))
@@ -186,15 +186,15 @@ public class RedSideClose extends CommandOpMode {
         Path9 = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(mirrorX(58.633), 84.777),
-                                new Pose(mirrorX(40.998), 37.914)
+                                new Pose(mirrorX(44.998), 37.914)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(126), Math.toRadians(180))
                 .build();
 
         Path10 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(mirrorX(40.998), 37.914),
-                                new Pose(mirrorX(14.662), 37.434)
+                                new Pose(mirrorX(44.998), 37.914),
+                                new Pose(mirrorX(16.662), 37.434)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
@@ -210,22 +210,22 @@ public class RedSideClose extends CommandOpMode {
         Path12 = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(mirrorX(58.473), 84.777),
-                                new Pose(mirrorX(11.500), 32.450)
+                                new Pose(mirrorX(17.500), 32.450)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(126), Math.toRadians(90))
                 .build();
 
         Path13 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(mirrorX(11.500), 32.450),
-                                new Pose(mirrorX(11.400), 11.300)
+                                new Pose(mirrorX(19.500), 32.450),
+                                new Pose(mirrorX(19.400), 11.300)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(90))
                 .build();
 
         Path14 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(mirrorX(11.400), 11.300),
+                                new Pose(mirrorX(19.400), 11.300),
                                 new Pose(mirrorX(58.550), 85.000)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(126))

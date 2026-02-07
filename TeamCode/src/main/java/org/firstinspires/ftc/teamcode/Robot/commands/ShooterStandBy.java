@@ -31,10 +31,6 @@ public class ShooterStandBy extends CommandBase {
     public void execute() {
         double d = calculateDistanceIn(drive);
         double rpm = clamp(AutoAim.getRpmForDistance(d), MIN_V, MAX_V);
-
-        // If you also want standby to track hood like AutoAim, uncomment:
-        // shooter.setHoodPos(AutoAim.getHoodForDistance(d));
-
         shooter.setVelocity(rpm);
     }
 

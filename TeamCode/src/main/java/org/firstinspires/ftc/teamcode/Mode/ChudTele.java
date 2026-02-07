@@ -20,35 +20,15 @@ import org.firstinspires.ftc.teamcode.Robot.commands.DriveCommand;
 public class ChudTele extends CommandOpMode {
     GamepadEx g;
     Robot negabot;
-
-    private boolean shooterStandby = false;
-    private boolean turretTracking = false;
-
-    private boolean poseLocked = false;
-
-    private Robot.Alliance alliance = Robot.Alliance.BLUE;
+    boolean chud = false;
+    double v = 3500;
 
     @Override
     public void initialize() {
         g = new GamepadEx(gamepad1);
         negabot = new Robot(hardwareMap, telemetry, new Pose(0,0, 0));
         negabot.reset();
-
-        Robot.ALLIANCE = Robot.Alliance.BLUE;
-
-
-        //setting position
-        if (Robot.LAST_POSE != null) {
-            negabot.drive.follower.setPose(Robot.LAST_POSE.copy());
-            poseLocked = true;
-        }
-        else {
-            negabot.drive.follower.setPose(new Pose(0,0, 0));
-
-        }
-
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g));
-       // negabot.turret.restoreAngleDeg(Robot.LAST_TURRET_DEG);
 
         negabot.Action(g,
                        GamepadKeys.Button.RIGHT_BUMPER,
@@ -91,34 +71,13 @@ public class ChudTele extends CommandOpMode {
                 }),
                 null
         );
-
-        negabot.Action(
-                g,
-                GamepadKeys.Button.DPAD_UP,
-                new InstantCommand(() -> {
-                    if (!opModeIsActive() || Robot.LAST_POSE != null || poseLocked) return;
-                    Pose corner = FieldConstants.BLUE_CORNER;
-                    negabot.drive.follower.setPose(corner);
-                    poseLocked = true;
-                }),
-                null
-        );
-
-
     }
 
-    //this is so then these default commands are activated on run
     public void run() {
-        if (!shooterStandby && opModeIsActive() && !turretTracking) {
-          //  negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, negabot.drive));
-            //negabot.turret.setDefaultCommand(new PPTracking(negabot.turret, negabot.drive, alliance));
-            //  turretTracking = true;
-           // shooterStandby = true;
+        if (!chud && opModeIsActive()) {
+            negabot.shooter.setVelocity(v);
+            chud = true;
         }
-
-        Robot.LAST_POSE = negabot.drive.follower.getPose().copy();
-        negabot.shooter.setVelocity(3300);
-       // negabot.turret.setTargetDeg(10);
         negabot.run();
     }
 }

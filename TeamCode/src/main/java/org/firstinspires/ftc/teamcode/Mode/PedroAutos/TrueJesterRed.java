@@ -61,7 +61,7 @@ public class TrueJesterRed extends CommandOpMode {
                         // Turret mirrored around 135° forward: turret' = 270 - turret
                         new InstantCommand(() -> { negabot.turret.setTargetDeg(mirrorTurretDeg(20)); }),
                         new InstantCommand(() -> { negabot.shooter.setMagazineCover(COVER_OPEN); }),
-                        new WaitCommand(3000),
+                        new WaitCommand(3200),
                         shoot(),
 
                         new InstantCommand(() -> { negabot.intake.setSpeed(-1); }),

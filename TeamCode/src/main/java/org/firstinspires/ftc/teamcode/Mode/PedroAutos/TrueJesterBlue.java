@@ -56,7 +56,7 @@ public class TrueJesterBlue extends CommandOpMode {
                 new SequentialCommandGroup(
                         new InstantCommand(() -> {negabot.turret.setTargetDeg(20); }),
                         new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN); }),
-                        new WaitCommand(3000),
+                        new WaitCommand(3200),
                         shoot(),
                         new InstantCommand(() -> {negabot.intake.setSpeed(-1); }),
                         new FollowPathCommand(f, Path1, true),
