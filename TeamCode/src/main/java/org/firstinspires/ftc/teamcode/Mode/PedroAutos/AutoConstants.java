@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Mode.PedroAutos;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.pedropathing.follower.Follower;
@@ -46,6 +47,20 @@ public class AutoConstants {
                 new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE);} )
         );
     }
+    public Command shotPrep(PathChain path, double turretAngle, Robot negabot, Follower f){
+        return new ParallelCommandGroup(
+
+                new FollowPathCommand(f, path, true),
+                new InstantCommand(() -> {negabot.intake.setSpeed(0);} ),
+                new SequentialCommandGroup(
+                        new WaitCommand(500),
+                        new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);}
+                        )),
+                new InstantCommand(() -> { negabot.turret.setTargetDeg(turretAngle); })
+
+        );
+    }
+
     private static double mirrorX(double x) {
         return 144.0 - x;
     }

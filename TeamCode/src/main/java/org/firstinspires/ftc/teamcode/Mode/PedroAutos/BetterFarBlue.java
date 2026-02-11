@@ -62,7 +62,7 @@ public class BetterFarBlue extends CommandOpMode {
                         new FollowPathCommand(f, Path1, true),
                         new FollowPathCommand(f, Path2),
                         new FollowPathCommand(f, Path3, true),
-                        shotPrep(Path4, 15, 0.1),
+                        shotPrep(Path4, 15),
                         new WaitCommand(1000),
                         shoot(),
                         gateIntake(15),
@@ -79,7 +79,7 @@ public class BetterFarBlue extends CommandOpMode {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> {negabot.intake.setSpeed(-1); }),
                 new FollowPathCommand(f, Path1, true),
-                shotPrep(Path4, a, 0.1),
+                shotPrep(Path4, a),
                 new WaitCommand(500),
                 shoot()
         );
@@ -88,7 +88,7 @@ public class BetterFarBlue extends CommandOpMode {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> {negabot.intake.setSpeed(-1); }),
                 new FollowPathCommand(f, Path2, true),
-                shotPrep(Path3, a, 0.1),
+                shotPrep(Path3, a),
                 new WaitCommand(500),
                 shoot()
         );
@@ -103,7 +103,7 @@ public class BetterFarBlue extends CommandOpMode {
                 new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE);} )
         );
     }
-    public Command shotPrep(PathChain path, double turretAngle, double hoodPos){
+    public Command shotPrep(PathChain path, double turretAngle){
         return new ParallelCommandGroup(
 
                 new FollowPathCommand(f, path, true),
