@@ -35,7 +35,6 @@ public class SoloBlue extends CommandOpMode {
 
         Robot.ALLIANCE = Robot.Alliance.BLUE;
 
-
         //setting position
         if (Robot.LAST_POSE != null) {
             negabot.drive.follower.setPose(Robot.LAST_POSE.copy());
