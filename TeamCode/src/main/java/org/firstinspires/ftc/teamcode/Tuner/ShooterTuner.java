@@ -32,8 +32,8 @@ public class ShooterTuner extends OpMode {
         negabot = new Robot(hardwareMap,
                 telemetry, new Pose(72, 72)
         );
-        servo1 = hardwareMap.get(Servo.class, "servo1");
-        servo3 = hardwareMap.get(Servo.class, "servo3");
+        //servo1 = hardwareMap.get(Servo.class, "servo1");
+        //servo3 = hardwareMap.get(Servo.class, "servo3");
         limelight = hardwareMap.get(Limelight3A.class, "ll");
         limelight.start();
     }
@@ -41,7 +41,7 @@ public class ShooterTuner extends OpMode {
     @Override
     public void loop() {
         LLResult result = limelight.getLatestResult();
-
+        negabot.shooter.setMagazineCover(0.1);
         double distance = (29.5 - 12) / Math.tan(Math.toRadians(12 + result.getTy()));
 
         negabot.shooter.setVelocity(targetRPM);
