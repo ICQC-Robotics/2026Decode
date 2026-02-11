@@ -263,4 +263,5 @@ public class BetterFarRed extends CommandOpMode {
         while (out >= 360.0) out -= 360.0;
         return out;
     }
+
 }
