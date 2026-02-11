@@ -53,7 +53,6 @@ public class TrueJesterBlue extends CommandOpMode {
         negabot.schedule(
                 new InstantCommand(() -> { negabot.shooter.setVelocity(4250);}),
                 new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE); }),
-                new InstantCommand(() -> {negabot.shooter.setHoodPos(0.06); }),
                 new SequentialCommandGroup(
                         new InstantCommand(() -> {negabot.turret.setTargetDeg(20); }),
                         new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN); }),
@@ -73,7 +72,6 @@ public class TrueJesterBlue extends CommandOpMode {
     public Command shoot(){
         return new SequentialCommandGroup(
                 new InstantCommand(() -> {negabot.intake.setSpeed(-1);} ),
-                new InstantCommand(() -> {negabot.shooter.setHoodPos(0.01); }),
                 new WaitCommand(500),
                 new InstantCommand(() -> {negabot.intake.setSpeed(0);} ),
                 new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE);} )
@@ -88,8 +86,7 @@ public class TrueJesterBlue extends CommandOpMode {
                         new WaitCommand(500),
                         new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);}
                         )),
-                new InstantCommand(() -> { t.setTargetDeg(turretAngle); }),
-                new InstantCommand(() -> {negabot.shooter.setHoodPos(hoodPos); })
+                new InstantCommand(() -> { t.setTargetDeg(turretAngle); })
 
         );
     }

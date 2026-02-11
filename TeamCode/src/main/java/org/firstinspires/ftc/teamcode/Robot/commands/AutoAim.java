@@ -32,16 +32,6 @@ public class AutoAim extends SequentialCommandGroup {
     private static final double RPM_TOLERANCE = 50;
     private static final double FEED_TIME_S = 1;
 
-<<<<<<< Updated upstream
-    //linear interp vals
-    private static final double MIN_DIST = 30;
-    private static final double MAX_DIST = 130;
-    public static final double MIN_V = 3350;
-    public static final double MAX_V = 4050;
-=======
-    private static final double BUMP_NEAR = 0.02;
-    private static final double BUMP_FAR  = 0.07;
-
     /**
      * Distance window we care about for lookup/limiting.
      * These are public so other commands (e.g. ShooterStandBy) can reuse them.
@@ -81,7 +71,6 @@ public class AutoAim extends SequentialCommandGroup {
 
     // Cover-bump LUT used only for d <= 120 (to preserve your original cap at > 120)
 
->>>>>>> Stashed changes
 
     private double spinUpRPM = MIN_V;
     public AutoAim(Drive drive, Shooter shooter, Intake intake, Wait wait) {
@@ -108,12 +97,6 @@ public class AutoAim extends SequentialCommandGroup {
                     @Override
                     public void execute() {
                         double d = calculateDistanceIn(drive);
-<<<<<<< Updated upstream
-                        spinUpRPM = clamp(calculateRpm(d), MIN_V, MAX_V);
-=======
-                        //TODO: spinUpRPM = clamp(getRpmForDistance(d), MIN_V, MAX_V);
->>>>>>> Stashed changes
-
                         spinUpRPM = clamp(fromEQ(d), MIN_V, MAX_V);
                         shooter.setVelocity(spinUpRPM);
                     }

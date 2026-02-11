@@ -50,7 +50,6 @@ public class BlueSideClose extends CommandOpMode {
                 negabot.schedule(
                         new InstantCommand(() -> { negabot.shooter.setVelocity(3750);}),
                         new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE); }),
-                        new InstantCommand(() -> {negabot.shooter.setHoodPos(0.15); }),
                         new SequentialCommandGroup(
                                 shotPrep(f, Path1, 0, 0.3),
                                 new WaitCommand(1000),
@@ -137,9 +136,7 @@ public class BlueSideClose extends CommandOpMode {
                             new WaitCommand(500),
                             new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);}
                             )),
-                    new InstantCommand(() -> { negabot.turret.setTargetDeg(turretAngle); }),
-                    new InstantCommand(() -> {negabot.shooter.setHoodPos(hoodPos); })
-
+                    new InstantCommand(() -> { negabot.turret.setTargetDeg(turretAngle); })
             );
         }
 

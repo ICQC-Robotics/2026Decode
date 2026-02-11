@@ -50,68 +50,29 @@ public class RedSideClose extends CommandOpMode {
 
         waitForStart();
         negabot.schedule(
-<<<<<<< Updated upstream
-                new InstantCommand(() -> { negabot.shooter.setVelocity(3950);}),
+                new InstantCommand(() -> { negabot.shooter.setVelocity(3750);}),
                 new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE); }),
-                new InstantCommand(() -> {negabot.shooter.setHoodPos(0.15); }),
                 new SequentialCommandGroup(
-                        // turret: 0 -> 270
-                        shotPrep(f, Path1, 270.0, 0.3),
+                        shotPrep(f, Path1,  mirrorTurretDeg(0), 0.3),
                         new WaitCommand(1000),
-=======
-                new InstantCommand(() -> { negabot.shooter.setVelocity(3350); }),
-                new InstantCommand(() -> { negabot.shooter.setMagazineCover(COVER_CLOSE); }),
-                new SequentialCommandGroup(
-                        shotPrep(f, Path1, mirrorTurretDeg(50), 0.3),
-                        new WaitCommand(700),
->>>>>>> Stashed changes
                         shoot(),
-
                         new FollowPathCommand(f, Path2, true),
                         new WaitCommand(1000),
-
-<<<<<<< Updated upstream
-                        // turret: 50.5 -> 219.5
-                        shotPrep(f, Path3, 221.5, 0.1),
+                        shotPrep(f, Path3, mirrorTurretDeg(50.5), 0.15),
                         shoot(),
-
                         new FollowPathCommand(f, Path4, true),
                         new WaitCommand(1000),
-
-                        // turret: 71 -> 199
-                        shotPrep(f, Path5, 200.0, 0.1),
-=======
-                        shotPrep(f, Path4, mirrorTurretDeg(52), 0.15),
-                        new WaitCommand(500),
->>>>>>> Stashed changes
+                        shotPrep(f, Path5, mirrorTurretDeg(71), 0.15),
                         shoot(),
-
                         new FollowPathCommand(f, Path6, true),
                         new FollowPathCommand(f, Path7, true),
                         new WaitCommand(1000),
-
-<<<<<<< Updated upstream
-                        // turret: 73 -> 197
-                        shotPrep(f, Path8, 197.0, 0.15),
-=======
-                        new WaitCommand(500),
-                        shotPrep(f, Path8, mirrorTurretDeg(54), 0.15),
-                        new WaitCommand(500),
->>>>>>> Stashed changes
+                        shotPrep(f, Path8, mirrorTurretDeg(72.5), 0.15),
                         shoot(),
-
                         new FollowPathCommand(f, Path9, true),
-
-<<<<<<< Updated upstream
-                        shotPrep(f, Path10, 197.0, 0.15),
-=======
-                        shotPrep(f, Path11, mirrorTurretDeg(54), 0.15),
-                        new WaitCommand(500),
->>>>>>> Stashed changes
+                        shotPrep(f, Path10, mirrorTurretDeg(72.5), 0.15),
                         shoot(),
-
-                        // 135 (forward) mirrors to 135
-                        new InstantCommand(() -> {negabot.turret.setTargetDeg(135); })
+                        new InstantCommand(() -> {negabot.turret.setTargetDeg(mirrorTurretDeg(135)); })
                 )
                         /*
                         new SequentialCommandGroup(
@@ -175,8 +136,7 @@ public class RedSideClose extends CommandOpMode {
                         new WaitCommand(500),
                         new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_OPEN);} )
                 ),
-                new InstantCommand(() -> { negabot.turret.setTargetDeg(turretAngle); }),
-                new InstantCommand(() -> {negabot.shooter.setHoodPos(hoodPos); })
+                new InstantCommand(() -> { negabot.turret.setTargetDeg(turretAngle); })
         );
     }
 
@@ -307,6 +267,14 @@ public class RedSideClose extends CommandOpMode {
         super.run();
         Robot.LAST_POSE = negabot.drive.follower.getPose().copy();
         Robot.LAST_TURRET_DEG = negabot.turret.getAngleDeg();
+    }
+    private static double mirrorTurretDeg(double turretDeg) {
+        // 135° is straight forward, so mirror around 135:
+        // turret' = 270 - turret
+        double out = 270.0 - turretDeg;
+        while (out < 0) out += 360.0;
+        while (out >= 360.0) out -= 360.0;
+        return out;
     }
 }
 
