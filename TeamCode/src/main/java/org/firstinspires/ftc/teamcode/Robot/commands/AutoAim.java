@@ -139,6 +139,7 @@ public class AutoAim extends SequentialCommandGroup {
                         new InstantCommand(() -> {
                             shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
                             intake.setSpeed(0);
+                            shooter.setVelocity(0); //TODO: Test
                         }, shooter, intake)
                 ));
     }
