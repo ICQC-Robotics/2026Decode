@@ -24,23 +24,23 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class AutoConstants {
-    Queue<PathChain> paths = new LinkedList<>();
-    Pose closeShotPose;
-    Pose closeStartPose;
-    Pose row1StartPose;
-    Pose row1EndPose;
-    Pose row2StartPose;
-    Pose row2EndPose;
-    Pose row3StartPose;
-    Pose row3EndPose;
-    Pose preGatePose;
-    Pose gatePressPose;
-    Pose farShotPose;
-    Pose farStartPose;
-    Pose loadingIntake1Pose;
-    Pose loadingIntake2Pose;
-    int farVelocity;
-    int closeVelocity;
+    static Queue<PathChain> paths = new LinkedList<>();
+    static Pose closeShotPose;
+    static Pose closeStartPose;
+    static Pose row1StartPose;
+    static Pose row1EndPose;
+    static Pose row2StartPose;
+    static Pose row2EndPose;
+    static Pose row3StartPose;
+    static Pose row3EndPose;
+    static Pose preGatePose;
+    static Pose gatePressPose;
+    static Pose farShotPose;
+    static Pose farStartPose;
+    static Pose loadingIntake1Pose;
+    static Pose loadingIntake2Pose;
+    static int farVelocity;
+    static int closeVelocity;
     final double COVER_OPEN = 0.1;
     final double COVER_CLOSE = 1.0;
 
@@ -90,7 +90,7 @@ public class AutoConstants {
         @param mirror true when the path should be mirrored
         @param reverse true when the path should be reversed
      **/
-    public PathChain path(Follower f, boolean mirror, boolean reverse, Pose... path){
+    public static PathChain path(Follower f, boolean mirror, boolean reverse, Pose... path){
         if(mirror){
             PathBuilder p = f.pathBuilder();
             for(int i = 0; i < path.length - 1; i++){
@@ -119,13 +119,14 @@ public class AutoConstants {
         if(reverse) p.setReversed();
         return p.build();
     }
-    public boolean fixPaths(){
-        Queue<PathChain> temp = new LinkedList<>();
-        while(true) {
-            PathChain p = paths.poll();
-            temp.add(p);
-            if (paths.isEmpty()) break;
+    public static boolean fixPaths(){
+        boolean issue = false;
+        PathChain[] arr = (PathChain[]) paths.toArray();
+        for(int i = 0; i < arr.length - 1; i++){
+            if(arr[i].endPoint() != arr[i + 1].firstPath().getPose(0)){
+                issue = true;
+            }
         }
-        return false;
+        return issue;
     }
 }
