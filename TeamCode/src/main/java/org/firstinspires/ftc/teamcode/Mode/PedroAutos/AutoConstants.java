@@ -19,7 +19,12 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
+
+import java.util.LinkedList;
+import java.util.Queue;
+
 public class AutoConstants {
+    Queue<PathChain> paths = new LinkedList<>();
     Pose closeShotPose;
     Pose closeStartPose;
     Pose row1StartPose;
@@ -113,5 +118,14 @@ public class AutoConstants {
         p.setLinearHeadingInterpolation(path[0].getHeading(), path[path.length - 1].getHeading());
         if(reverse) p.setReversed();
         return p.build();
+    }
+    public boolean fixPaths(){
+        Queue<PathChain> temp = new LinkedList<>();
+        while(true) {
+            PathChain p = paths.poll();
+            temp.add(p);
+            if (paths.isEmpty()) break;
+        }
+        return false;
     }
 }
