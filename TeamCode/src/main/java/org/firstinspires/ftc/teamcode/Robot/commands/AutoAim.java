@@ -56,13 +56,12 @@ public class AutoAim extends SequentialCommandGroup {
      */
     private static final double[][] RPM_LUT = new double[][] {
 
-            {  63, 3150 },
-            {  96, 3500 },
-            {  110, 3890 },
-            {  125, 3930 },
-            {  130, 4110 },
-            {  140, 4180 },
-            {  145, 4200 },
+            {  49, 3700 },
+            {  65, 3100 },
+            {  95, 3700 },
+            {  128, 3890 },
+            {  144, 4000 },
+
 
     };
 
