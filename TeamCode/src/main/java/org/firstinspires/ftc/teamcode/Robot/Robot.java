@@ -22,7 +22,7 @@ public class Robot {
     public Intake intake;
     public Shooter shooter;
     public Turret turret;
-    public Vision vision;
+    public Limelight limelight;
     public Wait wait;
     public Indicator indicator;
     public static Pose LAST_POSE;
@@ -62,7 +62,7 @@ public class Robot {
                 new PIDFCoefficients(13, 0, 0, 0)
         );
 
-        vision = new Vision(
+        limelight = new Limelight(
                 h.get(Limelight3A.class, "ll")
         );
 /*
