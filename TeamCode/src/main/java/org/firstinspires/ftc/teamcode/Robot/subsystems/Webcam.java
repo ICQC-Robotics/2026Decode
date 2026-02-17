@@ -12,12 +12,12 @@ public class Webcam extends SubsystemBase {
     private VisionPortal portal;
     private IntakeColorProcessing processor;
 
-    public Webcam(HardwareMap hardwareMap) {
+    public Webcam(HardwareMap hardwareMap, String cameraName) {
 
         processor = new IntakeColorProcessing();
 
         portal = new VisionPortal.Builder()
-                .setCamera(hardwareMap.get(WebcamName.class, "webcam"))
+                .setCamera(hardwareMap.get(WebcamName.class, cameraName))
                 .addProcessor(processor)
                 .build();
     }

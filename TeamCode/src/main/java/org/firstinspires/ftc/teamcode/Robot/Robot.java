@@ -24,6 +24,8 @@ public class Robot {
     public Turret turret;
     public Limelight limelight;
     public Wait wait;
+    public Webcam webcam;
+
     public Indicator indicator;
     public static Pose LAST_POSE;
     public static double LAST_TURRET_DEG;
@@ -72,6 +74,8 @@ public class Robot {
         );
 */
         wait = new Wait();
+
+        webcam = new Webcam(h, "webcam");
     }
 
     public void Action(GamepadEx g, GamepadKeys.Button b, Command Press, Command Release) {
