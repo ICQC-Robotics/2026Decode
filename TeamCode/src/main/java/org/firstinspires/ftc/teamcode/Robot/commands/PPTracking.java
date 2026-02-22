@@ -79,7 +79,7 @@ public class PPTracking extends CommandBase {
         return turretDeg;
     }
 
-    static double wrap360(double a) {
+    public static double wrap360(double a) {
         a %= 360.0;
         if (a < 0) a += 360.0;
         return a;
@@ -89,7 +89,7 @@ public class PPTracking extends CommandBase {
     public void decDeg() { offset = offset - 3; }
     public void resetDegOffset() { offset = 0; }
 
-    static double wrap180(double a) {
+    public static double wrap180(double a) {
         a = (a + 180.0) % 360.0;
         if (a < 0) a += 360.0;
         return a - 180.0;

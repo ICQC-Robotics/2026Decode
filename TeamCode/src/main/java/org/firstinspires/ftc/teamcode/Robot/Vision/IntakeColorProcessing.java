@@ -68,11 +68,11 @@ public class IntakeColorProcessing implements VisionProcessor {
         if (max < threshold) {
             detectedZone = Zone.NONE;
         } else if (max == leftValue) {
-            detectedZone = Zone.LEFT;
+            detectedZone = Zone.RIGHT;
         } else if (max == centerValue) {
             detectedZone = Zone.CENTER;
         } else {
-            detectedZone = Zone.RIGHT;
+            detectedZone = Zone.LEFT;
         }
 
         return null;
