@@ -12,7 +12,6 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.ServoImplEx;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.*;
@@ -22,9 +21,8 @@ public class Robot {
     public Intake intake;
     public Shooter shooter;
     public Turret turret;
-    public Limelight limelight;
     public Wait wait;
-    public Webcam webcam;
+    public Vision vision;
 
     public Indicator indicator;
     public static Pose LAST_POSE;
@@ -64,18 +62,12 @@ public class Robot {
                 new PIDFCoefficients(13, 0, 0, 0)
         );
 
-        limelight = new Limelight(
-                h.get(Limelight3A.class, "ll")
+        vision = new Vision(
+                h.get(Limelight3A.class, "ll"),
+                h, "webcam"
         );
-/*
-        indicator = new Indicator(
-                h.get(ServoImplEx.class, "servo3"),
-                h.get(ServoImplEx.class, "servo4")
-        );
-*/
-        wait = new Wait();
 
-        webcam = new Webcam(h, "webcam");
+        wait = new Wait();
     }
 
     public void Action(GamepadEx g, GamepadKeys.Button b, Command Press, Command Release) {

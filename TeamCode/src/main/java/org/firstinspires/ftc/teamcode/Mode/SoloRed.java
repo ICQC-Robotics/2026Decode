@@ -143,22 +143,6 @@ public class SoloRed extends CommandOpMode {
 
 
         Robot.LAST_POSE = negabot.drive.follower.getPose().copy();
-        telemetry.addData("zone", negabot.webcam.getZone());
-        trackingTelemetry();
-        telemetry.update();
         negabot.run();
-    }
-
-    private void trackingTelemetry() {
-        Pose p = negabot.drive.follower.getPose();
-
-        double x = p.getX();
-        double y = p.getY();
-
-        double headingRaw = negabot.drive.getHeading();
-        double headingDeg = Math.toDegrees(headingRaw);
-
-        telemetry.addData("headingRaw", headingRaw);
-        telemetry.addData("headingDeg(conv)", headingDeg);
     }
 }

@@ -1,26 +1,40 @@
 package org.firstinspires.ftc.teamcode.Robot.subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import com.pedropathing.geometry.Pose;
+import org.firstinspires.ftc.teamcode.Robot.Vision.IntakeColorProcessing;
+import org.firstinspires.ftc.vision.VisionPortal;
 
+public class Vision extends SubsystemBase {
 
-public class Limelight extends SubsystemBase {
-
+    //ll
     private final Limelight3A limelight;
     private LLResult lastResult;
     public final double turretRadius = 0;
     public final double turretOffsetX = 0;
     public final double turretOffsetY = 0;
 
-    public Limelight(Limelight3A vision) {
+    //webcam
+    private VisionPortal portal;
+    private IntakeColorProcessing processor;
+
+    public Vision(Limelight3A vision, HardwareMap hardwareMap, String cameraName) {
         limelight = vision;
         limelight.pipelineSwitch(0);
         limelight.start();
+
+        processor = new IntakeColorProcessing();
+        portal = new VisionPortal.Builder()
+                .setCamera(hardwareMap.get(WebcamName.class, cameraName))
+                .addProcessor(processor)
+                .build();
     }
 
     @Override
@@ -42,5 +56,17 @@ public class Limelight extends SubsystemBase {
 
     public void updateRobotYawDeg(double robotYawDeg) {
         limelight.updateRobotOrientation(robotYawDeg);
+    }
+
+    public IntakeColorProcessing.Zone getZone() {
+        return processor.getDetectedZone();
+    }
+
+    public void stop() {
+        portal.stopStreaming();
+    }
+
+    public void close() {
+        portal.close();
     }
 }
