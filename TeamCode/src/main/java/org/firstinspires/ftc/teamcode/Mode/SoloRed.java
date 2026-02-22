@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.DriveCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.PPTracking;
+import org.firstinspires.ftc.teamcode.Robot.commands.Relocalize;
 import org.firstinspires.ftc.teamcode.Robot.commands.ShooterStandBy;
 
 @TeleOp(group=".")
@@ -99,6 +100,7 @@ public class SoloRed extends CommandOpMode {
                 new SequentialCommandGroup(
                         new InstantCommand(() -> CommandScheduler.getInstance().schedule(ppTracking)),
                         new AutoAim(negabot.drive, negabot.shooter, negabot.intake, negabot.wait),
+                        new Relocalize(negabot.drive, negabot.vision, negabot.turret),
                         new InstantCommand(() -> CommandScheduler.getInstance().cancel(ppTracking))
                 ),
                 null

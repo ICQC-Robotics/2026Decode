@@ -42,15 +42,21 @@ public class Vision extends SubsystemBase {
         lastResult = limelight.getLatestResult();
     }
 
-    public Pose getBotposeMT1(int t) {
+    public Pose getBotposeMT1(double t) {
         if (lastResult == null || !lastResult.isValid()) return null;
         t -= 135;
-        t *= -1;
+        double tRad = Math.toRadians(t);
         Pose3D pose = lastResult.getBotpose();
-        Pose p = new Pose(pose.getPosition().x, pose.getPosition().y, pose.getOrientation().getYaw(AngleUnit.RADIANS));
-        p.setHeading(p.getHeading() + t);
-        p = p.withX(p.getX() + turretRadius * Math.sin(t));
-        p = p.withY(p.getY() - turretRadius * Math.cos(t));
+        Pose p = new Pose(
+                pose.getPosition().x,
+                pose.getPosition().y,
+                pose.getOrientation().getYaw(AngleUnit.RADIANS)
+        );
+
+        p.setHeading(p.getHeading() + tRad);
+        p = p.withX(p.getX() + turretRadius * Math.sin(tRad));
+        p = p.withY(p.getY() - turretRadius * Math.cos(tRad));
+
         return p.withX(p.getX() - turretOffsetX).withY(p.getY() - turretOffsetY);
     }
 
