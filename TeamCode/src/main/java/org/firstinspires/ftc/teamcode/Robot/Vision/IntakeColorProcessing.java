@@ -26,10 +26,10 @@ public class IntakeColorProcessing implements VisionProcessor {
 
     private volatile Zone detectedZone = Zone.NONE;
 
-    private final Scalar PURPLE_LOW  = new Scalar(130, 80, 60);
+    private final Scalar PURPLE_LOW  = new Scalar(130, 60, 40);
     private final Scalar PURPLE_HIGH = new Scalar(165, 255, 255);
 
-    private final Scalar GREEN_LOW  = new Scalar(40, 70, 70);
+    private final Scalar GREEN_LOW  = new Scalar(45, 60, 40);
     private final Scalar GREEN_HIGH = new Scalar(85, 255, 255);
 
     @Override
@@ -61,7 +61,7 @@ public class IntakeColorProcessing implements VisionProcessor {
         centerMat.release();
         rightMat.release();
 
-        double threshold = 1_000_000;
+        double threshold = 1000000;
 
         double max = Math.max(leftValue, Math.max(centerValue, rightValue));
 
