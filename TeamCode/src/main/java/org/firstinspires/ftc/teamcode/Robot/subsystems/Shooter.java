@@ -15,10 +15,10 @@ public class Shooter extends SubsystemBase {
     private final PIDFCoefficients pidf;
 
     private double targetVelocityRPM;
-    private double rpmTolerance = 5;
+    private double rpmTolerance = 0;
 
     // Bang-bang outputs
-    private double fullPower = 0.95;
+    private double fullPower = 1;
     private double offPower  = 0.05;
 
     // Optional: if you want it to "coast" at a low power when above target instead of fully off
