@@ -37,7 +37,7 @@ public class Turret extends SubsystemBase {
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         turretMotor.setPower(0.0);
 
-        ticksPerDeg = (537.7 * GEAR_RATIO) / 360.0;
+        ticksPerDeg = (384.5 * GEAR_RATIO) / 360.0;
 
         this.setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
         this.setTargetDeg(clamp(getAngleDeg(), MIN_DEG, MAX_DEG));
@@ -49,7 +49,7 @@ public class Turret extends SubsystemBase {
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         turretMotor.setPower(0.0);
 
-        //ticksPerDeg = (537.7 * GEAR_RATIO) / 360.0;
+        //ticksPerDeg = (384.5 * GEAR_RATIO) / 360.0;
 
         this.setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
         this.setTargetDeg(clamp(getAngleDeg(), MIN_DEG, MAX_DEG));
