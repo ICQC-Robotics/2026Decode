@@ -29,7 +29,7 @@ public class AutoAim extends SequentialCommandGroup {
         }
     }
 
-    private static final double RPM_TOLERANCE = 25; // TODO: change if needed
+    private static final double RPM_TOLERANCE = 20; // TODO: change if needed
     private static final double FEED_TIME_S = 1;
 
     private static final double BUMP_NEAR = 0.02;
