@@ -113,4 +113,8 @@ public class Shooter extends SubsystemBase {
         leftCover.setPosition(pos);
         rightCover.setPosition(1 - pos);
     }
+
+    public double getTargetVelocity(){
+        return targetVelocityRPM;
+    }
 }

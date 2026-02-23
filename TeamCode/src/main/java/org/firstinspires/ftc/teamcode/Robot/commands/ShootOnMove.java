@@ -18,18 +18,25 @@
 //        OPEN_COVER(0.1),
 //        CLOSED_COVER(1);
 //        private final double pos;
-//        Positions(double pos) { this.pos = pos; }
-//        public double getPos() { return pos; }
+//
+//        Positions(double pos) {
+//            this.pos = pos;
+//        }
+//
+//        public double getPos() {
+//            return pos;
+//        }
 //    }
+//
 //    private static final double RPM_TOLERANCE = 25;
 //    private static final double FEED_TIME_S = 1;
 //    public static final double MIN_DIST = 20;
 //    public static final double MAX_DIST = 150;
 //    public static final double MIN_V = 2820;
 //    public static final double MAX_V = 4200;
-//    private static final double[][] RPM_LUT = new double[][] {
-//            {  63, 3150 }, {  96, 3500 }, {  110, 3890 },
-//            {  125, 3930 }, {  130, 4110 }, {  140, 4180 }, {  145, 4200 },
+//    private static final double[][] RPM_LUT = new double[][]{
+//            {63, 3150}, {96, 3500}, {110, 3890},
+//            {125, 3930}, {130, 4110}, {140, 4180}, {145, 4200},
 //    };
 //
 //    private double spinUpRPM = MIN_V;
@@ -38,22 +45,27 @@
 //    private static final double SHOOTER_EFFICIENCY = 0.75;
 //    private static final double DRAG_COEFF = 0.65;
 //
-//    public ShootOnMove(Drive drive, Shooter shooter, Intake intake, Wait wait) {
+//    public AutoAim(Drive drive, Shooter shooter, Intake intake, Wait wait) {
 //        addCommands(shootSequence(drive, shooter, intake, wait));
 //        addRequirements(shooter, intake);
 //    }
+//
 //    private SequentialCommandGroup shootSequence(Drive drive, Shooter shooter, Intake intake, Wait wait) {
 //        return new SequentialCommandGroup(
 //                new InstantCommand(() -> shooter.setMagazineCover(Positions.CLOSED_COVER.getPos()), shooter),
 //
 //                new CommandBase() {
-//                    { addRequirements(shooter); }
+//                    {
+//                        addRequirements(shooter);
+//                    }
+//
 //                    @Override
 //                    public void execute() {
 //                        double d = calculateDistanceIn(drive);
 //                        spinUpRPM = Math.max(MIN_V, Math.min(getRpmForDistance(d), MAX_V));
 //                        shooter.setVelocity(spinUpRPM);
 //                    }
+//
 //                    @Override
 //                    public boolean isFinished() {
 //                        return Math.abs(shooter.getVelocity() - spinUpRPM) <= RPM_TOLERANCE;
@@ -64,15 +76,24 @@
 //                        new WaitCommand(100),
 //                        new InstantCommand(() -> intake.setSpeed(-1), intake),
 //                        new CommandBase() {
-//                            { addRequirements(shooter, intake); }
+//                            {
+//                                addRequirements(shooter, intake);
+//                            }
+//
 //                            @Override
-//                            public void initialize() { wait.start(); }
+//                            public void initialize() {
+//                                wait.start();
+//                            }
+//
 //                            @Override
 //                            public void execute() {
 //                                shooter.setVelocity(getRpmForDistance(calculateDistanceIn(drive)));
 //                            }
+//
 //                            @Override
-//                            public boolean isFinished() { return wait.elapsed() >= FEED_TIME_S; }
+//                            public boolean isFinished() {
+//                                return wait.elapsed() >= FEED_TIME_S;
+//                            }
 //                        },
 //                        new InstantCommand(() -> {
 //                            shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
@@ -80,6 +101,7 @@
 //                        }, shooter, intake)
 //                ));
 //    }
+//
 //    public double calculateDistanceIn(Drive drive) {
 //        Pose robot = drive.follower.getPose();
 //        Pose vel = drive.follower.getVelocity();
@@ -98,6 +120,7 @@
 //        double vY = gY - (vel.getY() * tFlight);
 //        return Math.hypot(vX - robot.getX(), vY - robot.getY());
 //    }
+//
 //    public static double getRpmForDistance(double distanceIn) {
 //        double d = Math.max(MIN_DIST, Math.min(distanceIn, MAX_DIST));
 //        for (int i = 0; i < RPM_LUT.length - 1; i++) {
