@@ -17,9 +17,9 @@ public class Vision extends SubsystemBase {
     //ll
     private final Limelight3A limelight;
     private LLResult lastResult;
-    public final double turretRadius = 0;
+    public final double turretRadius = 2.75;
     public final double turretOffsetX = 0;
-    public final double turretOffsetY = 0;
+    public final double turretOffsetY = 3;
 
     //webcam
     private VisionPortal portal;
