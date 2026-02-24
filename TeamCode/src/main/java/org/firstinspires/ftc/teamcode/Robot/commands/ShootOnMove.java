@@ -5,6 +5,7 @@
 //import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 //import com.arcrobotics.ftclib.command.WaitCommand;
 //import com.pedropathing.geometry.Pose;
+//import com.pedropathing.math.Vector;
 //
 //import org.firstinspires.ftc.teamcode.PP.FieldConstants;
 //import org.firstinspires.ftc.teamcode.Robot.Robot;
@@ -45,7 +46,7 @@
 //    private static final double SHOOTER_EFFICIENCY = 0.75;
 //    private static final double DRAG_COEFF = 0.65;
 //
-//    public AutoAim(Drive drive, Shooter shooter, Intake intake, Wait wait) {
+//    public ShootOnMove(Drive drive, Shooter shooter, Intake intake, Wait wait) {
 //        addCommands(shootSequence(drive, shooter, intake, wait));
 //        addRequirements(shooter, intake);
 //    }
@@ -104,21 +105,34 @@
 //
 //    public double calculateDistanceIn(Drive drive) {
 //        Pose robot = drive.follower.getPose();
-//        Pose vel = drive.follower.getVelocity();
+//        Vector vel = drive.follower.getVelocity();
 //        if (robot == null || vel == null) return MIN_DIST;
 //        double gX = (Robot.ALLIANCE == Robot.Alliance.BLUE) ? FieldConstants.BLUE_GOAL_X : FieldConstants.RED_GOAL_X;
 //        double gY = (Robot.ALLIANCE == Robot.Alliance.BLUE) ? FieldConstants.BLUE_GOAL_Y : FieldConstants.RED_GOAL_Y;
-//        double dx = gX - robot.getX();
-//        double dy = gY - robot.getY();
-//        double staticDist = Math.hypot(dx, dy);
-//        double targetRPM = getRpmForDistance(staticDist);
-//        double v0 = (targetRPM * 0.104719755 * WHEEL_RADIUS_IN) * SHOOTER_EFFICIENCY;
-//        double vx0 = v0 * Math.cos(Math.toRadians(SHOOTER_ANGLE_DEG));
-//        double k = 0.976 * DRAG_COEFF;
-//        double tFlight = (Math.exp(staticDist * k) - 1) / (k * vx0);
-//        double vX = gX - (vel.getX() * tFlight);
-//        double vY = gY - (vel.getY() * tFlight);
-//        return Math.hypot(vX - robot.getX(), vY - robot.getY());
+//        double cd = Math.hypot(gX - robot.getX(), gY - robot.getY());
+//        double od = 0;
+//        while((Math.abs(cd - od) > 1)){
+//            double t = getTime(cd);
+//            od = cd;
+//            cd = Math.hypot(gX - robot.getX() - vel.getXComponent() * t, gY - robot.getY() - vel.getYComponent() * t);
+//        }
+//        return cd;
+//    }
+//    public double calculateAngle(Drive drive) {
+//        Pose robot = drive.follower.getPose();
+//        Vector vel = drive.follower.getVelocity();
+//        if (robot == null || vel == null) return MIN_DIST;
+//        double gX = (Robot.ALLIANCE == Robot.Alliance.BLUE) ? FieldConstants.BLUE_GOAL_X : FieldConstants.RED_GOAL_X;
+//        double gY = (Robot.ALLIANCE == Robot.Alliance.BLUE) ? FieldConstants.BLUE_GOAL_Y : FieldConstants.RED_GOAL_Y;
+//        double cd = Math.hypot(gX - robot.getX(), gY - robot.getY());
+//        double od = 0;
+//        double t = 0;
+//        while((Math.abs(cd - od) > 1)){
+//            t = getTime(cd);
+//            od = cd;
+//            cd = Math.hypot(gX - robot.getX() - vel.getXComponent() * t, gY - robot.getY() - vel.getYComponent() * t);
+//        }
+//        return Math.atan2(gX - robot.getX() - vel.getXComponent() * t, gY - robot.getY() - vel.getYComponent() * t);
 //    }
 //
 //    public static double getRpmForDistance(double distanceIn) {
@@ -130,5 +144,8 @@
 //            }
 //        }
 //        return RPM_LUT[RPM_LUT.length - 1][1];
+//    }
+//    public static double getTime(double d){
+//        return -1;
 //    }
 //}
