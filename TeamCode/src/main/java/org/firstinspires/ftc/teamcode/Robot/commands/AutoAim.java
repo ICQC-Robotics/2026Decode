@@ -62,7 +62,7 @@ public class AutoAim extends SequentialCommandGroup {
             {  95, 3600 },
             {  128, 3980 },
             {  135, 4050 },
-            {  144, 4130 },
+            {  144, 4160 },
 
 
     };
@@ -146,13 +146,11 @@ public class AutoAim extends SequentialCommandGroup {
                 ));
     }
 
-    public double calculateDistanceIn(Drive drive) {
+    public static double calculateDistanceIn(Drive drive) {
         Pose robot = drive.follower.getPose();
         if (robot == null) return MIN_DIST;
 
-        double goalX;
-        double goalY;
-
+        double goalX, goalY;
         if (Robot.ALLIANCE == Robot.Alliance.BLUE) {
             goalX = FieldConstants.BLUE_GOAL_X;
             goalY = FieldConstants.BLUE_GOAL_Y;
@@ -161,8 +159,20 @@ public class AutoAim extends SequentialCommandGroup {
             goalY = FieldConstants.RED_GOAL_Y;
         }
 
-        double dx = goalX - robot.getX();
-        double dy = goalY - robot.getY();
+        // robot pose (center)
+        double x = robot.getX();
+        double y = robot.getY();
+
+        // IMPORTANT: heading should be in RADIANS if you're using Math.cos/sin
+        // Pose heading is typically radians in pedro (double-check, but usually yes)
+        double headingRad = robot.getHeading();
+
+        // shift center -> turret pivot (forward along heading)
+        double turretX = x + PPTracking.TURRET_FORWARD_OFFSET_IN * Math.cos(headingRad);
+        double turretY = y + PPTracking.TURRET_FORWARD_OFFSET_IN * Math.sin(headingRad);
+
+        double dx = goalX - turretX;
+        double dy = goalY - turretY;
 
         return Math.hypot(dx, dy);
     }

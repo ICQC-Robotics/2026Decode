@@ -19,7 +19,7 @@ public class PPTracking extends CommandBase {
     private static final double FORWARD_DEG = 135;
 
     //  turret is mounted forward from robot center
-    private static final double TURRET_FORWARD_OFFSET_IN = 0;
+    static final double TURRET_FORWARD_OFFSET_IN = 4;
 
     public double offset = 0;
 
@@ -55,8 +55,8 @@ public class PPTracking extends CommandBase {
                                  double headingRad) {
 
         //shift origin from robot center -> turret position (field coords)
-        double turretX = x + TURRET_FORWARD_OFFSET_IN * Math.cos(Math.toDegrees(headingRad));
-        double turretY = y + TURRET_FORWARD_OFFSET_IN * Math.sin(Math.toDegrees(headingRad));
+        double turretX = x + TURRET_FORWARD_OFFSET_IN * Math.cos(headingRad);
+        double turretY = y + TURRET_FORWARD_OFFSET_IN * Math.sin(headingRad);
 
         double dx = targetX - turretX;
         double dy = targetY - turretY;

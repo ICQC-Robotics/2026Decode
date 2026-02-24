@@ -29,7 +29,7 @@ public class ShooterStandBy extends CommandBase {
 
     @Override
     public void execute() {
-        double d = calculateDistanceIn(drive);
+        double d = AutoAim.calculateDistanceIn(drive);
         double rpm = clamp(AutoAim.getRpmForDistance(d), MIN_V, MAX_V);
         shooter.setVelocity(rpm);
     }
@@ -39,17 +39,7 @@ public class ShooterStandBy extends CommandBase {
         return false;
     }
 
-    private double calculateDistanceIn(Drive drive) {
-        Pose robot = drive.follower.getPose();
-        if (robot == null) return AutoAim.MIN_DIST;
 
-        double goalX = (Robot.ALLIANCE == Robot.Alliance.BLUE) ? FieldConstants.BLUE_GOAL_X : FieldConstants.RED_GOAL_X;
-        double goalY = (Robot.ALLIANCE == Robot.Alliance.BLUE) ? FieldConstants.BLUE_GOAL_Y : FieldConstants.RED_GOAL_Y;
-
-        double dx = goalX - robot.getX();
-        double dy = goalY - robot.getY();
-        return Math.hypot(dx, dy);
-    }
 
     private static double clamp(double v, double lo, double hi) {
         if (v < lo) return lo;

@@ -18,8 +18,8 @@ public class Shooter extends SubsystemBase {
     private double rpmTolerance = 0;
 
     // Bang-bang outputs
-    private double fullPower = 1;
-    private double offPower  = 0.0;
+    private double fullPower = 0.95;
+    private double offPower  = 0.05;
 
     // Optional: if you want it to "coast" at a low power when above target instead of fully off
     // private double holdPower = 0.0;
