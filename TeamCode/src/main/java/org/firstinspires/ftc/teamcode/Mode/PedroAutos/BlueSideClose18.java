@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Turret;
 
 @Autonomous
-public class BlueSide21 extends CommandOpMode {
+public class BlueSideClose18 extends CommandOpMode {
         Robot negabot;
         PathChain Path1, Path2, Path3, Path4, Path5, Path6, Path7, Path8, Path9, Path10, Path11, Path12, Path13, Path14, Path15, Path16, GatePath, GateBack, GatePath1, HitGate;
         Pose startPose = new Pose(34.36974789915966, 136.4201680672269, Math.toRadians(0));
