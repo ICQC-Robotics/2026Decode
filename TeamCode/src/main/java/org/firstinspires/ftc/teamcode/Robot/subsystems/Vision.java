@@ -43,13 +43,18 @@ public class Vision extends SubsystemBase {
     }
 
     public Pose getBotposeMT1(double t) {
-        if (lastResult == null || !lastResult.isValid()) return null;
+        LLResult r = limelight.getLatestResult();
+        if (r == null || !r.isValid()) return null;
+
         t -= 135;
         double tRad = Math.toRadians(t);
-        Pose3D pose = lastResult.getBotpose();
+
+        Pose3D pose = r.getBotpose();
+        if (pose == null) return null;
+
         Pose p = new Pose(
-                pose.getPosition().x,
-                pose.getPosition().y,
+                pose.getPosition().x * 39.37007874,
+                pose.getPosition().y * 39.37007874,
                 pose.getOrientation().getYaw(AngleUnit.RADIANS)
         );
 
