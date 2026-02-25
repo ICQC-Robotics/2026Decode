@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.PP.Constants;
 public class Drive extends SubsystemBase {
     private final DcMotorEx fR, fL, bR, bL;
     public final Follower follower;
-    private final Telemetry telemetry;
+    public final Telemetry telemetry;
 
     public Drive(HardwareMap h, Telemetry t, Pose startPose,
                  DcMotorEx fR, DcMotorSimple.Direction fRD,
