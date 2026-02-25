@@ -41,6 +41,7 @@ public class SoloBlue extends CommandOpMode {
         negabot = new Robot(hardwareMap, telemetry, new Pose(0,0, 0));
         negabot.reset();
 
+
         Robot.ALLIANCE = Robot.Alliance.BLUE;
 
         //setting position
@@ -92,6 +93,7 @@ public class SoloBlue extends CommandOpMode {
 
         // create PPTracking ONCE (do not set as default)
         ppTracking = new PPTracking(negabot.turret, negabot.drive, alliance);
+        ppTracking.resetDegOffset();
 
         // A: start tracking -> autoaim -> stop tracking
         negabot.Action(

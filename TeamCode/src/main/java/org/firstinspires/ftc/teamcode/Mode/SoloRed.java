@@ -43,6 +43,8 @@ public class SoloRed extends CommandOpMode {
 
         Robot.ALLIANCE = Robot.Alliance.RED;
 
+
+
         //setting position
         if (Robot.LAST_POSE != null) {
             negabot.drive.follower.setPose(Robot.LAST_POSE.copy());
@@ -92,6 +94,7 @@ public class SoloRed extends CommandOpMode {
 
         // create PPTracking ONCE (do not set as default)
         ppTracking = new PPTracking(negabot.turret, negabot.drive, alliance);
+        ppTracking.resetDegOffset();
 
         // A: start tracking -> autoaim -> stop tracking
         negabot.Action(

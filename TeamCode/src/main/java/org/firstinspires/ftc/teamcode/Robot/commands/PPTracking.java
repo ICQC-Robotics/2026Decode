@@ -6,6 +6,7 @@ import org.firstinspires.ftc.teamcode.PP.FieldConstants;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
+import com.arcrobotics.ftclib.command.ParallelDeadlineGroup;
 
 public class PPTracking extends CommandBase {
     private final Turret turret;
@@ -13,13 +14,11 @@ public class PPTracking extends CommandBase {
 
     private Robot.Alliance alliance;
 
-    //70in: 3700 0.1
-    //30in: 3400 0.4
     private static final double DEADBAND_DEG = 1;//tune this
     private static final double FORWARD_DEG = 135;
 
-    //  turret is mounted forward from robot center
-    static final double TURRET_FORWARD_OFFSET_IN = 4;
+
+    static final double TURRET_FORWARD_OFFSET_IN = 3;
 
     public double offset = 0;
 
@@ -54,21 +53,17 @@ public class PPTracking extends CommandBase {
                                  double targetX, double targetY,
                                  double headingRad) {
 
-        //shift origin from robot center -> turret position (field coords)
         double turretX = x + TURRET_FORWARD_OFFSET_IN * Math.cos(headingRad);
         double turretY = y + TURRET_FORWARD_OFFSET_IN * Math.sin(headingRad);
 
         double dx = targetX - turretX;
         double dy = targetY - turretY;
 
-        // Field/global bearing to target: 0=right, 90=up, +CCW
+
         double bearingDeg = Math.toDegrees(Math.atan2(dy, dx));
 
-        // Robot heading in same convention
         double headingDeg = Math.toDegrees(headingRad);
 
-        // Required turret deflection relative to robot forward:
-        // + = target is to robot's left, - = to robot's right
         double deflectionDeg = wrap180(bearingDeg - headingDeg);
 
         // Turret mapping:
