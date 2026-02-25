@@ -146,6 +146,11 @@ public class SoloRed extends CommandOpMode {
         }
 
 
+        Pose pose = negabot.drive.follower.getPose();
+        telemetry.addData("X (in)", pose.getX());
+        telemetry.addData("Y (in)", pose.getY());
+        telemetry.addData("Heading (deg)", Math.toDegrees(pose.getHeading()));
+        telemetry.update();
 
         Robot.LAST_POSE = negabot.drive.follower.getPose().copy();
         negabot.run();

@@ -46,11 +46,14 @@ public class Relocalize extends CommandBase {
         double llDeg  = Math.toDegrees(llPose.getHeading());
         double dHeadDeg = wrap(llDeg - estDeg);
 
-        if (dist > maxDistIn) return;
-        if (Math.abs(dHeadDeg) > maxHeadingDeg) return;
+//        if (dist > maxDistIn) return;
+//        if (Math.abs(dHeadDeg) > maxHeadingDeg) return;
 
         drive.follower.setPose(llPose);
         Robot.LAST_POSE = llPose.copy();
+
+        drive.telemetry.addLine("Relocalized");
+        drive.telemetry.update();
     }
 
     @Override
