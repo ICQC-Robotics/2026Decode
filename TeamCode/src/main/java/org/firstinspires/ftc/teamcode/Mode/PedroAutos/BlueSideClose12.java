@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Turret;
 
 @Autonomous
-public class BlueSideClose18 extends CommandOpMode {
+public class BlueSideClose12 extends CommandOpMode {
         Robot negabot;
         PathChain Path1, Path2, Path3, Path4, Path5, Path6, Path7, Path8, Path9, Path10, Path11, Path12, Path13, Path14, Path15, Path16, GatePath, GateBack, GatePath1, HitGate;
         Pose startPose = new Pose(34.36974789915966, 136.4201680672269, Math.toRadians(0));
@@ -53,27 +53,23 @@ public class BlueSideClose18 extends CommandOpMode {
                                 shotPrep(f, Path1, 9),
                                 shoot(),
                                 new FollowPathCommand(f, Path2, true),
-                                shotPrep(f, Path3, 100),
+                                new FollowPathCommand(f, Path3, true),
+                                shotPrep(f, Path4, 95),
                                 new WaitCommand(500),
                                 shoot(),
-                                new FollowPathCommand(f, Path4, true),
                                 new FollowPathCommand(f, Path5, true),
-                                shotPrep(f, Path6, 106),
+                                new FollowPathCommand(f, Path6, true),
+                                shotPrep(f, Path7, 106),
                                 shoot(),
-                                new FollowPathCommand(f, Path7, true),
                                 new FollowPathCommand(f, Path8, true),
                                 new FollowPathCommand(f, Path9, true),
+                                new FollowPathCommand(f, Path10, true),
                                 new WaitCommand(800),
-                                shotPrep(f, Path10, 60),
+                                shotPrep(f, Path11, 60),
                                 shoot(),
-                                new FollowPathCommand(f, Path11, true),
-                                shotPrep(f, Path12, 60),
-                                shoot(),
-                                new FollowPathCommand(f, Path13, true),
-                                new FollowPathCommand(f, Path14, true),
-                                shotPrep(f, Path15, 60),
-                                shoot(),
-                                new FollowPathCommand(f, Path16, true)
+                                new FollowPathCommand(f, Path12, true),
+                                new WaitCommand(3000),
+                                new FollowPathCommand(f, Path13, true)
 
                         )
                         /*
@@ -167,16 +163,27 @@ public class BlueSideClose18 extends CommandOpMode {
                     .build();
 
             Path3 = follower.pathBuilder().addPath(
-                            new BezierLine(
+                            new BezierCurve(
                                     new Pose(18.457, 83.952),
-
-                                    new Pose(50.824, 83.952)
+                                    new Pose(51.136, 77.619),
+                                    new Pose(24.184, 73.024),
+                                    new Pose(14.989, 76.848)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(90))
 
                     .build();
 
             Path4 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(14.989, 76.848),
+
+                                    new Pose(50.824, 83.952)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(90))
+
+                    .build();
+
+            Path5 = follower.pathBuilder().addPath(
                             new BezierCurve(
                                     new Pose(50.824, 83.952),
                                     new Pose(52.183, 59.776),
@@ -186,7 +193,7 @@ public class BlueSideClose18 extends CommandOpMode {
 
                     .build();
 
-            Path5 = follower.pathBuilder().addPath(
+            Path6 = follower.pathBuilder().addPath(
                             new BezierLine(
                                     new Pose(37.553, 60.265),
 
@@ -196,7 +203,7 @@ public class BlueSideClose18 extends CommandOpMode {
 
                     .build();
 
-            Path6 = follower.pathBuilder().addPath(
+            Path7 = follower.pathBuilder().addPath(
                             new BezierCurve(
                                     new Pose(15.599, 59.607),
                                     new Pose(41.420, 70.210),
@@ -206,7 +213,7 @@ public class BlueSideClose18 extends CommandOpMode {
 
                     .build();
 
-            Path7 = follower.pathBuilder().addPath(
+            Path8 = follower.pathBuilder().addPath(
                             new BezierCurve(
                                     new Pose(50.681, 84.238),
                                     new Pose(63.307, 32.508),
@@ -216,7 +223,7 @@ public class BlueSideClose18 extends CommandOpMode {
 
                     .build();
 
-            Path8 = follower.pathBuilder().addPath(
+            Path9 = follower.pathBuilder().addPath(
                             new BezierLine(
                                     new Pose(36.810, 35.723),
 
@@ -226,7 +233,7 @@ public class BlueSideClose18 extends CommandOpMode {
 
                     .build();
 
-            Path9 = follower.pathBuilder().addPath(
+            Path10 = follower.pathBuilder().addPath(
                             new BezierLine(
                                     new Pose(11.936, 36.270),
 
@@ -236,7 +243,7 @@ public class BlueSideClose18 extends CommandOpMode {
 
                     .build();
 
-            Path10 = follower.pathBuilder().addPath(
+            Path11 = follower.pathBuilder().addPath(
                             new BezierLine(
                                     new Pose(15.513, 67.748),
 
@@ -246,63 +253,23 @@ public class BlueSideClose18 extends CommandOpMode {
 
                     .build();
 
-            Path11 = follower.pathBuilder().addPath(
+            Path12 = follower.pathBuilder().addPath(
                             new BezierLine(
                                     new Pose(50.765, 83.742),
 
-                                    new Pose(11.454, 8.950)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(60), Math.toRadians(90))
-
-                    .build();
-
-            Path12 = follower.pathBuilder().addPath(
-                            new BezierCurve(
-                                    new Pose(11.454, 8.950),
-                                    new Pose(16.011, 59.114),
-                                    new Pose(50.820, 83.927)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(60))
-
-                    .build();
-
-            Path13 = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    new Pose(50.820, 83.927),
-
-                                    new Pose(7.142, 41.019)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(60), Math.toRadians(90))
-
-                    .build();
-
-            Path14 = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    new Pose(7.142, 41.019),
-
-                                    new Pose(7.593, 9.868)
+                                    new Pose(15.639, 67.577)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(90))
 
                     .build();
 
-            Path15 = follower.pathBuilder().addPath(
+            Path13 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(7.593, 9.868),
+                                    new Pose(15.639, 67.577),
 
-                                    new Pose(50.420, 83.921)
+                                    new Pose(22.954, 67.531)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(60))
-
-                    .build();
-
-            Path16 = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    new Pose(50.420, 83.921),
-
-                                    new Pose(43.912, 74.801)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(60), Math.toRadians(60))
+                    ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(90))
 
                     .build();
         }

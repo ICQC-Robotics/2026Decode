@@ -34,7 +34,7 @@ public class BlueFarSideLastRow extends CommandOpMode {
     PathChain ZoneCBack;
 
     Pose startPose = new Pose(57.05219206680585, 7.098121085594997, Math.toRadians(0));
-    final double COVER_OPEN = 0.1;
+    final double COVER_OPEN = 0.25;
     final double COVER_CLOSE = 1.0;
 
     Drive d;

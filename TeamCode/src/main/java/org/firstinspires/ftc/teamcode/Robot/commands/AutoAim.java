@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
 public class AutoAim extends SequentialCommandGroup {
 
     public enum Positions {
-        OPEN_COVER(0.1),
+        OPEN_COVER(0.25),
         CLOSED_COVER(1);
 
         private final double pos;
@@ -57,11 +57,12 @@ public class AutoAim extends SequentialCommandGroup {
     private static final double[][] RPM_LUT = new double[][] {
 
             {  49, 3700 },
-            {  65, 3100 },
+            {  65, 3150 },
             {  78, 3350 },
             {  95, 3600 },
             {  128, 3980 },
             {  135, 4050 },
+            {  139, 4090 },
             {  144, 4160 },
 
 
