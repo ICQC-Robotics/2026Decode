@@ -103,11 +103,6 @@ public class SoloRed extends CommandOpMode {
                 new SequentialCommandGroup(
                         new InstantCommand(() -> CommandScheduler.getInstance().schedule(ppTracking)),
                         new AutoAim(negabot.drive, negabot.shooter, negabot.intake, negabot.wait),
-                        new InstantCommand(() -> {
-                            telemetry.addLine("relocalizing now");
-                            telemetry.update();
-                        }),
-                        new Relocalize(negabot.drive, negabot.vision, negabot.turret),
                         new InstantCommand(() -> CommandScheduler.getInstance().cancel(ppTracking))
                 ),
                 null

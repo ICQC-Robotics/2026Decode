@@ -47,7 +47,7 @@ public class BlueSideClose12 extends CommandOpMode {
 
                 waitForStart();
                 negabot.schedule(
-                        new InstantCommand(() -> { negabot.shooter.setVelocity(3365);}),
+                        new InstantCommand(() -> { negabot.shooter.setVelocity(3345);}),
                         new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE); }),
                         new SequentialCommandGroup(
                                 shotPrep(f, Path1, 9),
