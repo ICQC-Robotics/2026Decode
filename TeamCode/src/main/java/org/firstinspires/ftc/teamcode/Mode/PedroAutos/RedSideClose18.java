@@ -21,33 +21,23 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Turret;
 
 @Autonomous
 public class RedSideClose18 extends CommandOpMode {
-
     Robot negabot;
+    PathChain Path1, Path2, Path3, Path4, Path5, Path6, Path7, Path8, Path9, Path10, Path11, Path12, Path13, Path14, Path15, Path16, GatePath, GateBack, GatePath1, HitGate;
 
-    PathChain Path1, Path2, Path3, Path4, Path5, Path6, Path7, Path8, Path9, Path10, Path11, Path12, Path13, Path14, Path15, Path16;
-
-    // Mirror across x = 72 => x' = 144 - x
+    // Mirror rules:
+    // Field mirror about x = 72 => x' = 144 - x
+    // Pose heading mirror       => heading' = pi - heading
+    // Turret: 135 forward       => turret' = 270 - turret
     private static double mx(double x) { return 144.0 - x; }
-
-    // Mirror a heading across the same vertical mirror line (reflect x component):
-    // if 0 rad is +x, mirrored heading is pi - heading
     private static double mHeading(double rad) { return normRad(Math.PI - rad); }
-
-    // Normalize to (-pi, pi]
     private static double normRad(double rad) {
         while (rad <= -Math.PI) rad += 2.0 * Math.PI;
         while (rad >  Math.PI)  rad -= 2.0 * Math.PI;
         return rad;
     }
-
-    // Turret: 135 deg is straight forward; mirror turret around that
     private static double mTurretDeg(double deg) { return 270.0 - deg; }
 
-    Pose startPose = new Pose(
-            mx(33.00965344815612),
-            136.4201680672269,
-            mHeading(Math.toRadians(0))
-    );
+    Pose startPose = new Pose(mx(34.539759705535104), 136.42016806722688, mHeading(Math.toRadians(0)));
 
     Pose gateIntake  = new Pose(mx(14),     60, mHeading(Math.toRadians(-20)));
     Pose gateIntake1 = new Pose(mx(16.302), 65, mHeading(Math.toRadians(-20)));
@@ -69,43 +59,46 @@ public class RedSideClose18 extends CommandOpMode {
         path(f);
 
         waitForStart();
-
         negabot.schedule(
-                new InstantCommand(() -> { negabot.shooter.setVelocity(3345); }),
+                new InstantCommand(() -> { negabot.shooter.setVelocity(3310); }),
                 new InstantCommand(() -> { negabot.shooter.setMagazineCover(COVER_CLOSE); }),
                 new SequentialCommandGroup(
-                        shotPrep(f, Path1,  mTurretDeg(9)),
+                        shotPrep(f, Path1, mTurretDeg(9)),
                         shoot(),
 
                         new FollowPathCommand(f, Path2, true),
 
-                        shotPrep(f, Path3,  mTurretDeg(100)),
+                        shotPrep(f, Path3, mTurretDeg(100)),
                         new WaitCommand(500),
                         shoot(),
 
                         new FollowPathCommand(f, Path4, true),
+
+                        // this explicit turret set must be mirrored too
+                        new InstantCommand(() -> { negabot.turret.setTargetDeg(mTurretDeg(95)); }),
+
                         new FollowPathCommand(f, Path5, true),
 
-                        shotPrep(f, Path6,  mTurretDeg(106)),
+                        shotPrep(f, Path6, mTurretDeg(95)),
+                        new WaitCommand(500),
                         shoot(),
 
                         new FollowPathCommand(f, Path7, true),
                         new FollowPathCommand(f, Path8, true),
                         new FollowPathCommand(f, Path9, true),
-                        new WaitCommand(500),
 
                         shotPrep(f, Path10, mTurretDeg(60)),
-                        shoot(),
-
-                        new FollowPathCommand(f, Path11, true),
-
-                        shotPrep(f, Path12, mTurretDeg(60)),
                         shoot(),
 
                         new FollowPathCommand(f, Path13, true),
                         new FollowPathCommand(f, Path14, true),
 
                         shotPrep(f, Path15, mTurretDeg(60)),
+                        shoot(),
+
+                        new FollowPathCommand(f, Path11, true),
+
+                        shotPrep(f, Path12, mTurretDeg(60)),
                         shoot(),
 
                         new FollowPathCommand(f, Path16, true)
@@ -138,7 +131,7 @@ public class RedSideClose18 extends CommandOpMode {
 
         Path1 = follower.pathBuilder().addPath(
                 new BezierLine(
-                        new Pose(mx(34.370), 136.420),
+                        new Pose(mx(34.540), 136.420),
                         new Pose(mx(50.371), 83.649)
                 )
         ).setLinearHeadingInterpolation(
@@ -169,8 +162,8 @@ public class RedSideClose18 extends CommandOpMode {
         Path4 = follower.pathBuilder().addPath(
                 new BezierCurve(
                         new Pose(mx(50.824), 83.952),
-                        new Pose(mx(52.183), 59.776),
-                        new Pose(mx(40.553), 60.265)
+                        new Pose(mx(54.393), 59.776),
+                        new Pose(mx(47.414), 60.265)
                 )
         ).setLinearHeadingInterpolation(
                 mHeading(Math.toRadians(90)),
@@ -179,7 +172,7 @@ public class RedSideClose18 extends CommandOpMode {
 
         Path5 = follower.pathBuilder().addPath(
                 new BezierLine(
-                        new Pose(mx(40.553), 60.265),
+                        new Pose(mx(47.414), 60.265),
                         new Pose(mx(15.599), 59.607)
                 )
         ).setLinearHeadingInterpolation(
@@ -202,7 +195,7 @@ public class RedSideClose18 extends CommandOpMode {
                 new BezierCurve(
                         new Pose(mx(50.681), 84.238),
                         new Pose(mx(63.307), 32.508),
-                        new Pose(mx(40.810), 35.723)
+                        new Pose(mx(45.140), 36.233)
                 )
         ).setLinearHeadingInterpolation(
                 mHeading(Math.toRadians(90)),
@@ -211,7 +204,7 @@ public class RedSideClose18 extends CommandOpMode {
 
         Path8 = follower.pathBuilder().addPath(
                 new BezierLine(
-                        new Pose(mx(40.810), 35.723),
+                        new Pose(mx(45.140), 36.233),
                         new Pose(mx(11.936), 36.270)
                 )
         ).setLinearHeadingInterpolation(
@@ -242,7 +235,7 @@ public class RedSideClose18 extends CommandOpMode {
         Path11 = follower.pathBuilder().addPath(
                 new BezierLine(
                         new Pose(mx(50.765), 83.742),
-                        new Pose(mx(11.454), 8.950)
+                        new Pose(mx(11.794), 15.750)
                 )
         ).setLinearHeadingInterpolation(
                 mHeading(Math.toRadians(60)),
@@ -251,8 +244,8 @@ public class RedSideClose18 extends CommandOpMode {
 
         Path12 = follower.pathBuilder().addPath(
                 new BezierCurve(
-                        new Pose(mx(11.454), 8.950),
-                        new Pose(mx(16.011), 59.114),
+                        new Pose(mx(11.794), 15.750),
+                        new Pose(mx(36.072), 13.550),
                         new Pose(mx(50.820), 83.927)
                 )
         ).setLinearHeadingInterpolation(
@@ -263,7 +256,7 @@ public class RedSideClose18 extends CommandOpMode {
         Path13 = follower.pathBuilder().addPath(
                 new BezierLine(
                         new Pose(mx(50.820), 83.927),
-                        new Pose(mx(8.672), 41.019)
+                        new Pose(mx(9.351), 45.393)
                 )
         ).setLinearHeadingInterpolation(
                 mHeading(Math.toRadians(60)),
@@ -272,8 +265,8 @@ public class RedSideClose18 extends CommandOpMode {
 
         Path14 = follower.pathBuilder().addPath(
                 new BezierLine(
-                        new Pose(mx(8.672), 41.019),
-                        new Pose(mx(8.273), 9.868)
+                        new Pose(mx(9.351), 45.393),
+                        new Pose(mx(9.123), 9.697)
                 )
         ).setLinearHeadingInterpolation(
                 mHeading(Math.toRadians(90)),
@@ -282,7 +275,7 @@ public class RedSideClose18 extends CommandOpMode {
 
         Path15 = follower.pathBuilder().addPath(
                 new BezierLine(
-                        new Pose(mx(8.273), 9.868),
+                        new Pose(mx(9.123), 9.697),
                         new Pose(mx(50.420), 83.921)
                 )
         ).setLinearHeadingInterpolation(
