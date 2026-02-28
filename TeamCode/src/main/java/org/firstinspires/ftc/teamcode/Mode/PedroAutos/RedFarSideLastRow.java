@@ -233,14 +233,14 @@ public class RedFarSideLastRow extends CommandOpMode {
                         new BezierCurve(
                                 new Pose(mx(55.886), 18.599),
                                 new Pose(mx(38.416), 5.943),
-                                new Pose(mx(12.221), 7.880)
+                                new Pose(mx(11.221), 7.880)
                         )
                 ).setLinearHeadingInterpolation(mHeading(Math.toRadians(0)), mHeading(Math.toRadians(0)))
                 .build();
 
         ZoneABack = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(mx(12.221), 7.880),
+                                new Pose(mx(11.221), 7.880),
                                 new Pose(mx(55.640), 18.681)
                         )
                 ).setLinearHeadingInterpolation(mHeading(Math.toRadians(0)), mHeading(Math.toRadians(0)))
@@ -249,14 +249,14 @@ public class RedFarSideLastRow extends CommandOpMode {
         ZoneBGo = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(mx(55.640), 18.681),
-                                new Pose(mx(9.410), 17.726)
+                                new Pose(mx(11.410), 17.726)
                         )
                 ).setLinearHeadingInterpolation(mHeading(Math.toRadians(0)), mHeading(Math.toRadians(0)))
                 .build();
 
         ZoneBBack = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(mx(9.410), 17.726),
+                                new Pose(mx(11.410), 17.726),
                                 new Pose(mx(55.590), 18.612)
                         )
                 ).setLinearHeadingInterpolation(mHeading(Math.toRadians(0)), mHeading(Math.toRadians(0)))
@@ -266,14 +266,14 @@ public class RedFarSideLastRow extends CommandOpMode {
                         new BezierCurve(
                                 new Pose(mx(55.590), 18.612),
                                 new Pose(mx(50.720), 44.647),
-                                new Pose(mx(7.118), 39.066)
+                                new Pose(mx(11.118), 39.066)
                         )
                 ).setLinearHeadingInterpolation(mHeading(Math.toRadians(0)), mHeading(Math.toRadians(0)))
                 .build();
 
         ZoneCBack = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(mx(7.118), 39.066),
+                                new Pose(mx(11.118), 39.066),
                                 new Pose(mx(55.666), 18.637)
                         )
                 ).setLinearHeadingInterpolation(mHeading(Math.toRadians(0)), mHeading(Math.toRadians(0)))
@@ -284,14 +284,14 @@ public class RedFarSideLastRow extends CommandOpMode {
                                 new Pose(mx(55.666), 18.637),
                                 new Pose(mx(4.696), 11.957),
                                 new Pose(mx(14.882), 21.907),
-                                new Pose(mx(8.413), 38.924)
+                                new Pose(mx(11.413), 38.924)
                         )
                 ).setLinearHeadingInterpolation(mHeading(Math.toRadians(0)), mHeading(Math.toRadians(270)))
                 .build();
 
         Path6 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(mx(8.413), 38.924),
+                                new Pose(mx(11.413), 38.924),
                                 new Pose(mx(55.723), 18.625)
                         )
                 ).setLinearHeadingInterpolation(mHeading(Math.toRadians(270)), mHeading(Math.toRadians(0)))
@@ -300,7 +300,7 @@ public class RedFarSideLastRow extends CommandOpMode {
         Path7 = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(mx(55.795), 18.379),
-                                new Pose(mx(9.217), 8.403)
+                                new Pose(mx(11.217), 8.403)
                         )
                 ).setLinearHeadingInterpolation(mHeading(Math.toRadians(0)), mHeading(Math.toRadians(0)))
                 .build();
@@ -308,14 +308,14 @@ public class RedFarSideLastRow extends CommandOpMode {
         Path8 = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(mx(57.052), 7.098),
-                                new Pose(mx(9.217), 17.403)
+                                new Pose(mx(11.217), 17.403)
                         )
                 ).setLinearHeadingInterpolation(mHeading(Math.toRadians(0)), mHeading(Math.toRadians(0)))
                 .build();
 
         Path9 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(mx(9.217), 17.403),
+                                new Pose(mx(11.217), 17.403),
                                 new Pose(mx(55.795), 18.379)
                         )
                 ).setLinearHeadingInterpolation(mHeading(Math.toRadians(0)), mHeading(Math.toRadians(0)))
@@ -323,7 +323,7 @@ public class RedFarSideLastRow extends CommandOpMode {
 
         Path10 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(mx(9.217), 8.403),
+                                new Pose(mx(11.217), 8.403),
                                 new Pose(mx(55.795), 18.379)
                         )
                 ).setLinearHeadingInterpolation(mHeading(Math.toRadians(0)), mHeading(Math.toRadians(0)))

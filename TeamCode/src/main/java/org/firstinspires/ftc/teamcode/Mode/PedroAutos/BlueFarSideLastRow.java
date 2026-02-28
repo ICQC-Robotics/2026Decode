@@ -87,7 +87,7 @@ public class BlueFarSideLastRow extends CommandOpMode {
                         new FollowPathCommand(f, Path3),
 
                         shotPrep(Path4, 0.1),
-                        new WaitCommand(700),
+                        new WaitCommand(500),
                         shoot(),
 
                         new InstantCommand(() -> { negabot.intake.setSpeed(-1); }),
@@ -95,7 +95,7 @@ public class BlueFarSideLastRow extends CommandOpMode {
                         new FollowPathCommand(f, Path8),
                         shotPrep( Path9, 0.1),
 
-                        new WaitCommand(700),
+                        new WaitCommand(500),
                         shoot(),
 
                         latchZone(),
@@ -236,14 +236,14 @@ public class BlueFarSideLastRow extends CommandOpMode {
         ZoneBGo = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(55.640, 18.681),
-                                new Pose(9.410, 17.726)
+                                new Pose(11.410, 17.726)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
 
         ZoneBBack = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(9.410, 17.726),
+                                new Pose(11.410, 17.726),
                                 new Pose(55.590, 18.612)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
@@ -253,7 +253,7 @@ public class BlueFarSideLastRow extends CommandOpMode {
                         new BezierCurve(
                                 new Pose(55.590, 18.612),
                                 new Pose(50.720, 44.647),
-                                new Pose(7.118, 39.066)
+                                new Pose(11.118, 39.066)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
 
@@ -261,7 +261,7 @@ public class BlueFarSideLastRow extends CommandOpMode {
 
         ZoneCBack = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(7.118, 39.066),
+                                new Pose(11.118, 39.066),
 
                                 new Pose(55.666, 18.637)
                         )
@@ -274,14 +274,14 @@ public class BlueFarSideLastRow extends CommandOpMode {
                                 new Pose(55.666, 18.637),
                                 new Pose(4.696, 11.957),
                                 new Pose(14.882, 21.907),
-                                new Pose(8.413, 38.924)
+                                new Pose(11.413, 38.924)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(270))
                 .build();
 
         Path6 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(8.413, 38.924),
+                                new Pose(11.413, 38.924),
                                 new Pose(55.723, 18.625)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(0))
@@ -290,7 +290,7 @@ public class BlueFarSideLastRow extends CommandOpMode {
         Path7 = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(55.795, 18.379),
-                                new Pose(9.217, 8.403)
+                                new Pose(11.217, 8.403)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
@@ -298,14 +298,14 @@ public class BlueFarSideLastRow extends CommandOpMode {
         Path8 = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(57.052, 7.098),
-                                new Pose(9.217, 17.403)
+                                new Pose(11.217, 17.403)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
 
         Path9 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(9.217, 17.403),
+                                new Pose(11.217, 17.403),
                                 new Pose(55.795, 18.379)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
@@ -313,7 +313,7 @@ public class BlueFarSideLastRow extends CommandOpMode {
 
         Path10 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(9.217, 8.403),
+                                new Pose(11.217, 8.403),
                                 new Pose(55.795, 18.379)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
