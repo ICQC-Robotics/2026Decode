@@ -44,7 +44,7 @@ public class RedSideClose18 extends CommandOpMode {
     private static double mTurretDeg(double deg) { return 270.0 - deg; }
 
     Pose startPose = new Pose(
-            mx(34.36974789915966),
+            mx(33.00965344815612),
             136.4201680672269,
             mHeading(Math.toRadians(0))
     );
@@ -170,7 +170,7 @@ public class RedSideClose18 extends CommandOpMode {
                 new BezierCurve(
                         new Pose(mx(50.824), 83.952),
                         new Pose(mx(52.183), 59.776),
-                        new Pose(mx(37.553), 60.265)
+                        new Pose(mx(40.553), 60.265)
                 )
         ).setLinearHeadingInterpolation(
                 mHeading(Math.toRadians(90)),
@@ -179,7 +179,7 @@ public class RedSideClose18 extends CommandOpMode {
 
         Path5 = follower.pathBuilder().addPath(
                 new BezierLine(
-                        new Pose(mx(37.553), 60.265),
+                        new Pose(mx(40.553), 60.265),
                         new Pose(mx(15.599), 59.607)
                 )
         ).setLinearHeadingInterpolation(
@@ -202,7 +202,7 @@ public class RedSideClose18 extends CommandOpMode {
                 new BezierCurve(
                         new Pose(mx(50.681), 84.238),
                         new Pose(mx(63.307), 32.508),
-                        new Pose(mx(36.810), 35.723)
+                        new Pose(mx(40.810), 35.723)
                 )
         ).setLinearHeadingInterpolation(
                 mHeading(Math.toRadians(90)),
@@ -211,7 +211,7 @@ public class RedSideClose18 extends CommandOpMode {
 
         Path8 = follower.pathBuilder().addPath(
                 new BezierLine(
-                        new Pose(mx(36.810), 35.723),
+                        new Pose(mx(40.810), 35.723),
                         new Pose(mx(11.936), 36.270)
                 )
         ).setLinearHeadingInterpolation(
