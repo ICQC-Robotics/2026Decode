@@ -106,6 +106,8 @@ public class BlueFarSideLastRow extends CommandOpMode {
                         branchOnLatchedZone(),
                         latchZone(),
                         branchOnLatchedZone()
+
+
 /*
                         new InstantCommand(() -> { negabot.intake.setSpeed(-1); }),
                         new FollowPathCommand(f, Path5, true),
@@ -154,28 +156,28 @@ public class BlueFarSideLastRow extends CommandOpMode {
                                 new InstantCommand(() -> { negabot.intake.setSpeed(-1); }),
                                 new FollowPathCommand(f, ZoneAGo, true),
                                 shotPrep(ZoneABack, 0.1),
-                                new WaitCommand(700),
+                                new WaitCommand(500),
                                 shoot()
                         ),
                         IntakeColorProcessing.Zone.CENTER, new SequentialCommandGroup(
                                 new InstantCommand(() -> { negabot.intake.setSpeed(-1); }),
                                 new FollowPathCommand(f, ZoneBGo, true),
                                 shotPrep(ZoneBBack, 0.1),
-                                new WaitCommand(700),
+                                new WaitCommand(500),
                                 shoot()
                         ),
                         IntakeColorProcessing.Zone.RIGHT, new SequentialCommandGroup(
                                 new InstantCommand(() -> { negabot.intake.setSpeed(-1); }),
                                 new FollowPathCommand(f, ZoneCGo, true),
                                 shotPrep(ZoneCBack, 0.1),
-                                new WaitCommand(700),
+                                new WaitCommand(500),
                                 shoot()
                         ),
                         IntakeColorProcessing.Zone.NONE, new SequentialCommandGroup(
                                 new InstantCommand(() -> { negabot.intake.setSpeed(-1); }),
                                 new FollowPathCommand(f, ZoneCGo, true),
                                 shotPrep(ZoneCBack, 0.1),
-                                new WaitCommand(700),
+                                new WaitCommand(500),
                                 shoot()
                         )
                 ),

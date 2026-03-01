@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Mode;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -14,8 +15,10 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.DriveCommand;
+import org.firstinspires.ftc.teamcode.Robot.commands.HoldCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.PPTracking;
 import org.firstinspires.ftc.teamcode.Robot.commands.Relocalize;
+import org.firstinspires.ftc.teamcode.Robot.commands.ShootOnMove;
 import org.firstinspires.ftc.teamcode.Robot.commands.ShooterStandBy;
 
 @TeleOp(group=".")
@@ -99,10 +102,13 @@ public class SoloBlue extends CommandOpMode {
         negabot.Action(
                 g,
                 GamepadKeys.Button.A,
-                new SequentialCommandGroup(
-                        new InstantCommand(() -> CommandScheduler.getInstance().schedule(ppTracking)),
-                        new AutoAim(negabot.drive, negabot.shooter, negabot.intake, negabot.wait),
-                        new InstantCommand(() -> CommandScheduler.getInstance().cancel(ppTracking))
+                new ParallelCommandGroup(
+                        new SequentialCommandGroup(
+                                new InstantCommand(() -> CommandScheduler.getInstance().schedule(ppTracking)),
+                                new AutoAim(negabot.drive, negabot.shooter, negabot.intake, negabot.wait),
+                                new InstantCommand(() -> CommandScheduler.getInstance().cancel(ppTracking))
+                        )
+                        //new HoldCommand(negabot.drive, g, ppTracking)
                 ),
                 null
         );

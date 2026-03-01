@@ -108,7 +108,7 @@ public class RedFarSideLastRow extends CommandOpMode {
                         new FollowPathCommand(f, Path3),
 
                         shotPrep(Path4, 0.1),
-                        new WaitCommand(700),
+                        new WaitCommand(500),
                         shoot(),
 
                         new InstantCommand(() -> { negabot.intake.setSpeed(-1); }),
@@ -116,7 +116,7 @@ public class RedFarSideLastRow extends CommandOpMode {
                         new FollowPathCommand(f, Path8),
                         shotPrep(Path9, 0.1),
 
-                        new WaitCommand(700),
+                        new WaitCommand(500),
                         shoot(),
 
                         latchZone(),
@@ -127,6 +127,7 @@ public class RedFarSideLastRow extends CommandOpMode {
                         branchOnLatchedZone(),
                         latchZone(),
                         branchOnLatchedZone()
+
                 )
         );
     }
@@ -166,28 +167,28 @@ public class RedFarSideLastRow extends CommandOpMode {
                                 new InstantCommand(() -> { negabot.intake.setSpeed(-1); }),
                                 new FollowPathCommand(f, ZoneAGo, true),
                                 shotPrep(ZoneABack, 0.1),
-                                new WaitCommand(700),
+                                new WaitCommand(500),
                                 shoot()
                         ),
                         IntakeColorProcessing.Zone.CENTER, new SequentialCommandGroup(
                                 new InstantCommand(() -> { negabot.intake.setSpeed(-1); }),
                                 new FollowPathCommand(f, ZoneBGo, true),
                                 shotPrep(ZoneBBack, 0.1),
-                                new WaitCommand(700),
+                                new WaitCommand(500),
                                 shoot()
                         ),
                         IntakeColorProcessing.Zone.LEFT, new SequentialCommandGroup(
                                 new InstantCommand(() -> { negabot.intake.setSpeed(-1); }),
                                 new FollowPathCommand(f, ZoneCGo, true),
                                 shotPrep(ZoneCBack, 0.1),
-                                new WaitCommand(700),
+                                new WaitCommand(500),
                                 shoot()
                         ),
                         IntakeColorProcessing.Zone.NONE, new SequentialCommandGroup(
                                 new InstantCommand(() -> { negabot.intake.setSpeed(-1); }),
                                 new FollowPathCommand(f, ZoneCGo, true),
                                 shotPrep(ZoneCBack, 0.1),
-                                new WaitCommand(700),
+                                new WaitCommand(500),
                                 shoot()
                         )
                 ),
