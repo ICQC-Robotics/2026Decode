@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Turret;
 public class BlueSideClose18 extends CommandOpMode {
         Robot negabot;
         PathChain Path1, Path2, Path3, Path4, Path5, Path6, Path7, Path8, Path9, Path10, Path11, Path12, Path13, Path14, Path15, Path16, GatePath, GateBack, GatePath1, HitGate;
-        Pose startPose = new Pose(34.539759705535104, 136.42016806722688, Math.toRadians(0));
+        Pose startPose = new Pose(34.539759705535104, (136.42016806722688-1.5), Math.toRadians(0));
 
         Pose gateIntake = new Pose(14, 60, Math.toRadians(-20));
         Pose gateIntake1 = new Pose(16.302, 65, Math.toRadians(-20));
@@ -47,7 +47,7 @@ public class BlueSideClose18 extends CommandOpMode {
 
                 waitForStart();
                 negabot.schedule(
-                        new InstantCommand(() -> { negabot.shooter.setVelocity(3310);}),
+                        new InstantCommand(() -> { negabot.shooter.setVelocity(3315);}),
                         new InstantCommand(() -> {negabot.shooter.setMagazineCover(COVER_CLOSE); }),
                         new SequentialCommandGroup(
                                 shotPrep(f, Path1, 9),
@@ -67,12 +67,12 @@ public class BlueSideClose18 extends CommandOpMode {
                                 new FollowPathCommand(f, Path9, true),
                                 shotPrep(f, Path10, 60),
                                 shoot(),
+                                new FollowPathCommand(f, Path11, true),
+                                shotPrep(f, Path12, 60),
+                                shoot(),
                                 new FollowPathCommand(f, Path13, true),
                                 new FollowPathCommand(f, Path14, true),
                                 shotPrep(f, Path15, 60),
-                                shoot(),
-                                new FollowPathCommand(f, Path11, true),
-                                shotPrep(f, Path12, 60),
                                 shoot(),
                                 new FollowPathCommand(f, Path16, true)
 
@@ -149,7 +149,7 @@ public class BlueSideClose18 extends CommandOpMode {
         public void path(Follower follower) {
             Path1 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(34.540, 136.420),
+                                    new Pose(34.540, 136.420-1.5),
 
                                     new Pose(50.371, 83.649)
                             )

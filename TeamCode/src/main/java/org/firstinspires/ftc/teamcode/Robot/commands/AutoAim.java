@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Robot.commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.pedropathing.geometry.Pose;
 
@@ -86,65 +87,74 @@ public class AutoAim extends SequentialCommandGroup {
     private SequentialCommandGroup shootSequence(Drive drive, Shooter shooter, Intake intake, Wait wait) {
         return new SequentialCommandGroup(
 
-                new InstantCommand(() -> {
-                    shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
-                    double d = calculateDistanceIn(drive);
-                }, shooter),
+                // Start opening the cover immediately
+                new InstantCommand(() ->
+                        shooter.setMagazineCover(Positions.OPEN_COVER.getPos()), shooter),
 
-                new CommandBase() {
-                    {
-                        addRequirements(shooter);
-                    }
-
-                    @Override
-                    public void execute() {
-                        double d = calculateDistanceIn(drive);
-                        spinUpRPM = clamp(getRpmForDistance(d), MIN_V, MAX_V);
-
-                        shooter.setVelocity(spinUpRPM);
-                    }
-
-                    @Override
-                    public boolean isFinished() {
-                        return Math.abs(shooter.getVelocity() - spinUpRPM) <= RPM_TOLERANCE;
-                    }
-                },
-
-                new SequentialCommandGroup(
-                        new InstantCommand(() -> shooter.setMagazineCover(Positions.OPEN_COVER.getPos()), shooter),
-                        new WaitCommand(wait, 0.5),
-                        new InstantCommand(() -> intake.setSpeed(-1), intake),
+                // Wait for BOTH:
+                // 1) shooter to reach velocity
+                // 2) cover to have had 0.5s to open
+                new ParallelCommandGroup(
 
                         new CommandBase() {
                             {
-                                addRequirements(shooter, intake);
-                            }
-
-                            @Override
-                            public void initialize() {
-                                wait.start();
+                                addRequirements(shooter);
                             }
 
                             @Override
                             public void execute() {
                                 double d = calculateDistanceIn(drive);
-                                double rpm = getRpmForDistance(d);
-
-
-                                shooter.setVelocity(rpm);
+                                spinUpRPM = clamp(getRpmForDistance(d), MIN_V, MAX_V);
+                                shooter.setVelocity(spinUpRPM);
                             }
 
                             @Override
                             public boolean isFinished() {
-                                return wait.elapsed() >= FEED_TIME_S;
+                                return Math.abs(shooter.getVelocity() - spinUpRPM) <= RPM_TOLERANCE;
                             }
                         },
 
-                        new InstantCommand(() -> {
-                            shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
-                            intake.setSpeed(0);
-                        }, shooter, intake)
-                ));
+                        new WaitCommand(wait, 0.65)
+                ),
+
+                // Only starts after BOTH parallel commands above are done
+                new InstantCommand(() -> intake.setSpeed(-1), intake),
+
+                // Feed for FEED_TIME_S while maintaining shooter RPM
+                new CommandBase() {
+                    {
+                        addRequirements(shooter, intake);
+                    }
+
+                    @Override
+                    public void initialize() {
+                        wait.start();
+                    }
+
+                    @Override
+                    public void execute() {
+                        double d = calculateDistanceIn(drive);
+                        double rpm = clamp(getRpmForDistance(d), MIN_V, MAX_V);
+                        shooter.setVelocity(rpm);
+                    }
+
+                    @Override
+                    public boolean isFinished() {
+                        return wait.elapsed() >= FEED_TIME_S;
+                    }
+
+                    @Override
+                    public void end(boolean interrupted) {
+                        intake.setSpeed(0);
+                    }
+                },
+
+                // Reset state
+                new InstantCommand(() -> {
+                    shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
+                    intake.setSpeed(0);
+                }, shooter, intake)
+        );
     }
 
     public static double calculateDistanceIn(Drive drive) {
