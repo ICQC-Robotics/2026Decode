@@ -16,8 +16,8 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
 public class AutoAim extends SequentialCommandGroup {
 
     public enum Positions {
-        OPEN_COVER(0.25),
-        CLOSED_COVER(1);
+        OPEN_COVER(.75),
+        CLOSED_COVER(.5);
 
         private final double pos;
 
@@ -31,7 +31,7 @@ public class AutoAim extends SequentialCommandGroup {
     }
 
     private static final double RPM_TOLERANCE = 20; // TODO: change if needed
-    private static final double FEED_TIME_S = 1;
+    private static final double FEED_TIME_S = .6;
 
     private static final double BUMP_NEAR = 0.02;
     private static final double BUMP_FAR  = 0.07;
@@ -64,7 +64,7 @@ public class AutoAim extends SequentialCommandGroup {
             {  128, 3980 },
             {  135, 4050 },
             {  139, 4090 },
-            {  144, 4160 },
+            {  144, 4170 },
 
 
     };
@@ -114,7 +114,7 @@ public class AutoAim extends SequentialCommandGroup {
                             }
                         },
 
-                        new WaitCommand(wait, 0.65)
+                        new WaitCommand(wait, 0.1)
                 ),
 
                 // Only starts after BOTH parallel commands above are done

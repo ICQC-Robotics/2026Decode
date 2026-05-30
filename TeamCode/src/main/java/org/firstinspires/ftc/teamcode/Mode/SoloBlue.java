@@ -5,6 +5,7 @@ import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.pedropathing.geometry.Pose;
@@ -99,19 +100,15 @@ public class SoloBlue extends CommandOpMode {
         ppTracking.resetDegOffset();
 
         // A: start tracking -> autoaim -> stop tracking
-        negabot.Action(
-                g,
-                GamepadKeys.Button.A,
-                new ParallelCommandGroup(
-                        new SequentialCommandGroup(
-                                new InstantCommand(() -> CommandScheduler.getInstance().schedule(ppTracking)),
-                                new AutoAim(negabot.drive, negabot.shooter, negabot.intake, negabot.wait),
-                                new InstantCommand(() -> CommandScheduler.getInstance().cancel(ppTracking))
+        new Trigger(() -> g.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
+                .whenActive(
+                        new AutoAim(
+                                negabot.drive,
+                                negabot.shooter,
+                                negabot.intake,
+                                negabot.wait
                         )
-                        //new HoldCommand(negabot.drive, g, ppTracking)
-                ),
-                null
-        );
+                );
 
 
         // Keep your DPAD offset buttons here exactly like before
@@ -143,9 +140,9 @@ public class SoloBlue extends CommandOpMode {
 
         if (!shooterStandby && opModeIsActive() && !turretTracking) {
             negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, negabot.drive));
+            negabot.turret.setDefaultCommand(ppTracking);
 
             // IMPORTANT: do NOT set PPTracking as default anymore
-            // negabot.turret.setDefaultCommand(ppTracking);
 
             turretTracking = true;
             shooterStandby = true;

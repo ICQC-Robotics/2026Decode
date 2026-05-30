@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Shooter extends SubsystemBase {
 
     private final DcMotorEx rightShooter, leftShooter;
-    public final Servo leftCover, rightCover;
+    public final Servo Cover;
 
     // Keep pidf if you still want the motor controller's internal velocity PIDF (optional)
     private final PIDFCoefficients pidf;
@@ -30,13 +30,12 @@ public class Shooter extends SubsystemBase {
     public Shooter(
             DcMotorEx rightShooter, DcMotorSimple.Direction rightDir,
             DcMotorEx leftShooter, DcMotorSimple.Direction leftDir,
-            Servo leftCover, Servo rightCover,
+            Servo Cover,
             PIDFCoefficients pidf
     ) {
         this.rightShooter = rightShooter;
         this.leftShooter = leftShooter;
-        this.leftCover = leftCover;
-        this.rightCover = rightCover;
+        this.Cover = Cover;
         this.pidf = pidf;
 
         this.rightShooter.setDirection(rightDir);
@@ -110,8 +109,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public void setMagazineCover(double pos) {
-        leftCover.setPosition(pos);
-        rightCover.setPosition(1 - pos);
+        Cover.setPosition(pos);
     }
 
     public double getTargetVelocity(){
