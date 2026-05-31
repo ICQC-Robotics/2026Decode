@@ -32,7 +32,7 @@ public class SoloBlue extends CommandOpMode {
 
     private boolean poseLocked = false;
 
-    private Pose blueReset = new Pose(26.241, 133.326, Math.toRadians(54));
+    private Pose blueReset = new Pose(32.62656072644722, 134.67423382519863, Math.toRadians(90));
 
     private Robot.Alliance alliance = Robot.Alliance.BLUE;
 

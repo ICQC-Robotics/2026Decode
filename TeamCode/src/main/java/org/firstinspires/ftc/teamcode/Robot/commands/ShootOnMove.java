@@ -18,8 +18,8 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
 
 public class ShootOnMove extends SequentialCommandGroup {
     public enum Positions {
-        OPEN_COVER(0.1),
-        CLOSED_COVER(1);
+        OPEN_COVER(0.75),
+        CLOSED_COVER(0.53);
 
         private final double pos;
 
