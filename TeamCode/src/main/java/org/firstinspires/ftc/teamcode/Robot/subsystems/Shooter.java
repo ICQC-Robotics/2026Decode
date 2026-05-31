@@ -5,17 +5,25 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Shooter extends SubsystemBase {
 
     private final DcMotorEx rightShooter, leftShooter;
     public final Servo Cover;
+    private final Servo Hood;
+    private final ShooterAimingModel aimingModel = new ShooterAimingModel();
+    private final ElapsedTime hoodSettleTimer = new ElapsedTime();
 
     // Keep pidf if you still want the motor controller's internal velocity PIDF (optional)
     private final PIDFCoefficients pidf;
 
     private double targetVelocityRPM;
-    private double rpmTolerance = 0;
+    private double rpmTolerance = 25;
+    private double targetHoodPosition = -1.0;
+    private static final double TARGET_RPM_CHANGE_RESET = 50.0;
+    private static final double HOOD_POSITION_EPSILON = 0.002;
+    private static final double HOOD_SETTLE_TIME_S = 0.20;
 
     // Bang-bang outputs
     private double fullPower = 1;
@@ -31,11 +39,13 @@ public class Shooter extends SubsystemBase {
             DcMotorEx rightShooter, DcMotorSimple.Direction rightDir,
             DcMotorEx leftShooter, DcMotorSimple.Direction leftDir,
             Servo Cover,
+            Servo Hood,
             PIDFCoefficients pidf
     ) {
         this.rightShooter = rightShooter;
         this.leftShooter = leftShooter;
         this.Cover = Cover;
+        this.Hood = Hood;
         this.pidf = pidf;
 
         this.rightShooter.setDirection(rightDir);
@@ -53,6 +63,7 @@ public class Shooter extends SubsystemBase {
         this.setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
 
         this.setMagazineCover(1);
+        this.setHoodPosition(0.2);
         targetVelocityRPM = 0;
     }
 
@@ -66,11 +77,14 @@ public class Shooter extends SubsystemBase {
     }
 
     public void setVelocity(double rpm) {
-        targetVelocityRPM = rpm;
-        bangHigh = false; // reset state on new target
         if (rpm <= 0) {
             stop();
+            return;
         }
+        if (Math.abs(rpm - targetVelocityRPM) > TARGET_RPM_CHANGE_RESET) {
+            bangHigh = false;
+        }
+        targetVelocityRPM = rpm;
     }
 
     public void stop() {
@@ -110,6 +124,30 @@ public class Shooter extends SubsystemBase {
 
     public void setMagazineCover(double pos) {
         Cover.setPosition(pos);
+    }
+
+    public void setHoodPosition(double pos) {
+        double clipped = Math.max(0.0, Math.min(1.0, pos));
+        if (Math.abs(clipped - targetHoodPosition) > HOOD_POSITION_EPSILON) {
+            hoodSettleTimer.reset();
+            targetHoodPosition = clipped;
+            Hood.setPosition(clipped);
+        }
+    }
+
+    public ShooterAimingModel.Solution aimForDistance(double distanceIn) {
+        ShooterAimingModel.Solution solution = aimingModel.update(distanceIn);
+        setHoodPosition(solution.hoodPosition);
+        setVelocity(solution.rpm);
+        return solution;
+    }
+
+    public boolean isHoodSettled() {
+        return hoodSettleTimer.seconds() >= HOOD_SETTLE_TIME_S;
+    }
+
+    public double getTargetHoodPosition() {
+        return targetHoodPosition;
     }
 
     public double getTargetVelocity(){

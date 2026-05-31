@@ -99,11 +99,12 @@ public class SoloBlue extends CommandOpMode {
         ppTracking = new PPTracking(negabot.turret, negabot.drive, alliance);
         ppTracking.resetDegOffset();
 
-        // A: start tracking -> autoaim -> stop tracking
+        // Right trigger: keep aiming while feeding, including robot-velocity lead.
         new Trigger(() -> g.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
                 .whenActive(
-                        new AutoAim(
+                        new ShootOnMove(
                                 negabot.drive,
+                                negabot.turret,
                                 negabot.shooter,
                                 negabot.intake,
                                 negabot.wait

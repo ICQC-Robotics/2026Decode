@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Shooter;
+import org.firstinspires.ftc.teamcode.Robot.subsystems.ShooterAimingModel;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
 
 public class AutoAim extends SequentialCommandGroup {
@@ -44,38 +45,11 @@ public class AutoAim extends SequentialCommandGroup {
     public static final double MAX_DIST = 150;
 
     /** Velocity bounds (rpm). Keep these as the single source of truth. */
-    public static final double MIN_V = 2820;
-    public static final double MAX_V = 4300 - 100;
-
-    /**
-     * Lookup tables (distance inches -> value).
-     *
-     * NOTE: The current values match your old linear interpolation (so behavior is unchanged),
-     * but now you can tune any point without re-deriving a formula.
-     *
-     * Tables MUST be sorted by distance ascending.
-     */
-    private static final double[][] RPM_LUT = new double[][] {
-
-            {  49, 3700 },
-            {  65, 3150 },
-            {  78, 3350 },
-            {  95, 3550 },
-            {  128, 3980 },
-            {  135, 4050 },
-            {  139, 4090 },
-            {  144, 4170 },
-
-
-    };
-
-    // Hood LUT used only for d <= 75 (to preserve your original piecewise behavior)
-
-
-    // Cover-bump LUT used only for d <= 120 (to preserve your original cap at > 120)
-
+    public static final double MIN_V = 2500;
+    public static final double MAX_V = 4100;
 
     private double spinUpRPM = MIN_V;
+    private ShooterAimingModel.Solution solution;
 
     public AutoAim(Drive drive, Shooter shooter, Intake intake, Wait wait) {
         addCommands(
@@ -104,13 +78,14 @@ public class AutoAim extends SequentialCommandGroup {
                             @Override
                             public void execute() {
                                 double d = calculateDistanceIn(drive);
-                                spinUpRPM = clamp(getRpmForDistance(d), MIN_V, MAX_V);
-                                shooter.setVelocity(spinUpRPM);
+                                solution = shooter.aimForDistance(d);
+                                spinUpRPM = solution.rpm;
                             }
 
                             @Override
                             public boolean isFinished() {
-                                return Math.abs(shooter.getVelocity() - spinUpRPM) <= RPM_TOLERANCE;
+                                return shooter.isHoodSettled()
+                                        && Math.abs(shooter.getVelocity() - spinUpRPM) <= RPM_TOLERANCE;
                             }
                         },
 
@@ -134,8 +109,8 @@ public class AutoAim extends SequentialCommandGroup {
                     @Override
                     public void execute() {
                         double d = calculateDistanceIn(drive);
-                        double rpm = clamp(getRpmForDistance(d), MIN_V, MAX_V);
-                        shooter.setVelocity(rpm);
+                        solution = shooter.aimForDistance(d);
+                        spinUpRPM = solution.rpm;
                     }
 
                     @Override
@@ -193,42 +168,7 @@ public class AutoAim extends SequentialCommandGroup {
      * Distance -> RPM mapping using lookup table + linear interpolation between points.
      */
     public static double getRpmForDistance(double distanceIn) {
-        return lookupInterpolated(clamp(distanceIn, MIN_DIST, MAX_DIST), RPM_LUT);
-    }
-
-
-
-
-    /**
-     * Generic table lookup with linear interpolation.
-     * Table format: { {x0, y0}, {x1, y1}, ... } where x is ascending.
-     */
-    private static double lookupInterpolated(double x, double[][] table) {
-        if (table == null || table.length == 0) return 0.0;
-        if (table.length == 1) return table[0][1];
-
-        // Clamp to endpoints
-        if (x <= table[0][0]) return table[0][1];
-        int last = table.length - 1;
-        if (x >= table[last][0]) return table[last][1];
-
-        // Find segment
-        for (int i = 0; i < last; i++) {
-            double x0 = table[i][0];
-            double y0 = table[i][1];
-            double x1 = table[i + 1][0];
-            double y1 = table[i + 1][1];
-
-            if (x >= x0 && x <= x1) {
-                double span = (x1 - x0);
-                if (span <= 1e-9) return y0; // avoid divide-by-zero if bad table data
-                double t = (x - x0) / span;
-                return y0 + t * (y1 - y0);
-            }
-        }
-
-        // Should never hit if table is sorted, but safe fallback
-        return table[last][1];
+        return ShooterAimingModel.previewDefaultRpm(clamp(distanceIn, MIN_DIST, MAX_DIST));
     }
 
     private static double clamp(double v, double lo, double hi) {
