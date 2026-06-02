@@ -58,4 +58,14 @@ public class ShooterTuner extends OpMode {
         telemetry.update();
     }
 
+    @Override
+    public void stop() {
+        if (negabot != null) {
+            negabot.shooter.stop();
+            negabot.intake.setSpeed(0);
+        }
+        if (limelight != null) {
+            limelight.stop();
+        }
+    }
 }
