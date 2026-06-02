@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.Robot.commands;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandBase;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.Robot.subsystems.Shooter;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 
@@ -38,23 +37,24 @@ public class AutoIntake extends CommandBase {
         return new InstantCommand(() -> {
             intake.set(Positions.LOWER_INTAKE.getPos());
 
-        });
+        }, intake);
     }
 
     public Command accept() {
         return new InstantCommand(() -> {
             intake.set(Positions.LOWER_INTAKE.getPos());
             intake.setSpeed(-1);
-        });
+        }, intake);
     }
 
     public Command autoAccept(double seconds) {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> {
-                    while (wait.elapsed() < seconds) {
-                        intake.setSpeed(1);
-                    }
-                })
+                    intake.set(Positions.LOWER_INTAKE.getPos());
+                    intake.setSpeed(-1);
+                }, intake),
+                new WaitCommand(wait, seconds),
+                new InstantCommand(() -> intake.setSpeed(0), intake)
         );
     }
 
@@ -62,27 +62,27 @@ public class AutoIntake extends CommandBase {
         return new InstantCommand(() -> {
             intake.set(Positions.LOWER_INTAKE.getPos());
             intake.setSpeed(-0.45);
-        });
+        }, intake);
     }
 
     public Command acceptSlowish() {
         return new InstantCommand(() -> {
             intake.set(Positions.LOWER_INTAKE.getPos());
             intake.setSpeed(-0.70);
-        });
+        }, intake);
     }
 
     public Command reject() {
         return new InstantCommand(() -> {
             intake.set(Positions.LOWER_INTAKE.getPos());
             intake.setSpeed(1);
-        });
+        }, intake);
     }
 
     public Command finish() {
         return new InstantCommand(() -> {
             intake.setSpeed(0);
             intake.set(Positions.LOWER_INTAKE.getPos());
-        });
+        }, intake);
     }
 }

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Robot.commands;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
@@ -16,10 +17,11 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.ShooterAimingModel;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
 
+@Config
 public class ShootOnMove extends SequentialCommandGroup {
     public enum Positions {
-        OPEN_COVER(0.1),
-        CLOSED_COVER(1);
+        OPEN_COVER(AutoAim.Positions.OPEN_COVER.getPos()),
+        CLOSED_COVER(AutoAim.Positions.CLOSED_COVER.getPos());
 
         private final double pos;
 
@@ -39,13 +41,7 @@ public class ShootOnMove extends SequentialCommandGroup {
     public static final double MIN_V = AutoAim.MIN_V;
     public static final double MAX_V = AutoAim.MAX_V;
 
-    private static final double SHOOTER_ANGLE_DEG = 40.0;
-    private static final double WHEEL_RADIUS_IN = 2.835;
-    private static final double SHOOTER_EFFICIENCY = 0.75;
-    private static final double DRAG_COEFF = 0.65;
-    private static final double MIN_FLIGHT_TIME_S = 0.05;
-    private static final double MAX_FLIGHT_TIME_S = 0.70;
-    private static final int LEAD_ITERATIONS = 5;
+    public static double FLIGHT_TIME_S = 1.0;
 
     private final Turret turret;
     private double spinUpRPM = MIN_V;
@@ -83,13 +79,14 @@ public class ShootOnMove extends SequentialCommandGroup {
                         aimTurretForShot(shot);
                         ShooterAimingModel.Solution solution = shooter.aimForDistance(shot.distanceIn);
                         spinUpRPM = solution.rpm;
+                        addShotTelemetry(drive, shooter, shot);
                     }
 
                     @Override
                     public boolean isFinished() {
                         return shooter.isHoodSettled()
                                 && turretReady()
-                                && Math.abs(shooter.getVelocity() - spinUpRPM) <= RPM_TOLERANCE;
+                                && shooter.isAtTargetVelocity(RPM_TOLERANCE);
                     }
                 },
 
@@ -116,6 +113,7 @@ public class ShootOnMove extends SequentialCommandGroup {
                                 MovingShot shot = calculateMovingShot(drive);
                                 aimTurretForShot(shot);
                                 shooter.aimForDistance(shot.distanceIn);
+                                addShotTelemetry(drive, shooter, shot);
                             }
 
                             @Override
@@ -157,32 +155,33 @@ public class ShootOnMove extends SequentialCommandGroup {
         double vx = (vel == null) ? 0.0 : vel.getXComponent();
         double vy = (vel == null) ? 0.0 : vel.getYComponent();
 
-        double distance = Math.hypot(gX - turretX, gY - turretY);
-        double time = getTime(distance);
-
-        for (int i = 0; i < LEAD_ITERATIONS; i++) {
-            double predictedTurretX = turretX + vx * time;
-            double predictedTurretY = turretY + vy * time;
-            distance = Math.hypot(gX - predictedTurretX, gY - predictedTurretY);
-            time = getTime(distance);
-        }
-
+        double time = getTime();
         double aimX = gX - (turretX + vx * time);
         double aimY = gY - (turretY + vy * time);
+        double distance = Math.hypot(aimX, aimY);
         return new MovingShot(distance, turretAngleDeg(aimX, aimY, headingRad), time);
+    }
+
+    private void addShotTelemetry(Drive drive, Shooter shooter, MovingShot shot) {
+        drive.telemetry.addData("SOM Distance", shot.distanceIn);
+        drive.telemetry.addData("SOM Flight Time", shot.flightTimeS);
+        drive.telemetry.addData("SOM Turret Target", shot.turretAngleDeg);
+        drive.telemetry.addData("SOM Turret Ready", turretReady());
+        drive.telemetry.addData("SOM Hood", shooter.getTargetHoodPosition());
+        drive.telemetry.addData("SOM Profile", shooter.getLastProfileName());
+        drive.telemetry.addData("SOM Target RPM", shooter.getTargetVelocity());
+        drive.telemetry.addData("SOM Actual RPM", shooter.getVelocity());
+        drive.telemetry.addData("SOM Right RPM", shooter.getRightVelocity());
+        drive.telemetry.addData("SOM Left RPM", shooter.getLeftVelocity());
+        drive.telemetry.addData("SOM RPM Ready", shooter.isAtTargetVelocity(RPM_TOLERANCE));
     }
 
     public static double getRpmForDistance(double distanceIn) {
         return ShooterAimingModel.previewDefaultRpm(Math.max(MIN_DIST, Math.min(distanceIn, MAX_DIST)));
     }
 
-    public static double getTime(double distanceIn) {
-        double rpm = getRpmForDistance(distanceIn);
-        double wheelSurfaceSpeed = (rpm / 60.0) * (2.0 * Math.PI * WHEEL_RADIUS_IN);
-        double launchSpeed = wheelSurfaceSpeed * SHOOTER_EFFICIENCY * DRAG_COEFF;
-        double horizontalSpeed = launchSpeed * Math.cos(Math.toRadians(SHOOTER_ANGLE_DEG));
-        if (horizontalSpeed <= 1e-6) return MAX_FLIGHT_TIME_S;
-        return clamp(distanceIn / horizontalSpeed, MIN_FLIGHT_TIME_S, MAX_FLIGHT_TIME_S);
+    public static double getTime() {
+        return Math.max(0.0, FLIGHT_TIME_S);
     }
 
     private void aimTurretForShot(MovingShot shot) {
@@ -214,17 +213,15 @@ public class ShootOnMove extends SequentialCommandGroup {
         return a - 180.0;
     }
 
-    private static double clamp(double v, double lo, double hi) {
-        return Math.max(lo, Math.min(hi, v));
-    }
-
     private static class MovingShot {
         final double distanceIn;
         final double turretAngleDeg;
+        final double flightTimeS;
 
         MovingShot(double distanceIn, double turretAngleDeg, double flightTimeS) {
             this.distanceIn = distanceIn;
             this.turretAngleDeg = turretAngleDeg;
+            this.flightTimeS = flightTimeS;
         }
     }
 }

@@ -1,14 +1,12 @@
 package org.firstinspires.ftc.teamcode.Tuner;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 
@@ -21,9 +19,9 @@ public class ShooterTuner extends OpMode {
     public static double kD = 0.0;
     public static double kF = 0.1;
 
-    Servo servo1, servo3;
-    public static double s1 = 0.5;
     public static double targetRPM = 3000;
+    public static double hoodPosition = 0.2;
+    public static double feedPower = 0.0;
     private Limelight3A limelight;
     private Robot negabot;
 
@@ -32,8 +30,6 @@ public class ShooterTuner extends OpMode {
         negabot = new Robot(hardwareMap,
                 telemetry, new Pose(72, 72)
         );
-        servo1 = hardwareMap.get(Servo.class, "servo1");
-        servo3 = hardwareMap.get(Servo.class, "servo3");
         limelight = hardwareMap.get(Limelight3A.class, "ll");
         limelight.start();
     }
@@ -41,21 +37,24 @@ public class ShooterTuner extends OpMode {
     @Override
     public void loop() {
         LLResult result = limelight.getLatestResult();
-
-        double distance = (29.5 - 12) / Math.tan(Math.toRadians(12 + result.getTy()));
+        double distance = Double.NaN;
+        if (result != null && result.isValid()) {
+            distance = (29.5 - 12) / Math.tan(Math.toRadians(12 + result.getTy()));
+        }
 
         negabot.shooter.setVelocity(targetRPM);
+        negabot.shooter.setHoodPosition(hoodPosition);
 
-        // IMPORTANT: bang-bang shooter needs periodic() to run
         negabot.shooter.periodic();
-
-        negabot.intake.setSpeed(-1);
-      //  servo1.setPosition(s1);
-       // servo3.setPosition(0.47);
+        negabot.intake.setSpeed(feedPower);
 
         telemetry.addData("distance", distance);
         telemetry.addData("Target RPM", targetRPM);
         telemetry.addData("Actual RPM", negabot.shooter.getVelocity());
+        telemetry.addData("Right RPM", negabot.shooter.getRightVelocity());
+        telemetry.addData("Left RPM", negabot.shooter.getLeftVelocity());
+        telemetry.addData("Hood Position", hoodPosition);
+        telemetry.addData("Feed Power", feedPower);
         telemetry.update();
     }
 

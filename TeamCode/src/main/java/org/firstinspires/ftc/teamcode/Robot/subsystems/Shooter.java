@@ -24,6 +24,10 @@ public class Shooter extends SubsystemBase {
     private static final double TARGET_RPM_CHANGE_RESET = 50.0;
     private static final double HOOD_POSITION_EPSILON = 0.002;
     private static final double HOOD_SETTLE_TIME_S = 0.20;
+    private static final double TICKS_PER_REV = 28.0;
+    private static final double MIN_VALID_RPM = 1.0;
+    private ShooterAimingModel.Solution lastSolution;
+    private double lastDistanceIn = 0.0;
 
     // Bang-bang outputs
     private double fullPower = 1;
@@ -95,9 +99,29 @@ public class Shooter extends SubsystemBase {
     }
 
     public double getVelocity() {
-        double velocityInTPS = this.rightShooter.getVelocity();
-        double ticksPerRev = 28; // adjust if not a 28 CPR motor/encoder setup
-        return (velocityInTPS * 60.0) / ticksPerRev;
+        double rightRPM = Math.abs(getRightVelocity());
+        double leftRPM = Math.abs(getLeftVelocity());
+
+        if (rightRPM < MIN_VALID_RPM) return leftRPM;
+        if (leftRPM < MIN_VALID_RPM) return rightRPM;
+        return (rightRPM + leftRPM) / 2.0;
+    }
+
+    public double getRightVelocity() {
+        return ticksPerSecondToRPM(rightShooter.getVelocity());
+    }
+
+    public double getLeftVelocity() {
+        return ticksPerSecondToRPM(leftShooter.getVelocity());
+    }
+
+    public boolean isAtTargetVelocity(double toleranceRPM) {
+        return targetVelocityRPM > 0
+                && Math.abs(getVelocity() - targetVelocityRPM) <= toleranceRPM;
+    }
+
+    private static double ticksPerSecondToRPM(double ticksPerSecond) {
+        return (ticksPerSecond * 60.0) / TICKS_PER_REV;
     }
 
     @Override
@@ -137,6 +161,8 @@ public class Shooter extends SubsystemBase {
 
     public ShooterAimingModel.Solution aimForDistance(double distanceIn) {
         ShooterAimingModel.Solution solution = aimingModel.update(distanceIn);
+        lastDistanceIn = distanceIn;
+        lastSolution = solution;
         setHoodPosition(solution.hoodPosition);
         setVelocity(solution.rpm);
         return solution;
@@ -152,5 +178,17 @@ public class Shooter extends SubsystemBase {
 
     public double getTargetVelocity(){
         return targetVelocityRPM;
+    }
+
+    public double getLastDistanceIn() {
+        return lastDistanceIn;
+    }
+
+    public ShooterAimingModel.Solution getLastSolution() {
+        return lastSolution;
+    }
+
+    public String getLastProfileName() {
+        return lastSolution == null ? "NONE" : lastSolution.profileName;
     }
 }

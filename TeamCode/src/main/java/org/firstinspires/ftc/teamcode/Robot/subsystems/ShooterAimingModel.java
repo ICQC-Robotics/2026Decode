@@ -47,6 +47,14 @@ public class ShooterAimingModel {
             return 0.0;
         }
 
+        double distanceToNearestSample(double distanceIn) {
+            double best = Double.POSITIVE_INFINITY;
+            for (double[] sample : rpmLut) {
+                best = Math.min(best, Math.abs(distanceIn - sample[0]));
+            }
+            return best;
+        }
+
         Solution solve(double distanceIn) {
             return new Solution(name, hoodPosition, lookupInterpolated(distanceIn, rpmLut),
                     holdMinIn, holdMaxIn);
@@ -54,18 +62,25 @@ public class ShooterAimingModel {
     }
 
     private static final Profile[] DEFAULT_PROFILES = new Profile[] {
-            new Profile("LOW", 0.2, 35.0, 68.0, new double[][] {
+            new Profile("HOOD_0_20", 0.2, 35.0, 50.0, new double[][] {
                     {40.0, 2600.0},
-                    {50.0, 2800.0},
-                    {58.0, 2925.0},
-                    {66.0, 3075.0}
+                    {50.0, 2800.0}
             }),
-            new Profile("MID", 0.5, 52.0, 82.0, new double[][] {
+            new Profile("HOOD_0_35", 0.35, 50.0, 62.5, new double[][] {
+                    {50.0, 2650.0},
+                    {54.5, 2700.0},
+                    {62.5, 2800.0}
+            }),
+            new Profile("HOOD_0_25", 0.25, 58.0, 66.0, new double[][] {
+                    {58.0, 2900.0},
+                    {66.0, 3050.0}
+            }),
+            new Profile("HOOD_0_50", 0.5, 56.0, 74.0, new double[][] {
                     {56.0, 2850.0},
                     {64.5, 2900.0},
                     {74.0, 3050.0}
             }),
-            new Profile("HIGH", 0.7, 62.0, 145.0, new double[][] {
+            new Profile("HOOD_0_70", 0.7, 67.0, 145.0, new double[][] {
                     {67.0, 3200.0},
                     {80.0, 3300.0},
                     {97.5, 3400.0},
@@ -86,20 +101,12 @@ public class ShooterAimingModel {
     }
 
     public Solution update(double distanceIn) {
-        if (currentProfile != null && currentProfile.contains(distanceIn)) {
-            return currentProfile.solve(distanceIn);
-        }
-
         currentProfile = selectProfile(distanceIn);
         return currentProfile.solve(distanceIn);
     }
 
     public Solution preview(double distanceIn) {
-        Profile profile = currentProfile;
-        if (profile == null || !profile.contains(distanceIn)) {
-            profile = selectProfile(distanceIn);
-        }
-        return profile.solve(distanceIn);
+        return selectProfile(distanceIn).solve(distanceIn);
     }
 
     public void reset() {
@@ -112,7 +119,7 @@ public class ShooterAimingModel {
 
         for (Profile profile : profiles) {
             double score = profile.contains(distanceIn)
-                    ? Math.abs(distanceIn - profile.centerIn)
+                    ? profile.distanceToNearestSample(distanceIn)
                     : 1000.0 + profile.distanceOutside(distanceIn);
             if (score < bestScore) {
                 best = profile;

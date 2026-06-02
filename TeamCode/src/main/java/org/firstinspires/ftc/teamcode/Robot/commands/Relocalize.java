@@ -37,7 +37,6 @@ public class Relocalize extends CommandBase {
 
         if (llPose == null) {
             drive.telemetry.addLine("llPose NULL");
-            drive.telemetry.update();
             return;
         }
 
@@ -58,7 +57,6 @@ public class Relocalize extends CommandBase {
         Robot.LAST_POSE = llPose.copy();
 
         drive.telemetry.addLine("Relocalized");
-        drive.telemetry.update();
     }
 
     @Override

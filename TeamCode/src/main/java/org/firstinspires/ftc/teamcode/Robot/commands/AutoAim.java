@@ -85,7 +85,7 @@ public class AutoAim extends SequentialCommandGroup {
                             @Override
                             public boolean isFinished() {
                                 return shooter.isHoodSettled()
-                                        && Math.abs(shooter.getVelocity() - spinUpRPM) <= RPM_TOLERANCE;
+                                        && shooter.isAtTargetVelocity(RPM_TOLERANCE);
                             }
                         },
 

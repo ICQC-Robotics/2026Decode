@@ -7,6 +7,7 @@ import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
@@ -21,9 +22,10 @@ import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
  */
 
 @Autonomous(group="!", name="Auto")
+@Disabled
 public class Auto extends CommandOpMode {
     Robot negabot;
-    Follower follower = negabot.drive.follower;
+    Follower follower;
     PathChain moveToShoot, moveToGrab;
 
     public void redClose() {
@@ -133,11 +135,20 @@ public class Auto extends CommandOpMode {
     @Override
     public void initialize() {
         negabot = new Robot(hardwareMap, telemetry, new Pose(72,72));
+        negabot.reset();
+        follower = negabot.drive.follower;
         telemetry.addLine("X for Red Close, Y for Red Far, A for Blue Close, B for Blue Far");
-        if(gamepad1.x) redClose();
-        if(gamepad1.y) redFar();
-        if(gamepad1.a) blueClose();
-        if(gamepad1.b) blueFar();
+        if(gamepad1.x) {
+            redClose();
+        } else if(gamepad1.y) {
+            redFar();
+        } else if(gamepad1.a) {
+            blueClose();
+        } else if(gamepad1.b) {
+            blueFar();
+        } else {
+            blueClose();
+        }
 
         negabot.schedule(
                 new SequentialCommandGroup(

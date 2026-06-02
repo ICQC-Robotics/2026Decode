@@ -27,7 +27,7 @@ public class WaitToShoot extends CommandBase {
     }
     @Override
     public void execute(){
-        if(shooter.getVelocity() > shooter.getTargetVelocity() - 100) intake.setSpeed(-1);
+        if(shooter.isAtTargetVelocity(100)) intake.setSpeed(-1);
         else intake.setSpeed(0);
     }
     @Override

@@ -15,6 +15,6 @@ public final class FieldConstants {
 
     //corners
     public static final Pose BLUE_CORNER = new Pose(26.241, 133.326, Math.toRadians(54));
-    public static final Pose RED_CORNER  = new Pose(7, 8.75, 90);
+    public static final Pose RED_CORNER  = new Pose(7, 8.75, Math.toRadians(90));
 
 }

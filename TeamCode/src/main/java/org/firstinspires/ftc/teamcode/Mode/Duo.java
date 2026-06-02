@@ -24,6 +24,7 @@ public class Duo extends CommandOpMode {
         g1 = new GamepadEx(gamepad1);
         g2 = new GamepadEx(gamepad2);
         negabot = new Robot(hardwareMap, telemetry, new Pose(0,0));
+        negabot.reset();
 
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g1));
 
