@@ -1,23 +1,18 @@
 package org.firstinspires.ftc.teamcode.Mode;
 
 import com.arcrobotics.ftclib.command.CommandOpMode;
-import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
-import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.PP.FieldConstants;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
-import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.DriveCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.PPTracking;
-import org.firstinspires.ftc.teamcode.Robot.commands.Relocalize;
-import org.firstinspires.ftc.teamcode.Robot.commands.ShootOnMove;
 import org.firstinspires.ftc.teamcode.Robot.commands.ShooterStandBy;
+import org.firstinspires.ftc.teamcode.Robot.commands.StationaryShoot;
 
 @TeleOp(group=".")
 public class SoloRed extends CommandOpMode {
@@ -97,14 +92,17 @@ public class SoloRed extends CommandOpMode {
         ppTracking = new PPTracking(negabot.turret, negabot.drive, alliance);
         ppTracking.resetDegOffset();
 
-        // A: start tracking -> autoaim -> stop tracking
+        // A: regular stationary shot. ShootOnMove stays separate for later.
         negabot.Action(
                 g,
                 GamepadKeys.Button.A,
-                new SequentialCommandGroup(
-                        new InstantCommand(() -> CommandScheduler.getInstance().schedule(ppTracking)),
-                        new ShootOnMove(negabot.drive, negabot.turret, negabot.shooter, negabot.intake, negabot.wait),
-                        new InstantCommand(() -> CommandScheduler.getInstance().cancel(ppTracking))
+                new StationaryShoot(
+                        negabot.drive,
+                        negabot.turret,
+                        negabot.shooter,
+                        negabot.intake,
+                        negabot.wait,
+                        () -> ppTracking.offset
                 ),
                 null
         );
