@@ -136,14 +136,9 @@ public class AutoAim extends SequentialCommandGroup {
         Pose robot = drive.follower.getPose();
         if (robot == null) return MIN_DIST;
 
-        double goalX, goalY;
-        if (Robot.ALLIANCE == Robot.Alliance.BLUE) {
-            goalX = FieldConstants.BLUE_GOAL_X;
-            goalY = FieldConstants.BLUE_GOAL_Y;
-        } else {
-            goalX = FieldConstants.RED_GOAL_X;
-            goalY = FieldConstants.RED_GOAL_Y;
-        }
+        Pose goal = FieldConstants.goalAimPointForAlliance(Robot.ALLIANCE == Robot.Alliance.BLUE);
+        double goalX = goal.getX();
+        double goalY = goal.getY();
 
         // robot pose (center)
         double x = robot.getX();

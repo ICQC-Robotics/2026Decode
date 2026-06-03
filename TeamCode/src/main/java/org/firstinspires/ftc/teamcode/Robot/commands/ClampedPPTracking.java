@@ -3,6 +3,7 @@
 package org.firstinspires.ftc.teamcode.Robot.commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
+import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.PP.FieldConstants;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
@@ -24,8 +25,8 @@ public class ClampedPPTracking extends CommandBase {
     // tune / match your PPTracking
     private static final double TURRET_FORWARD_OFFSET_IN = 3;
 
-    private double targetX = FieldConstants.BLUE_GOAL_X;
-    private double targetY = FieldConstants.BLUE_GOAL_Y;
+    private double targetX = FieldConstants.BLUE_GOAL_AIM_X;
+    private double targetY = FieldConstants.BLUE_GOAL_AIM_Y;
 
     // optional manual offset like PPTracking
     public double offset = 0;
@@ -42,14 +43,9 @@ public class ClampedPPTracking extends CommandBase {
 
     @Override
     public void initialize() {
-        // Pick target based on alliance
-        if (alliance == Robot.Alliance.RED) {
-            targetX = FieldConstants.RED_GOAL_X;
-            targetY = FieldConstants.RED_GOAL_Y;
-        } else {
-            targetX = FieldConstants.BLUE_GOAL_X;
-            targetY = FieldConstants.BLUE_GOAL_Y;
-        }
+        Pose target = FieldConstants.goalAimPointForAlliance(alliance == Robot.Alliance.BLUE);
+        targetX = target.getX();
+        targetY = target.getY();
 
         // IMPORTANT: don't call holdCurrentAngle() here if it schedules/locks turret
         // turret.holdCurrentAngle();

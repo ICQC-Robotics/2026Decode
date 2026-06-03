@@ -146,8 +146,9 @@ public class ShootOnMove extends SequentialCommandGroup {
         if (robot == null) return new MovingShot(MIN_DIST, 135.0, 0.0);
 
         Vector vel = drive.follower.getVelocity();
-        double gX = (Robot.ALLIANCE == Robot.Alliance.BLUE) ? FieldConstants.BLUE_GOAL_X : FieldConstants.RED_GOAL_X;
-        double gY = (Robot.ALLIANCE == Robot.Alliance.BLUE) ? FieldConstants.BLUE_GOAL_Y : FieldConstants.RED_GOAL_Y;
+        Pose goal = FieldConstants.goalAimPointForAlliance(Robot.ALLIANCE == Robot.Alliance.BLUE);
+        double gX = goal.getX();
+        double gY = goal.getY();
 
         double headingRad = robot.getHeading();
         double turretX = robot.getX() + PPTracking.TURRET_FORWARD_OFFSET_IN * Math.cos(headingRad);

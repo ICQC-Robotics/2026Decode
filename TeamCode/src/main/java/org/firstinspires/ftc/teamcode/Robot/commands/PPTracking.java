@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Robot.commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
+import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.PP.FieldConstants;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
@@ -22,8 +23,8 @@ public class PPTracking extends CommandBase {
 
     public double offset = 0;
 
-    double TARGET_X = FieldConstants.BLUE_GOAL_X;
-    double TARGET_Y = FieldConstants.BLUE_GOAL_Y;
+    double TARGET_X = FieldConstants.BLUE_GOAL_AIM_X;
+    double TARGET_Y = FieldConstants.BLUE_GOAL_AIM_Y;
 
     public PPTracking(Turret turret, Drive d, Robot.Alliance alliance) {
         this.turret = turret;
@@ -36,10 +37,9 @@ public class PPTracking extends CommandBase {
     public void initialize() {
         Robot.LAST_TURRET_DEG = 135;
         turret.holdCurrentAngle();
-        if (alliance == Robot.Alliance.RED) {
-            TARGET_X = FieldConstants.RED_GOAL_X;
-            TARGET_Y = FieldConstants.RED_GOAL_Y;
-        }
+        Pose target = FieldConstants.goalAimPointForAlliance(alliance == Robot.Alliance.BLUE);
+        TARGET_X = target.getX();
+        TARGET_Y = target.getY();
     }
 
     @Override
