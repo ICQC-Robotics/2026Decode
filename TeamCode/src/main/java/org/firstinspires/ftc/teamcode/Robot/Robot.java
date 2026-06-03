@@ -50,7 +50,7 @@ public class Robot {
 
         shooter = new Shooter(
                 h.get(DcMotorEx.class, "shooter1"), DcMotorSimple.Direction.REVERSE,
-                h.get(DcMotorEx.class, "shooter2"), DcMotorSimple.Direction.FORWARD,
+                h.get(DcMotorEx.class, "shooter2"), DcMotorSimple.Direction.REVERSE,
                 h.get(Servo.class, "servo1"),
                 h.get(Servo.class, "servo0"),
                 new PIDFCoefficients(6, 0.0, 0.005, 13.5)
