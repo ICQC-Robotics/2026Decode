@@ -9,6 +9,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Shooter extends SubsystemBase {
 
+    public static final double BASELINE_RPM = 2600;
+
     private final DcMotorEx rightShooter, leftShooter;
     public final Servo Cover;
     private final Servo Hood;
@@ -165,6 +167,15 @@ public class Shooter extends SubsystemBase {
         lastSolution = solution;
         setHoodPosition(solution.hoodPosition);
         setVelocity(solution.rpm);
+        return solution;
+    }
+
+    public ShooterAimingModel.Solution standbyForDistance(double distanceIn) {
+        ShooterAimingModel.Solution solution = aimingModel.update(distanceIn);
+        lastDistanceIn = distanceIn;
+        lastSolution = solution;
+        setHoodPosition(solution.hoodPosition);
+        setVelocity(BASELINE_RPM);
         return solution;
     }
 

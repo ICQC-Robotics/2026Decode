@@ -41,7 +41,7 @@ public class StationaryShoot extends SequentialCommandGroup {
         this.turret = turret;
         this.turretOffsetDeg = turretOffsetDeg;
         addCommands(shootSequence(drive, shooter, intake, wait));
-        addRequirements(turret, shooter, intake);
+        addRequirements(shooter, intake);
     }
 
     private SequentialCommandGroup shootSequence(Drive drive, Shooter shooter, Intake intake, Wait wait) {
@@ -50,13 +50,12 @@ public class StationaryShoot extends SequentialCommandGroup {
 
                 new CommandBase() {
                     {
-                        addRequirements(turret, shooter);
+                        addRequirements(shooter);
                     }
 
                     @Override
                     public void execute() {
                         StationaryShot shot = calculateStationaryShot(drive);
-                        aimTurretForShot(shot);
                         ShooterAimingModel.Solution solution = shooter.aimForDistance(shot.distanceIn);
                         addShotTelemetry(drive, shooter, shot, solution);
                     }
@@ -75,7 +74,7 @@ public class StationaryShoot extends SequentialCommandGroup {
                         new InstantCommand(() -> intake.setSpeed(-1), intake),
                         new CommandBase() {
                             {
-                                addRequirements(turret, shooter, intake);
+                                addRequirements(shooter, intake);
                             }
 
                             @Override
@@ -86,7 +85,6 @@ public class StationaryShoot extends SequentialCommandGroup {
                             @Override
                             public void execute() {
                                 StationaryShot shot = calculateStationaryShot(drive);
-                                aimTurretForShot(shot);
                                 ShooterAimingModel.Solution solution = shooter.aimForDistance(shot.distanceIn);
                                 addShotTelemetry(drive, shooter, shot, solution);
                             }
@@ -122,10 +120,6 @@ public class StationaryShoot extends SequentialCommandGroup {
         double aimY = goal.getY() - turretY;
         double distance = Math.hypot(aimX, aimY);
         return new StationaryShot(distance, turretAngleDeg(aimX, aimY, headingRad));
-    }
-
-    private void aimTurretForShot(StationaryShot shot) {
-        turret.setTargetDeg(shot.turretAngleDeg);
     }
 
     private boolean turretReady() {

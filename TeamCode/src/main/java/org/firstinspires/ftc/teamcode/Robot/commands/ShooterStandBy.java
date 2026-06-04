@@ -26,7 +26,7 @@ public class ShooterStandBy extends CommandBase {
     @Override
     public void execute() {
         double d = AutoAim.calculateDistanceIn(drive);
-        shooter.aimForDistance(d);
+        shooter.standbyForDistance(d);
     }
 
     @Override

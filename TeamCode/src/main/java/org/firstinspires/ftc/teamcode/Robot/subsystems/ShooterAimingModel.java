@@ -62,26 +62,21 @@ public class ShooterAimingModel {
     }
 
     private static final Profile[] DEFAULT_PROFILES = new Profile[] {
-            new Profile("HOOD_0_20", 0.2, 35.0, 50.0, new double[][] {
+            new Profile("HOOD_0_20", 0.2, 35.0, 52.0, new double[][] {
                     {40.0, 2600.0},
                     {50.0, 2800.0}
             }),
-            new Profile("HOOD_0_35", 0.35, 50.0, 62.5, new double[][] {
+            new Profile("HOOD_0_25", 0.25, 50.0, 70.0, new double[][] {
                     {50.0, 2650.0},
                     {54.5, 2700.0},
-                    {62.5, 2800.0}
-            }),
-            new Profile("HOOD_0_25", 0.25, 58.0, 66.0, new double[][] {
-                    {58.0, 2900.0},
-                    {66.0, 3050.0}
-            }),
-            new Profile("HOOD_0_50", 0.5, 56.0, 74.0, new double[][] {
                     {56.0, 2850.0},
+                    {58.0, 2900.0},
+                    {62.5, 2800.0},
                     {64.5, 2900.0},
-                    {74.0, 3050.0}
+                    {70.0, 3000.0}
             }),
-            new Profile("HOOD_0_70", 0.7, 67.0, 145.0, new double[][] {
-                    {67.0, 3200.0},
+            new Profile("HOOD_0_70", 0.7, 70.0, 145.0, new double[][] {
+                    {74.0, 3050.0},
                     {80.0, 3300.0},
                     {97.5, 3400.0},
                     {115.5, 3700.0},
@@ -114,6 +109,10 @@ public class ShooterAimingModel {
     }
 
     private Profile selectProfile(double distanceIn) {
+        if (currentProfile != null && currentProfile.contains(distanceIn)) {
+            return currentProfile;
+        }
+
         Profile best = null;
         double bestScore = Double.POSITIVE_INFINITY;
 

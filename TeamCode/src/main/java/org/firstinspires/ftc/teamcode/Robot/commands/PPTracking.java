@@ -7,17 +7,12 @@ import org.firstinspires.ftc.teamcode.PP.FieldConstants;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
-import com.arcrobotics.ftclib.command.ParallelDeadlineGroup;
 
 public class PPTracking extends CommandBase {
     private final Turret turret;
     private final Drive d;
 
     private Robot.Alliance alliance;
-
-    private static final double DEADBAND_DEG = 1;//tune this
-    private static final double FORWARD_DEG = 135;
-
 
     static final double TURRET_FORWARD_OFFSET_IN = 3;
 
@@ -44,7 +39,7 @@ public class PPTracking extends CommandBase {
 
     @Override
     public void execute() {
-        turret.setTargetDeg(
+        turret.setSmoothedTargetDeg(
                 turretAngleDeg(d.getX(), d.getY(), TARGET_X, TARGET_Y, d.getHeading())
         );
     }
@@ -88,12 +83,6 @@ public class PPTracking extends CommandBase {
         a = (a + 180.0) % 360.0;
         if (a < 0) a += 360.0;
         return a - 180.0;
-    }
-
-    private double normalizeRad(double angle) {
-        while (angle > Math.PI)  angle -= 2.0 * Math.PI;
-        while (angle < -Math.PI) angle += 2.0 * Math.PI;
-        return angle;
     }
 }
 
