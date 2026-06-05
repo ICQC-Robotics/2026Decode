@@ -79,6 +79,30 @@ public class Drive extends SubsystemBase {
         return follower.getPose().getHeading();
     }
 
+    public void driveRobotCentric(double forward, double strafe, double turn) {
+
+        double fRPower = forward - strafe - turn;
+        double fLPower = forward + strafe + turn;
+        double bRPower = forward + strafe - turn;
+        double bLPower = forward - strafe + turn;
+
+        double max = Math.max(
+                1.0,
+                Math.max(
+                        Math.abs(fRPower),
+                        Math.max(
+                                Math.abs(fLPower),
+                                Math.max(Math.abs(bRPower), Math.abs(bLPower))
+                        )
+                )
+        );
+
+        fR.setPower(fRPower / max);
+        fL.setPower(fLPower / max);
+        bR.setPower(bRPower / max);
+        bL.setPower(bLPower / max);
+    }
+
     public void turnInPlace(double turnPower) {
         fL.setPower(turnPower);
         bL.setPower(turnPower);

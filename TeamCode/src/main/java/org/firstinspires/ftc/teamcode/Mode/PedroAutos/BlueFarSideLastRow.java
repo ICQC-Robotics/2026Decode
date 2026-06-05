@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Vision.IntakeColorProcessing;
+import org.firstinspires.ftc.teamcode.Robot.commands.ArtifactSeekCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.PPTracking;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
@@ -98,15 +99,8 @@ public class BlueFarSideLastRow extends CommandOpMode {
                         new WaitCommand(500),
                         shoot(),
 
-                        latchZone(),
-                        branchOnLatchedZone(),
-                        latchZone(),
-                        branchOnLatchedZone(),
-                        latchZone(),
-                        branchOnLatchedZone(),
-                        latchZone(),
-                        branchOnLatchedZone()
-
+                        artifactCycle(),
+                        artifactCycle()
 
 /*
                         new InstantCommand(() -> { negabot.intake.setSpeed(-1); }),
@@ -142,6 +136,65 @@ public class BlueFarSideLastRow extends CommandOpMode {
                 )
         );
     }
+
+    private Command artifactCycle() {
+
+        return new SequentialCommandGroup(
+
+                new InstantCommand(() -> {
+                    negabot.intake.setSpeed(-1);
+                }),
+
+                // Drive to artifact pile
+                new ArtifactSeekCommand(negabot),
+
+                // Build return path from CURRENT pose
+                new InstantCommand(() -> {
+
+                    Pose currentPose = f.getPose();
+
+                    PathChain returnPath =
+
+                            f.pathBuilder()
+
+                                    .addPath(
+                                            new BezierLine(
+                                                    currentPose,
+                                                    new Pose(
+                                                            55.886,
+                                                            18.599,
+                                                            0
+                                                    )
+                                            )
+                                    )
+
+                                    .setLinearHeadingInterpolation(
+                                            currentPose.getHeading(),
+                                            0
+                                    )
+
+                                    .build();
+
+                    f.followPath(returnPath, 1.0, true);
+                }),
+
+                // Wait for drive back
+                new WaitCommand(1800),
+
+                new InstantCommand(() -> {
+                    intake.setSpeed(0);
+                }),
+
+                new InstantCommand(() -> {
+                    negabot.shooter.setMagazineCover(COVER_OPEN);
+                }),
+
+                new WaitCommand(500),
+
+                shoot()
+        );
+    }
+
 
     private Command latchZone() {
         return new InstantCommand(() -> {

@@ -24,6 +24,7 @@ public class Robot {
     public Wait wait;
     public Vision vision;
 
+
     public Indicator indicator;
     public static Pose LAST_POSE;
     public static double LAST_TURRET_DEG;
