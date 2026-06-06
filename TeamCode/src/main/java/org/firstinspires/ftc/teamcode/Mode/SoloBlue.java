@@ -9,6 +9,7 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
+import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.DriveCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.PPTracking;
@@ -38,6 +39,8 @@ public class SoloBlue extends CommandOpMode {
         negabot = new Robot(hardwareMap, telemetry, new Pose(0,0, 0));
         negabot.reset();
 
+        negabot.shooter.setMagazineCover(AutoAim.Positions.CLOSED_COVER.getPos());
+        negabot.shooter.setHoodPosition(0.25);
 
         Robot.ALLIANCE = Robot.Alliance.BLUE;
 
