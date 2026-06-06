@@ -34,7 +34,7 @@ public class ShootOnMove extends SequentialCommandGroup {
         }
     }
 
-    private static final double RPM_TOLERANCE = 25;
+    private static final double RPM_TOLERANCE = 50;
     private static final double FEED_TIME_S = 1;
     public static final double MIN_DIST = 20;
     public static final double MAX_DIST = 150;
@@ -92,7 +92,6 @@ public class ShootOnMove extends SequentialCommandGroup {
 
                 new SequentialCommandGroup(
                         new InstantCommand(() -> shooter.setMagazineCover(Positions.OPEN_COVER.getPos()), shooter),
-                        new WaitCommand(100),
                         new InstantCommand(() -> intake.setSpeed(-1), intake),
                         new CommandBase() {
                             {

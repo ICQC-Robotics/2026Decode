@@ -19,7 +19,7 @@ import java.util.function.DoubleSupplier;
 
 public class StationaryShoot extends SequentialCommandGroup {
 
-    private static final double RPM_TOLERANCE = 25;
+    private static final double RPM_TOLERANCE = 50;
     private static final double TURRET_TOLERANCE_DEG = 1.0;
     private static final double FEED_TIME_S = 0.6;
     private static final double MIN_DIST = AutoAim.MIN_DIST;
@@ -63,8 +63,8 @@ public class StationaryShoot extends SequentialCommandGroup {
                     @Override
                     public boolean isFinished() {
                         return shooter.isHoodSettled()
-                                && turretReady();
-                                //&& shooter.isAtTargetVelocity(RPM_TOLERANCE);
+                                && turretReady()
+                                && shooter.isAtTargetVelocity(RPM_TOLERANCE);
                     }
                 },
 
