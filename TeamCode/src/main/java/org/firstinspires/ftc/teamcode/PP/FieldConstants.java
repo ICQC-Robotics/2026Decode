@@ -7,7 +7,7 @@ public final class FieldConstants {
     private FieldConstants() {}
 
     public static final double FIELD_SIZE_IN = 144.0;
-    public static final double GOAL_AIM_INSET_IN = 3.0;
+    public static final double GOAL_AIM_INSET_IN = 0.0;
 
     public static final double BLUE_GOAL_CORNER_X = 0.0;
     public static final double BLUE_GOAL_CORNER_Y = FIELD_SIZE_IN;

@@ -25,7 +25,7 @@ public class SoloBlue extends CommandOpMode {
 
     private boolean poseLocked = false;
 
-    private Pose blueReset = new Pose(26.241, 133.326, Math.toRadians(54));
+    private Pose blueReset = new Pose(32.54237288135593, 134.56271186440677, Math.toRadians(90));
 
     private Robot.Alliance alliance = Robot.Alliance.BLUE;
 
@@ -137,7 +137,6 @@ public class SoloBlue extends CommandOpMode {
             negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, negabot.drive));
             negabot.turret.setDefaultCommand(ppTracking);
 
-            // IMPORTANT: do NOT set PPTracking as default anymore
 
             turretTracking = true;
             shooterStandby = true;

@@ -25,7 +25,7 @@ public class Shooter extends SubsystemBase {
     private double targetHoodPosition = -1.0;
     private static final double TARGET_RPM_CHANGE_RESET = 50.0;
     private static final double HOOD_POSITION_EPSILON = 0.002;
-    private static final double HOOD_SETTLE_TIME_S = 0.20;
+    private static final double HOOD_SETTLE_TIME_S = 0;
     private static final double TICKS_PER_REV = 28.0;
     private static final double MIN_VALID_RPM = 1.0;
     private ShooterAimingModel.Solution lastSolution;
@@ -175,7 +175,7 @@ public class Shooter extends SubsystemBase {
         lastDistanceIn = distanceIn;
         lastSolution = solution;
         setHoodPosition(solution.hoodPosition);
-        setVelocity(BASELINE_RPM);
+        setVelocity(solution.rpm);
         return solution;
     }
 
