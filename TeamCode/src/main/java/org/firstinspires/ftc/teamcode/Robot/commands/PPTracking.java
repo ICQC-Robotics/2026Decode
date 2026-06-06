@@ -39,9 +39,10 @@ public class PPTracking extends CommandBase {
 
     @Override
     public void execute() {
-        turret.setSmoothedTargetDeg(
+        turret.setTargetDeg(
                 turretAngleDeg(d.getX(), d.getY(), TARGET_X, TARGET_Y, d.getHeading())
         );
+
     }
 
     public double turretAngleDeg(double x, double y,
