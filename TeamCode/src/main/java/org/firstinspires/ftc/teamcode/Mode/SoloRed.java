@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Mode;
 
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -9,6 +10,7 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
+import org.firstinspires.ftc.teamcode.Robot.commands.AlignChassisToGoal;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.DriveCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.PPTracking;
@@ -95,15 +97,20 @@ public class SoloRed extends CommandOpMode {
         ppTracking.resetDegOffset();
 
         // Right trigger: regular stationary shot. ShootOnMove stays separate for later.
+        // If the goal is in the turret's dead zone, square the chassis up first
+        // (instant no-op when it's already reachable) so the turret can actually aim.
         new Trigger(() -> g.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
                 .whenActive(
-                        new StationaryShoot(
-                                negabot.drive,
-                                negabot.turret,
-                                negabot.shooter,
-                                negabot.intake,
-                                negabot.wait,
-                                () -> ppTracking.offset
+                        new SequentialCommandGroup(
+                                new AlignChassisToGoal(negabot.drive, g, alliance),
+                                new StationaryShoot(
+                                        negabot.drive,
+                                        negabot.turret,
+                                        negabot.shooter,
+                                        negabot.intake,
+                                        negabot.wait,
+                                        () -> ppTracking.offset
+                                )
                         )
                 );
         // Keep your DPAD offset buttons here exactly like before
