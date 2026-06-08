@@ -106,7 +106,7 @@ public class Turret extends SubsystemBase {
     }
 
     public void setTargetDeg(double deg) {
-        targetDeg = clamp(deg, MIN_DEG, MAX_DEG);
+        targetDeg = nearestReachableDeg(deg, MIN_DEG, MAX_DEG);
         int ticks = degToTicks(targetDeg - angleOffsetDeg);
         turretMotor.setTargetPosition(ticks);
         turretMotor.setPower(1);
@@ -162,6 +162,31 @@ public class Turret extends SubsystemBase {
         if (v < lo) return lo;
         if (v > hi) return hi;
         return v;
+    }
+
+    /**
+     * Picks the closest angle to {@code desiredDeg} that the turret can actually reach.
+     * Desired angles are computed mod 360, but the turret only spans [lo, hi] (a 270 deg
+     * range here, leaving a 90 deg dead zone behind the robot it can't physically rotate
+     * into). A plain min/max clamp always saturates dead-zone angles to {@code hi}, even
+     * when {@code lo} (i.e. wrapping around through 360/0) is the nearer, more accurate
+     * limit to point toward. This picks whichever reachable bound is angularly closer.
+     */
+    private static double nearestReachableDeg(double desiredDeg, double lo, double hi) {
+        double d = wrap360(desiredDeg);
+        if (d >= lo && d <= hi) return d;
+        return circularDistanceDeg(d, lo) <= circularDistanceDeg(d, hi) ? lo : hi;
+    }
+
+    private static double circularDistanceDeg(double a, double b) {
+        double diff = Math.abs(wrap360(a) - wrap360(b)) % 360.0;
+        return Math.min(diff, 360.0 - diff);
+    }
+
+    private static double wrap360(double a) {
+        a %= 360.0;
+        if (a < 0) a += 360.0;
+        return a;
     }
 
     public void restoreAngleDeg(double savedAngleDeg) {
