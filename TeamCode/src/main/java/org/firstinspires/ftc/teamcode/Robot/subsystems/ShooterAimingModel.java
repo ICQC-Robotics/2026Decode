@@ -126,8 +126,10 @@ public class ShooterAimingModel {
         return best;
     }
 
+    private static final ShooterAimingModel PREVIEW_INSTANCE = new ShooterAimingModel();
+
     public static double previewDefaultRpm(double distanceIn) {
-        return new ShooterAimingModel().preview(distanceIn).rpm;
+        return PREVIEW_INSTANCE.preview(distanceIn).rpm;
     }
 
     private static double lookupInterpolated(double x, double[][] table) {

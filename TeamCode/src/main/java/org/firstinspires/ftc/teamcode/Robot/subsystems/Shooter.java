@@ -28,6 +28,11 @@ public class Shooter extends SubsystemBase {
     private static final double HOOD_SETTLE_TIME_S = 0;
     private static final double TICKS_PER_REV = 28.0;
     private static final double MIN_VALID_RPM = 1.0;
+
+    // Cached per-loop velocity to avoid redundant I2C reads
+    private double cachedRightRPM = 0.0;
+    private double cachedLeftRPM = 0.0;
+    private double cachedVelocityRPM = 0.0;
     private ShooterAimingModel.Solution lastSolution;
     private double lastDistanceIn = 0.0;
 
@@ -98,20 +103,15 @@ public class Shooter extends SubsystemBase {
     }
 
     public double getVelocity() {
-        double rightRPM = Math.abs(getRightVelocity());
-        double leftRPM = Math.abs(getLeftVelocity());
-
-        if (rightRPM < MIN_VALID_RPM) return leftRPM;
-        if (leftRPM < MIN_VALID_RPM) return rightRPM;
-        return (rightRPM + leftRPM) / 2.0;
+        return cachedVelocityRPM;
     }
 
     public double getRightVelocity() {
-        return ticksPerSecondToRPM(rightShooter.getVelocity());
+        return cachedRightRPM;
     }
 
     public double getLeftVelocity() {
-        return ticksPerSecondToRPM(leftShooter.getVelocity());
+        return cachedLeftRPM;
     }
 
     public boolean isAtTargetVelocity(double toleranceRPM) {
@@ -125,20 +125,26 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
-        if (targetVelocityRPM <= 0) return;
+        // Read hardware once per loop cycle; all getters return the cached values
+        cachedRightRPM = ticksPerSecondToRPM(rightShooter.getVelocity());
+        cachedLeftRPM  = ticksPerSecondToRPM(leftShooter.getVelocity());
+        double rightAbs = Math.abs(cachedRightRPM);
+        double leftAbs  = Math.abs(cachedLeftRPM);
+        if (rightAbs < MIN_VALID_RPM)      cachedVelocityRPM = leftAbs;
+        else if (leftAbs < MIN_VALID_RPM)  cachedVelocityRPM = rightAbs;
+        else                               cachedVelocityRPM = (rightAbs + leftAbs) / 2.0;
 
-        double currentRPM = getVelocity();
+        if (targetVelocityRPM <= 0) return;
 
         // Pure bang-bang with hysteresis band
         double low = targetVelocityRPM - rpmTolerance;
         double high = targetVelocityRPM + rpmTolerance;
 
-        if (currentRPM < low) {
-            bangHigh = true;   // go full
-        } else if (currentRPM > high) {
-            bangHigh = false;  // go off
+        if (cachedVelocityRPM < low) {
+            bangHigh = true;
+        } else if (cachedVelocityRPM > high) {
+            bangHigh = false;
         }
-        // else: within band → keep previous bangHigh (prevents chatter)
 
         double out = bangHigh ? fullPower : offPower;
         rightShooter.setPower(out);
@@ -168,12 +174,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public ShooterAimingModel.Solution standbyForDistance(double distanceIn) {
-        ShooterAimingModel.Solution solution = aimingModel.update(distanceIn);
-        lastDistanceIn = distanceIn;
-        lastSolution = solution;
-        setHoodPosition(solution.hoodPosition);
-        setVelocity(solution.rpm);
-        return solution;
+        return aimForDistance(distanceIn);
     }
 
     public boolean isHoodSettled() {
