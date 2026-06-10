@@ -1,15 +1,23 @@
 package org.firstinspires.ftc.teamcode.Robot.subsystems;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+@Config
 public class Shooter extends SubsystemBase {
 
-    public static final double BASELINE_RPM = 2600;
+    // Bang-bang hysteresis band (±RPM around target). Tune via FTC Dashboard.
+    public static double BANG_BAND_RPM = 25.0;
+
+    private static final double TICKS_PER_REV = 28.0;
+    private static final double MIN_VALID_RPM = 1.0;
+    private static final double TARGET_CHANGE_RESET_RPM = 50.0;
+    private static final double HOOD_POSITION_EPSILON = 0.002;
+    private static final double HOOD_SETTLE_TIME_S = 0.0;
 
     private final DcMotorEx rightShooter, leftShooter;
     public final Servo Cover;
@@ -17,80 +25,53 @@ public class Shooter extends SubsystemBase {
     private final ShooterAimingModel aimingModel = new ShooterAimingModel();
     private final ElapsedTime hoodSettleTimer = new ElapsedTime();
 
-    // Keep pidf if you still want the motor controller's internal velocity PIDF (optional)
-    private final PIDFCoefficients pidf;
-
-    private double targetVelocityRPM;
-    private double rpmTolerance = 25;
+    private double targetVelocityRPM = 0.0;
     private double targetHoodPosition = -1.0;
-    private static final double TARGET_RPM_CHANGE_RESET = 50.0;
-    private static final double HOOD_POSITION_EPSILON = 0.002;
-    private static final double HOOD_SETTLE_TIME_S = 0;
-    private static final double TICKS_PER_REV = 28.0;
-    private static final double MIN_VALID_RPM = 1.0;
+    private boolean bangHigh = false;
 
-    // Cached per-loop velocity to avoid redundant I2C reads
+    // Velocity cached once per loop to avoid redundant I2C reads
     private double cachedRightRPM = 0.0;
     private double cachedLeftRPM = 0.0;
     private double cachedVelocityRPM = 0.0;
-    private ShooterAimingModel.Solution lastSolution;
+
     private double lastDistanceIn = 0.0;
-
-    // Bang-bang outputs
-    private double fullPower = 1;
-    private double offPower  = 0.0;
-
-    // Bang-bang state (for hysteresis / keeping last output within tolerance band)
-    private boolean bangHigh = false;
+    private ShooterAimingModel.Solution lastSolution;
 
     public Shooter(
             DcMotorEx rightShooter, DcMotorSimple.Direction rightDir,
             DcMotorEx leftShooter, DcMotorSimple.Direction leftDir,
             Servo Cover,
-            Servo Hood,
-            PIDFCoefficients pidf
+            Servo Hood
     ) {
         this.rightShooter = rightShooter;
         this.leftShooter = leftShooter;
         this.Cover = Cover;
         this.Hood = Hood;
-        this.pidf = pidf;
 
         this.rightShooter.setDirection(rightDir);
-        this.rightShooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        // FLOAT (coast) so the flywheel spins down naturally on bang-bang "off" phase
+        this.rightShooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
         this.rightShooter.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         this.rightShooter.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
 
         this.leftShooter.setDirection(leftDir);
-        this.leftShooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        this.leftShooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
         this.leftShooter.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         this.leftShooter.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
 
-        // Optional: keep this if you're relying on the built-in velocity PIDF when using setVelocity(),
-        // but since we're doing pure bang-bang on setPower(), this doesn't really matter.
-        this.setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
-
-        this.setMagazineCover(1);
-        this.setHoodPosition(0.2);
-        targetVelocityRPM = 0;
+        setMagazineCover(1.0);
+        setHoodPosition(0.2);
     }
 
-    public void setPIDF(double p, double i, double d, double f) {
-        this.pidf.p = p;
-        this.pidf.i = i;
-        this.pidf.d = d;
-        this.pidf.f = f;
-        this.rightShooter.setVelocityPIDFCoefficients(p, i, d, f);
-        this.leftShooter.setVelocityPIDFCoefficients(p, i, d, f);
-    }
+    // ── velocity control ───────────────────────────────────────────────────────
 
     public void setVelocity(double rpm) {
         if (rpm <= 0) {
             stop();
             return;
         }
-        if (Math.abs(rpm - targetVelocityRPM) > TARGET_RPM_CHANGE_RESET) {
-            bangHigh = false;
+        if (Math.abs(rpm - targetVelocityRPM) > TARGET_CHANGE_RESET_RPM) {
+            bangHigh = false; // reset bang state on large target jumps
         }
         targetVelocityRPM = rpm;
     }
@@ -102,54 +83,47 @@ public class Shooter extends SubsystemBase {
         leftShooter.setPower(0);
     }
 
+    /** Returns the averaged flywheel velocity (RPM), cached from the last periodic() call. */
     public double getVelocity() {
         return cachedVelocityRPM;
     }
 
+    /** Signed right-motor velocity (RPM), cached from the last periodic() call. */
     public double getRightVelocity() {
         return cachedRightRPM;
     }
 
+    /** Signed left-motor velocity (RPM), cached from the last periodic() call. */
     public double getLeftVelocity() {
         return cachedLeftRPM;
     }
 
     public boolean isAtTargetVelocity(double toleranceRPM) {
         return targetVelocityRPM > 0
-                && Math.abs(getVelocity() - targetVelocityRPM) <= toleranceRPM;
+                && Math.abs(cachedVelocityRPM - targetVelocityRPM) <= toleranceRPM;
     }
 
-    private static double ticksPerSecondToRPM(double ticksPerSecond) {
-        return (ticksPerSecond * 60.0) / TICKS_PER_REV;
+    // ── aiming model ───────────────────────────────────────────────────────────
+
+    /**
+     * Looks up the hood angle and RPM for {@code distanceIn}, applies them immediately,
+     * and returns the solution. Call every loop while in standby or mid-shot.
+     */
+    public ShooterAimingModel.Solution aimForDistance(double distanceIn) {
+        ShooterAimingModel.Solution solution = aimingModel.update(distanceIn);
+        lastDistanceIn = distanceIn;
+        lastSolution = solution;
+        setHoodPosition(solution.hoodPosition);
+        setVelocity(solution.rpm);
+        return solution;
     }
 
-    @Override
-    public void periodic() {
-        // Read hardware once per loop cycle; all getters return the cached values
-        cachedRightRPM = ticksPerSecondToRPM(rightShooter.getVelocity());
-        cachedLeftRPM  = ticksPerSecondToRPM(leftShooter.getVelocity());
-        double rightAbs = Math.abs(cachedRightRPM);
-        double leftAbs  = Math.abs(cachedLeftRPM);
-        if (rightAbs < MIN_VALID_RPM)      cachedVelocityRPM = leftAbs;
-        else if (leftAbs < MIN_VALID_RPM)  cachedVelocityRPM = rightAbs;
-        else                               cachedVelocityRPM = (rightAbs + leftAbs) / 2.0;
-
-        if (targetVelocityRPM <= 0) return;
-
-        // Pure bang-bang with hysteresis band
-        double low = targetVelocityRPM - rpmTolerance;
-        double high = targetVelocityRPM + rpmTolerance;
-
-        if (cachedVelocityRPM < low) {
-            bangHigh = true;
-        } else if (cachedVelocityRPM > high) {
-            bangHigh = false;
-        }
-
-        double out = bangHigh ? fullPower : offPower;
-        rightShooter.setPower(out);
-        leftShooter.setPower(out);
+    /** Identical to {@link #aimForDistance} — kept for call-site readability. */
+    public ShooterAimingModel.Solution standbyForDistance(double distanceIn) {
+        return aimForDistance(distanceIn);
     }
+
+    // ── servo control ──────────────────────────────────────────────────────────
 
     public void setMagazineCover(double pos) {
         Cover.setPosition(pos);
@@ -164,18 +138,7 @@ public class Shooter extends SubsystemBase {
         }
     }
 
-    public ShooterAimingModel.Solution aimForDistance(double distanceIn) {
-        ShooterAimingModel.Solution solution = aimingModel.update(distanceIn);
-        lastDistanceIn = distanceIn;
-        lastSolution = solution;
-        setHoodPosition(solution.hoodPosition);
-        setVelocity(solution.rpm);
-        return solution;
-    }
-
-    public ShooterAimingModel.Solution standbyForDistance(double distanceIn) {
-        return aimForDistance(distanceIn);
-    }
+    // ── state queries ──────────────────────────────────────────────────────────
 
     public boolean isHoodSettled() {
         return hoodSettleTimer.seconds() >= HOOD_SETTLE_TIME_S;
@@ -185,7 +148,7 @@ public class Shooter extends SubsystemBase {
         return targetHoodPosition;
     }
 
-    public double getTargetVelocity(){
+    public double getTargetVelocity() {
         return targetVelocityRPM;
     }
 
@@ -199,5 +162,34 @@ public class Shooter extends SubsystemBase {
 
     public String getLastProfileName() {
         return lastSolution == null ? "NONE" : lastSolution.profileName;
+    }
+
+    // ── periodic (bang-bang) ───────────────────────────────────────────────────
+
+    @Override
+    public void periodic() {
+        // Read both motors once per loop — all getters return these cached values
+        cachedRightRPM = ticksPerSecondToRPM(rightShooter.getVelocity());
+        cachedLeftRPM  = ticksPerSecondToRPM(leftShooter.getVelocity());
+
+        double rightAbs = Math.abs(cachedRightRPM);
+        double leftAbs  = Math.abs(cachedLeftRPM);
+        if (rightAbs < MIN_VALID_RPM)      cachedVelocityRPM = leftAbs;
+        else if (leftAbs < MIN_VALID_RPM)  cachedVelocityRPM = rightAbs;
+        else                               cachedVelocityRPM = (rightAbs + leftAbs) / 2.0;
+
+        if (targetVelocityRPM <= 0) return;
+
+        // Hysteresis band prevents chatter at the boundary
+        if (cachedVelocityRPM < targetVelocityRPM - BANG_BAND_RPM)      bangHigh = true;
+        else if (cachedVelocityRPM > targetVelocityRPM + BANG_BAND_RPM) bangHigh = false;
+
+        double out = bangHigh ? 1.0 : 0.0;
+        rightShooter.setPower(out);
+        leftShooter.setPower(out);
+    }
+
+    private static double ticksPerSecondToRPM(double ticksPerSecond) {
+        return (ticksPerSecond * 60.0) / TICKS_PER_REV;
     }
 }

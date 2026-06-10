@@ -1,16 +1,20 @@
 package org.firstinspires.ftc.teamcode.Robot.commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
-import com.pedropathing.geometry.Pose;
 
-import org.firstinspires.ftc.teamcode.PP.FieldConstants;
-import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Shooter;
 
 /**
- * Standby spin-up that continuously recomputes shooter velocity
- * from current robot pose, using AutoAim's distance->RPM lookup table.
+ * Default command for the Shooter subsystem.
+ *
+ * Runs continuously every loop: computes distance from current pose to the
+ * alliance goal, looks up the correct hood angle and flywheel RPM via the
+ * ShooterAimingModel, and applies both immediately. The bang-bang controller
+ * in Shooter.periodic() then drives the motors toward that velocity.
+ *
+ * Because this is the shooter's default command, it is automatically replaced
+ * (and later restored) whenever another command explicitly requires the shooter.
  */
 public class ShooterStandBy extends CommandBase {
 
@@ -25,13 +29,19 @@ public class ShooterStandBy extends CommandBase {
 
     @Override
     public void execute() {
-        double d = AutoAim.calculateDistanceIn(drive);
-        shooter.standbyForDistance(d);
+        double distIn = AutoAim.calculateDistanceIn(drive);
+        shooter.standbyForDistance(distIn);
+
+        drive.telemetry.addData("Standby Dist (in)",  distIn);
+        drive.telemetry.addData("Standby Profile",    shooter.getLastProfileName());
+        drive.telemetry.addData("Standby Target RPM", shooter.getTargetVelocity());
+        drive.telemetry.addData("Standby Actual RPM", shooter.getVelocity());
+        drive.telemetry.addData("Standby Hood",       shooter.getTargetHoodPosition());
+        drive.telemetry.addData("Standby At Speed",   shooter.isAtTargetVelocity(75));
     }
 
     @Override
     public boolean isFinished() {
-        return false;
+        return false; // runs forever as default
     }
-
 }

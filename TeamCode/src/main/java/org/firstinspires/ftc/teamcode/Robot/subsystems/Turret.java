@@ -8,126 +8,49 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 public class Turret extends SubsystemBase {
 
-    public static final double MIN_DEG = 0;
-    public static final double MAX_DEG = 270;
+    public static final double MIN_DEG = 0.0;
+    public static final double MAX_DEG = 270.0;
     public static final double GEAR_RATIO = 2.77272727;
 
-    private final DcMotorEx turretMotor;
+    private static final double TICKS_PER_REV = 384.5;
+    private static final double TICKS_PER_DEG = (TICKS_PER_REV * GEAR_RATIO) / 360.0;
+
+    private final DcMotorEx motor;
     private final PIDFCoefficients pidf;
 
-    private final double ticksPerDeg;
-
-    private double targetDeg = 0;
-    private double visionTxDeg = Double.NaN;
-    private static final double TX_DEADBAND_DEG = 0.1;
     private double angleOffsetDeg = 135.0;
+    private double targetDeg = 135.0;
 
-    public Turret(DcMotorEx turretMotor,
-                  DcMotorSimple.Direction direction,
-                  PIDFCoefficients pidf) {
-
-        this.turretMotor = turretMotor;
+    public Turret(DcMotorEx motor, DcMotorSimple.Direction direction, PIDFCoefficients pidf) {
+        this.motor = motor;
         this.pidf = pidf;
 
-        turretMotor.setDirection(direction);
-        turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motor.setDirection(direction);
+        motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor.setTargetPosition(0);
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motor.setPower(0.0);
 
-        //turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turretMotor.setTargetPosition(0);
-        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        turretMotor.setPower(0.0);
-
-        ticksPerDeg = (384.5 * GEAR_RATIO) / 360.0;
-
-        this.setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
-        this.setTargetDeg(clamp(getAngleDeg(), MIN_DEG, MAX_DEG));
-    }
-
-    public void resetEncoder(){
-        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turretMotor.setTargetPosition(0);
-        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        turretMotor.setPower(0.0);
-
-        //ticksPerDeg = (384.5 * GEAR_RATIO) / 360.0;
-
-        this.setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
-        this.setTargetDeg(clamp(getAngleDeg(), MIN_DEG, MAX_DEG));
-    }
-
-    public void setCurrentAsZeroButStartAtAngleDeg(double startupAngleDeg) {
-        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turretMotor.setTargetPosition(0);
-        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        turretMotor.setPower(0.0);
-
-        // ticks is now 0, so angleOffsetDeg becomes the startup angle in your global system
-        angleOffsetDeg = clamp(startupAngleDeg, MIN_DEG, MAX_DEG);
-
-        targetDeg = angleOffsetDeg;
-        visionTxDeg = Double.NaN;
-
-        setTargetDeg(targetDeg);
-    }
-
-
-    public void assumeCurrentAngleDeg(double angleDeg) {
-        double clamped = clamp(angleDeg, MIN_DEG, MAX_DEG);
-
-        // Keep the SAME global coordinate system (135 is still forward).
-        // We are only anchoring encoder ticks to that coordinate system.
-        angleOffsetDeg = clamped - (turretMotor.getCurrentPosition() / ticksPerDeg);
-
-        // Hold this angle so it doesn't jump
-        targetDeg = clamped;
-        turretMotor.setTargetPosition(degToTicks(targetDeg - angleOffsetDeg));
-        turretMotor.setPower(1);
+        setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
+        setTargetDeg(clamp(getAngleDeg(), MIN_DEG, MAX_DEG));
     }
 
     public void setPIDF(double p, double i, double d, double f) {
-        this.pidf.p = p;
-        this.pidf.i = i;
-        this.pidf.d = d;
-        this.pidf.f = f;
-
-        turretMotor.setPIDFCoefficients(
-                DcMotor.RunMode.RUN_TO_POSITION,
-                new PIDFCoefficients(p, i, d, f)
-        );
-        turretMotor.setTargetPositionTolerance((int) (1.0 * ticksPerDeg));
-    }
-
-    public void setVisionTxDeg(double txDeg) {
-        visionTxDeg = txDeg;
-    }
-
-    public void clearVisionTx() {
-        visionTxDeg = Double.NaN;
+        pidf.p = p; pidf.i = i; pidf.d = d; pidf.f = f;
+        motor.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION,
+                new PIDFCoefficients(p, i, d, f));
+        motor.setTargetPositionTolerance((int) (1.0 * TICKS_PER_DEG));
     }
 
     public void setTargetDeg(double deg) {
-        targetDeg = nearestReachableDeg(deg, MIN_DEG, MAX_DEG);
-        int ticks = degToTicks(targetDeg - angleOffsetDeg);
-        turretMotor.setTargetPosition(ticks);
-        turretMotor.setPower(1);
-    }
-
-    public void holdCurrentAngle() {
-        setTargetDeg(getAngleDeg());
-    }
-
-    public void setCurrentAsZero() {
-        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turretMotor.setTargetPosition(0);
-        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        turretMotor.setPower(0.0);
-
-        targetDeg = angleOffsetDeg;
-        visionTxDeg = Double.NaN;
+        targetDeg = nearestReachableDeg(deg);
+        motor.setTargetPosition(degToTicks(targetDeg - angleOffsetDeg));
+        motor.setPower(1.0);
     }
 
     public double getAngleDeg() {
-        return (turretMotor.getCurrentPosition() / ticksPerDeg) + angleOffsetDeg;
+        return (motor.getCurrentPosition() / TICKS_PER_DEG) + angleOffsetDeg;
     }
 
     public double getTargetDeg() {
@@ -138,44 +61,45 @@ public class Turret extends SubsystemBase {
         return Math.abs(targetDeg - getAngleDeg()) <= toleranceDeg;
     }
 
-    @Override
-    public void periodic() {
-        if (!Double.isNaN(visionTxDeg)) {
-
-            double tx = visionTxDeg;
-            if (Math.abs(tx) < TX_DEADBAND_DEG) tx = 0;
-
-            double current = getAngleDeg();
-            double desired = current + tx;
-
-            desired = clamp(desired, MIN_DEG, MAX_DEG);
-            setTargetDeg(desired);
-            visionTxDeg = Double.NaN;
-        }
+    public void holdCurrentAngle() {
+        setTargetDeg(getAngleDeg());
     }
+
+    public void resetEncoder() {
+        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor.setTargetPosition(0);
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motor.setPower(0.0);
+        angleOffsetDeg = 135.0;
+        targetDeg = 135.0;
+        setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
+        setTargetDeg(clamp(getAngleDeg(), MIN_DEG, MAX_DEG));
+    }
+
+    public void setCurrentAsZeroButStartAtAngleDeg(double startupAngleDeg) {
+        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor.setTargetPosition(0);
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motor.setPower(0.0);
+        angleOffsetDeg = clamp(startupAngleDeg, MIN_DEG, MAX_DEG);
+        targetDeg = angleOffsetDeg;
+        setTargetDeg(targetDeg);
+    }
+
+    @Override
+    public void periodic() {}
+
+    // ── helpers ────────────────────────────────────────────────────────────────
 
     private int degToTicks(double deg) {
-        return (int) Math.round(deg * ticksPerDeg);
+        return (int) Math.round(deg * TICKS_PER_DEG);
     }
 
-    private static double clamp(double v, double lo, double hi) {
-        if (v < lo) return lo;
-        if (v > hi) return hi;
-        return v;
-    }
-
-    /**
-     * Picks the closest angle to {@code desiredDeg} that the turret can actually reach.
-     * Desired angles are computed mod 360, but the turret only spans [lo, hi] (a 270 deg
-     * range here, leaving a 90 deg dead zone behind the robot it can't physically rotate
-     * into). A plain min/max clamp always saturates dead-zone angles to {@code hi}, even
-     * when {@code lo} (i.e. wrapping around through 360/0) is the nearer, more accurate
-     * limit to point toward. This picks whichever reachable bound is angularly closer.
-     */
-    private static double nearestReachableDeg(double desiredDeg, double lo, double hi) {
-        double d = wrap360(desiredDeg);
-        if (d >= lo && d <= hi) return d;
-        return circularDistanceDeg(d, lo) <= circularDistanceDeg(d, hi) ? lo : hi;
+    private static double nearestReachableDeg(double desired) {
+        double d = wrap360(desired);
+        if (d >= MIN_DEG && d <= MAX_DEG) return d;
+        return circularDistanceDeg(d, MIN_DEG) <= circularDistanceDeg(d, MAX_DEG)
+                ? MIN_DEG : MAX_DEG;
     }
 
     private static double circularDistanceDeg(double a, double b) {
@@ -189,9 +113,7 @@ public class Turret extends SubsystemBase {
         return a;
     }
 
-    public void restoreAngleDeg(double savedAngleDeg) {
-        angleOffsetDeg = savedAngleDeg - (turretMotor.getCurrentPosition() / ticksPerDeg);
-        targetDeg = savedAngleDeg;
-        setTargetDeg(savedAngleDeg);
+    private static double clamp(double v, double lo, double hi) {
+        return Math.max(lo, Math.min(hi, v));
     }
 }
