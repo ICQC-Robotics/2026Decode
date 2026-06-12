@@ -20,6 +20,10 @@ public class Turret extends SubsystemBase {
 
     private double angleOffsetDeg = 135.0;
     private double targetDeg = 135.0;
+    // Tracks whether the motor has been given power since the last reset so that
+    // setPower(1.0) is only sent once rather than every loop iteration (repeated
+    // setPower calls in RUN_TO_POSITION can cause brief PIDF re-initialisation on
+    // the REV Hub, producing the random bidirectional jitter we want to eliminate).
     private boolean motorEnabled = false;
 
     public Turret(DcMotorEx motor, DcMotorSimple.Direction direction, PIDFCoefficients pidf) {
@@ -41,6 +45,7 @@ public class Turret extends SubsystemBase {
         pidf.p = p; pidf.i = i; pidf.d = d; pidf.f = f;
         motor.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION,
                 new PIDFCoefficients(p, i, d, f));
+        // Math.round so we get 3 ticks (~1.01°) not 2 ticks (~0.68°) from truncation.
         motor.setTargetPositionTolerance((int) Math.round(1.0 * TICKS_PER_DEG));
     }
 

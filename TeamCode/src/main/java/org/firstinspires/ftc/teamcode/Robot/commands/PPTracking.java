@@ -17,8 +17,15 @@ public class PPTracking extends CommandBase {
     static final double TURRET_FORWARD_OFFSET_IN = 3;
 
     public double offset = 0;
-    private double smoothedAngle = 135.0;
+
+    // Exponential low-pass filter on the computed goal angle.
+    // Localization noise jitters the raw angle ±1° or more per loop; with no
+    // derivative term (kD=0) each micro-correction overshoots, causing the
+    // random bidirectional error. The filter lets genuine tracking changes
+    // through while attenuating high-frequency noise.
+    // Tune: increase toward 1.0 for faster response, decrease for more smoothing.
     private static final double FILTER_ALPHA = 0.6;
+    private double smoothedAngle = 135.0;
 
     double TARGET_X = FieldConstants.BLUE_GOAL_AIM_X;
     double TARGET_Y = FieldConstants.BLUE_GOAL_AIM_Y;
@@ -43,8 +50,8 @@ public class PPTracking extends CommandBase {
     @Override
     public void execute() {
         double raw = turretAngleDeg(d.getX(), d.getY(), TARGET_X, TARGET_Y, d.getHeading());
-        double diff = wrap180(raw - smoothedAngle);
-        smoothedAngle = wrap360(smoothedAngle + FILTER_ALPHA * diff);
+        // wrap180 diff keeps the filter interpolating via the short path across 0/360.
+        smoothedAngle = wrap360(smoothedAngle + FILTER_ALPHA * wrap180(raw - smoothedAngle));
         turret.setTargetDeg(smoothedAngle);
     }
 
@@ -58,16 +65,11 @@ public class PPTracking extends CommandBase {
         double dx = targetX - turretX;
         double dy = targetY - turretY;
 
-
         double bearingDeg = Math.toDegrees(Math.atan2(dy, dx));
-
         double headingDeg = Math.toDegrees(headingRad);
-
         double deflectionDeg = wrap180(bearingDeg - headingDeg);
 
-        // Turret mapping:
-        // 135 = straight forward, and increasing turret angle turns RIGHT (CW)
-        // so: right deflection (negative) -> turret angle increases
+        // 135 = straight forward, increasing angle turns RIGHT (CW)
         double turretDeg = wrap360(135.0 - deflectionDeg + offset);
 
         return turretDeg;
@@ -89,4 +91,3 @@ public class PPTracking extends CommandBase {
         return a - 180.0;
     }
 }
-
