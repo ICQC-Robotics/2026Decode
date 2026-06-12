@@ -20,6 +20,7 @@ public class Turret extends SubsystemBase {
 
     private double angleOffsetDeg = 135.0;
     private double targetDeg = 135.0;
+    private boolean motorEnabled = false;
 
     public Turret(DcMotorEx motor, DcMotorSimple.Direction direction, PIDFCoefficients pidf) {
         this.motor = motor;
@@ -40,13 +41,16 @@ public class Turret extends SubsystemBase {
         pidf.p = p; pidf.i = i; pidf.d = d; pidf.f = f;
         motor.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION,
                 new PIDFCoefficients(p, i, d, f));
-        motor.setTargetPositionTolerance((int) (1.0 * TICKS_PER_DEG));
+        motor.setTargetPositionTolerance((int) Math.round(1.0 * TICKS_PER_DEG));
     }
 
     public void setTargetDeg(double deg) {
         targetDeg = nearestReachableDeg(deg);
         motor.setTargetPosition(degToTicks(targetDeg - angleOffsetDeg));
-        motor.setPower(1.0);
+        if (!motorEnabled) {
+            motor.setPower(1.0);
+            motorEnabled = true;
+        }
     }
 
     public double getAngleDeg() {
@@ -70,6 +74,7 @@ public class Turret extends SubsystemBase {
         motor.setTargetPosition(0);
         motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motor.setPower(0.0);
+        motorEnabled = false;
         angleOffsetDeg = 135.0;
         targetDeg = 135.0;
         setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
@@ -81,6 +86,7 @@ public class Turret extends SubsystemBase {
         motor.setTargetPosition(0);
         motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motor.setPower(0.0);
+        motorEnabled = false;
         angleOffsetDeg = clamp(startupAngleDeg, MIN_DEG, MAX_DEG);
         targetDeg = angleOffsetDeg;
         setTargetDeg(targetDeg);

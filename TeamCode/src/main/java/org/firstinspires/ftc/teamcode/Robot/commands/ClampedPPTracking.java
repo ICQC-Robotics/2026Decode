@@ -30,6 +30,8 @@ public class ClampedPPTracking extends CommandBase {
 
     // optional manual offset like PPTracking
     public double offset = 0;
+    private double smoothedAngle = 135.0;
+    private static final double FILTER_ALPHA = 0.6;
 
     public ClampedPPTracking(Turret turret, Drive d, Robot.Alliance alliance,
                              double minDeg, double maxDeg) {
@@ -46,28 +48,24 @@ public class ClampedPPTracking extends CommandBase {
         Pose target = FieldConstants.goalAimPointForAlliance(alliance == Robot.Alliance.BLUE);
         targetX = target.getX();
         targetY = target.getY();
-
-        // IMPORTANT: don't call holdCurrentAngle() here if it schedules/locks turret
-        // turret.holdCurrentAngle();
+        smoothedAngle = turret.getAngleDeg();
     }
 
     @Override
     public void execute() {
-        double desired = turretAngleDeg(
+        double raw = turretAngleDeg(
                 d.getX(), d.getY(),
                 targetX, targetY,
                 d.getHeading()
         );
 
-        double current = turret.getAngleDeg();
+        // Exponential low-pass filter with wrap-aware diff to reject localization noise.
+        // This also replaces the old desiredCont continuity logic since wrap180 handles
+        // the shortest-path interpolation across the 0/360 boundary.
+        double diff = wrap180(raw - smoothedAngle);
+        smoothedAngle = wrap360(smoothedAngle + FILTER_ALPHA * diff);
 
-        // make desired continuous near current (shortest-path)
-        double desiredCont = current + wrap180(desired - current);
-
-        // clamp
-        double clamped = clamp(desiredCont, minDeg, maxDeg);
-
-        turret.setTargetDeg(wrap360(clamped));
+        turret.setTargetDeg(clamp(smoothedAngle, minDeg, maxDeg));
     }
 
     /** Same math as PPTracking: returns 0..360 */

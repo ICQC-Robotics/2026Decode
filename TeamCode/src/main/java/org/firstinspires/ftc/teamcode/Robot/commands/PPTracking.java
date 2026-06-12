@@ -17,6 +17,8 @@ public class PPTracking extends CommandBase {
     static final double TURRET_FORWARD_OFFSET_IN = 3;
 
     public double offset = 0;
+    private double smoothedAngle = 135.0;
+    private static final double FILTER_ALPHA = 0.6;
 
     double TARGET_X = FieldConstants.BLUE_GOAL_AIM_X;
     double TARGET_Y = FieldConstants.BLUE_GOAL_AIM_Y;
@@ -32,6 +34,7 @@ public class PPTracking extends CommandBase {
     public void initialize() {
         Robot.LAST_TURRET_DEG = 135;
         turret.holdCurrentAngle();
+        smoothedAngle = turret.getAngleDeg();
         Pose target = FieldConstants.goalAimPointForAlliance(alliance == Robot.Alliance.BLUE);
         TARGET_X = target.getX();
         TARGET_Y = target.getY();
@@ -39,10 +42,10 @@ public class PPTracking extends CommandBase {
 
     @Override
     public void execute() {
-        turret.setTargetDeg(
-                turretAngleDeg(d.getX(), d.getY(), TARGET_X, TARGET_Y, d.getHeading())
-        );
-
+        double raw = turretAngleDeg(d.getX(), d.getY(), TARGET_X, TARGET_Y, d.getHeading());
+        double diff = wrap180(raw - smoothedAngle);
+        smoothedAngle = wrap360(smoothedAngle + FILTER_ALPHA * diff);
+        turret.setTargetDeg(smoothedAngle);
     }
 
     public double turretAngleDeg(double x, double y,
