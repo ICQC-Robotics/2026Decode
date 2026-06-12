@@ -41,10 +41,21 @@ public class ShootOnMove extends SequentialCommandGroup {
     public static final double MIN_V = AutoAim.MIN_V;
     public static final double MAX_V = AutoAim.MAX_V;
 
-    public static double FLIGHT_TIME_S = 1.0;
+    // Effective horizontal ball speed (in/s). Flight time = distance / this.
+    // Tune live in FTC Dashboard against a known strafing shot (see notes).
+    public static double BALL_SPEED_IN_PER_S = 180.0;
+
+    // Number of fixed-point iterations to converge the moving-target solve.
+    private static final int SOLVE_ITERATIONS = 3;
+
+    // Low-pass on the localizer velocity so aim doesn't jitter while driving.
+    private static final double VEL_FILTER_ALPHA = 0.5;
 
     private final Turret turret;
     private double spinUpRPM = MIN_V;
+
+    private double filteredVx = 0.0, filteredVy = 0.0;
+    private boolean velInitialized = false;
 
     public ShootOnMove(Drive drive, Shooter shooter, Intake intake, Wait wait) {
         this(drive, null, shooter, intake, wait);
@@ -155,10 +166,27 @@ public class ShootOnMove extends SequentialCommandGroup {
         double vx = (vel == null) ? 0.0 : vel.getXComponent();
         double vy = (vel == null) ? 0.0 : vel.getYComponent();
 
-        double time = getTime();
-        double aimX = gX - (turretX + vx * time);
-        double aimY = gY - (turretY + vy * time);
+        // Low-pass the velocity so localizer noise doesn't make the turret jitter
+        if (!velInitialized) {
+            filteredVx = vx; filteredVy = vy; velInitialized = true;
+        } else {
+            filteredVx += VEL_FILTER_ALPHA * (vx - filteredVx);
+            filteredVy += VEL_FILTER_ALPHA * (vy - filteredVy);
+        }
+        vx = filteredVx; vy = filteredVy;
+
+        // Flight time depends on distance, which depends on flight time -> iterate
+        // to a fixed point. Converges in a few steps while |v| < BALL_SPEED.
+        double aimX = gX - turretX;
+        double aimY = gY - turretY;
         double distance = Math.hypot(aimX, aimY);
+        double time = 0.0;
+        for (int i = 0; i < SOLVE_ITERATIONS; i++) {
+            time = flightTimeForDistance(distance);
+            aimX = gX - (turretX + vx * time);
+            aimY = gY - (turretY + vy * time);
+            distance = Math.hypot(aimX, aimY);
+        }
         return new MovingShot(distance, turretAngleDeg(aimX, aimY, headingRad), time);
     }
 
@@ -180,8 +208,9 @@ public class ShootOnMove extends SequentialCommandGroup {
         return ShooterAimingModel.previewDefaultRpm(Math.max(MIN_DIST, Math.min(distanceIn, MAX_DIST)));
     }
 
-    public static double getTime() {
-        return Math.max(0.0, FLIGHT_TIME_S);
+    /** Flight time (s) for a given shot distance, using the tunable ball speed. */
+    public static double flightTimeForDistance(double distanceIn) {
+        return distanceIn / Math.max(1.0, BALL_SPEED_IN_PER_S);
     }
 
     private void aimTurretForShot(MovingShot shot) {

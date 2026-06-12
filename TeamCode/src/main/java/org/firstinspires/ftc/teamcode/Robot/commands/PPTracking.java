@@ -43,6 +43,11 @@ public class PPTracking extends CommandBase {
                 turretAngleDeg(d.getX(), d.getY(), TARGET_X, TARGET_Y, d.getHeading())
         );
 
+        // Turret diagnostics: if Actual lags Target by a few deg at one heading,
+        // it's P-only/cable drag. If Target sits at 0 or 270, it's the travel limit.
+        d.telemetry.addData("Turret Target", turret.getTargetDeg());
+        d.telemetry.addData("Turret Actual", turret.getAngleDeg());
+        d.telemetry.addData("Turret Error",  turret.getTargetDeg() - turret.getAngleDeg());
     }
 
     public double turretAngleDeg(double x, double y,
