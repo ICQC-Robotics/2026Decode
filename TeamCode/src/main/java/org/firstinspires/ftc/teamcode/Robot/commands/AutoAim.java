@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.ShooterAimingModel;
+import org.firstinspires.ftc.teamcode.Robot.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
 
 public class AutoAim extends SequentialCommandGroup {
