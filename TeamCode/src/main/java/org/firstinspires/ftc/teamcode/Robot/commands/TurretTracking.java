@@ -77,7 +77,7 @@ public class TurretTracking extends CommandBase {
         double headingRad = drive.getHeading();
 
         double raw    = computeGoalAngleDeg(x, y, headingRad);   // also sets lastDeflectionDeg
-        double target = Turret.clampDeg(raw + offset);
+        double target = Turret.clampDeg(raw + offset + zoneOffset(x, y, headingRad));
         smoothed += FILTER_ALPHA * (target - smoothed);
         turret.setTargetDeg(smoothed);
 
@@ -115,6 +115,47 @@ public class TurretTracking extends CommandBase {
         a = (a + 180.0) % 360.0;
         if (a < 0) a += 360.0;
         return a - 180.0;
+    }
+
+    // ── zone offset ────────────────────────────────────────────────────────────
+
+    /**
+     * Returns an additional turret offset when the robot is inside the configured
+     * rectangle and its heading is within the configured window.
+     *
+     * Everything is defined in the BLUE alliance frame.  For RED:
+     *   - Position:  X is mirrored about the field centre (x → 144 − x).
+     *   - Heading:   reflected about the vertical axis (θ → 180° − θ).
+     *   - Offset:    sign is negated (the geometry is flipped).
+     */
+    private double zoneOffset(double x, double y, double headingRad) {
+        if (Turret.ZONE_OFFSET_DEG == 0.0) return 0.0;
+
+        boolean blue = (alliance == Robot.Alliance.BLUE);
+
+        // Map position and heading into the blue frame.
+        double checkX       = blue ? x : 144.0 - x;
+        double checkHeadDeg = wrapHalf(blue
+                ? Math.toDegrees(headingRad)
+                : 180.0 - Math.toDegrees(headingRad));
+
+        boolean inRect = checkX       >= Turret.ZONE_X_MIN
+                      && checkX       <= Turret.ZONE_X_MAX
+                      && y            >= Turret.ZONE_Y_MIN
+                      && y            <= Turret.ZONE_Y_MAX;
+        if (!inRect) return 0.0;
+
+        // Normalise the heading window bounds the same way so the comparison works
+        // even when the window straddles ±180.
+        double lo = Turret.ZONE_HEADING_MIN_DEG;
+        double hi = Turret.ZONE_HEADING_MAX_DEG;
+        boolean headingInWindow = (lo <= hi)
+                ? (checkHeadDeg >= lo && checkHeadDeg <= hi)
+                : (checkHeadDeg >= lo || checkHeadDeg <= hi); // window wraps ±180
+
+        if (!headingInWindow) return 0.0;
+
+        return blue ? Turret.ZONE_OFFSET_DEG : -Turret.ZONE_OFFSET_DEG;
     }
 
     // ── logging ────────────────────────────────────────────────────────────────

@@ -94,6 +94,21 @@ public class Turret extends SubsystemBase {
         motor.setTargetPositionTolerance((int) Math.round(TICKS_PER_DEG));
     }
 
+    // ── zone-based aim correction ──────────────────────────────────────────────
+    // When the robot is inside the rectangle below AND its heading falls in
+    // [ZONE_HEADING_MIN_DEG, ZONE_HEADING_MAX_DEG], ZONE_OFFSET_DEG is added to
+    // the turret target.  All values are defined in the BLUE alliance frame.
+    // For RED the rectangle is mirrored about X = 72 and the heading is mirrored
+    // about the vertical axis (θ → 180°−θ); the offset sign is also negated.
+    // Set ZONE_OFFSET_DEG = 0 to disable.  Tune everything else on the field.
+    public static double ZONE_X_MIN           =  0.0;   // field inches, blue frame
+    public static double ZONE_X_MAX           = 48.0;
+    public static double ZONE_Y_MIN           =  0.0;
+    public static double ZONE_Y_MAX           = 72.0;
+    public static double ZONE_HEADING_MIN_DEG = 135.0;  // robot heading range that triggers
+    public static double ZONE_HEADING_MAX_DEG = 180.0;  //   (Pedro convention, −180 to 180)
+    public static double ZONE_OFFSET_DEG      =  0.0;   // degrees added when in zone (+ = CW)
+
     // ── geometry ───────────────────────────────────────────────────────────────
 
     /**
