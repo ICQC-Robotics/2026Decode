@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Far-Shot Velocity Tuning Guide</title>
+<style>
+  @page { size: letter; margin: 0.6in; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+    color: #1a1a1a; font-size: 11px; line-height: 1.45; margin: 0;
+  }
+  h1 { font-size: 20px; margin: 0 0 2px; color: #0b3d91; }
+  .sub { color: #555; font-size: 11px; margin: 0 0 14px; }
+  h2 {
+    font-size: 13px; margin: 16px 0 6px; color: #0b3d91;
+    border-bottom: 2px solid #0b3d91; padding-bottom: 3px;
+  }
+  table { border-collapse: collapse; width: 100%; margin: 6px 0 4px; }
+  th, td { border: 1px solid #bbb; padding: 3px 6px; text-align: center; }
+  th { background: #0b3d91; color: #fff; font-size: 10px; }
+  td.fill { background: #fffbe6; }
+  tr:nth-child(even) td { background: #f4f7fc; }
+  tr:nth-child(even) td.fill { background: #fff4cc; }
+  .warn { color: #b00020; font-weight: bold; }
+  ol { margin: 4px 0 4px 18px; padding: 0; }
+  li { margin: 2px 0; }
+  .note { background: #f4f7fc; border-left: 3px solid #0b3d91; padding: 6px 10px; margin: 8px 0; }
+  .cols { display: flex; gap: 18px; }
+  .cols > div { flex: 1; }
+  code { background: #eef1f6; padding: 0 3px; border-radius: 3px; font-size: 10px; }
+  .small { font-size: 10px; color: #555; }
+</style>
+</head>
+<body>
+
+<h1>Far-Shot Velocity Tuning Guide</h1>
+<p class="sub">Profile: <strong>HOOD_0_70</strong> &middot; Hood = 0.7 &middot; 18 points, 70&ndash;155 in &middot; Print &amp; fill the right column on the field</p>
+
+<div class="cols">
+<div>
+<table>
+<tr><th>#</th><th>Dist (in)</th><th>Hood</th><th>Start RPM</th><th>Tuned RPM</th></tr>
+<tr><td>1</td><td>70</td><td>0.7</td><td>3180</td><td class="fill"></td></tr>
+<tr><td>2</td><td>75</td><td>0.7</td><td>3200</td><td class="fill"></td></tr>
+<tr><td>3</td><td>80</td><td>0.7</td><td>3230</td><td class="fill"></td></tr>
+<tr><td>4</td><td>85</td><td>0.7</td><td>3280</td><td class="fill"></td></tr>
+<tr><td>5</td><td>90</td><td>0.7</td><td>3330</td><td class="fill"></td></tr>
+<tr><td>6</td><td>95</td><td>0.7</td><td>3380</td><td class="fill"></td></tr>
+<tr><td>7</td><td>100</td><td>0.7</td><td>3440</td><td class="fill"></td></tr>
+<tr><td>8</td><td>105</td><td>0.7</td><td>3530</td><td class="fill"></td></tr>
+<tr><td>9</td><td>110</td><td>0.7</td><td>3610</td><td class="fill"></td></tr>
+</table>
+</div>
+<div>
+<table>
+<tr><th>#</th><th>Dist (in)</th><th>Hood</th><th>Start RPM</th><th>Tuned RPM</th></tr>
+<tr><td>10</td><td>115</td><td>0.7</td><td>3690</td><td class="fill"></td></tr>
+<tr><td>11</td><td>120</td><td>0.7</td><td>3780</td><td class="fill"></td></tr>
+<tr><td>12</td><td>125</td><td>0.7</td><td>3860</td><td class="fill"></td></tr>
+<tr><td>13</td><td>130</td><td>0.7</td><td>3940</td><td class="fill"></td></tr>
+<tr><td>14</td><td>135</td><td>0.7</td><td><span class="warn">4030*</span></td><td class="fill"></td></tr>
+<tr><td>15</td><td>140</td><td>0.7</td><td><span class="warn">4110*</span></td><td class="fill"></td></tr>
+<tr><td>16</td><td>145</td><td>0.7</td><td><span class="warn">4200*</span></td><td class="fill"></td></tr>
+<tr><td>17</td><td>150</td><td>0.7</td><td><span class="warn">4280*</span></td><td class="fill"></td></tr>
+<tr><td>18</td><td>155</td><td>0.7</td><td><span class="warn">4370*</span></td><td class="fill"></td></tr>
+</table>
+</div>
+</div>
+
+<p class="small">Start RPMs come from the current curve, which <strong>overshoots far</strong> &rarr; expect to dial most <strong>down</strong>, especially 120+.
+<span class="warn">*Rows 14&ndash;18 are above the 4100 RPM cap</span> &mdash; spin the flywheel up empty first; whatever it tops out at is your real max range. Drop any row past the distance you can actually reach.</p>
+
+<h2>Setup (once)</h2>
+<ol>
+  <li><strong>Put a fresh, full battery in.</strong> RPM depends on voltage &mdash; tune near match voltage or the numbers won't hold up.</li>
+  <li>Deploy current code from Android Studio (Run).</li>
+  <li>On the Driver Station, select the <strong>"Shooter Tuner"</strong> OpMode (don't start it yet).</li>
+  <li>Connect a laptop to the robot's WiFi, open <strong>FTC Dashboard</strong> &rarr; <code>192.168.43.1:8080/dash</code>.</li>
+  <li>Set <code>hoodPosition = 0.7</code>, <code>targetRPM</code> = first row's value, <code>feedPower = 0</code>.</li>
+  <li>(Optional) Add <strong>Target RPM</strong> and <strong>Actual RPM</strong> to the Dashboard graph so you can see the flywheel settle.</li>
+</ol>
+
+<h2>For each row, top to bottom</h2>
+<ol start="7">
+  <li><strong>Tape-measure</strong> the robot to the distance (goal &rarr; turret pivot). Place it there, turret aimed at the goal.</li>
+  <li><strong>Init + Start</strong> the OpMode. Flywheel spins up.</li>
+  <li><strong>Wait for Actual RPM to settle</strong> around target (bang-bang oscillates slightly &mdash; that's normal; wait until it hovers, not still climbing).</li>
+  <li><strong>Fire one ball</strong> &mdash; flick <code>feedPower</code> to fire then back to 0 (or feed with intake). Watch where it lands.</li>
+  <li><strong>Adjust</strong> <code>targetRPM</code>: lands <strong>short</strong> &rarr; +25&ndash;50; <strong>overshoots</strong> &rarr; &minus;25&ndash;50.</li>
+  <li><strong>Re-fire</strong>, letting RPM recover to target between shots.</li>
+  <li>When <strong>3 shots in a row score</strong>, write that RPM in the table. Stop the OpMode.</li>
+  <li>Move to the next distance, repeat.</li>
+</ol>
+
+<h2>Enter into code</h2>
+<ol start="15">
+  <li>Replace the <code>HOOD_0_70</code> table in <code>ShooterAimingModel.java</code> with your 18 pairs (ascending), and set the profile max to cover your top distance:
+  <div class="note small" style="font-family:monospace;">
+  new Profile("HOOD_0_70", 0.7, 70.0, 155.0, new double[][] {<br>
+  &nbsp;&nbsp;{70.0, ___}, {75.0, ___}, {80.0, ___}, {85.0, ___}, {90.0, ___}, {95.0, ___},<br>
+  &nbsp;&nbsp;{100.0, ___}, {105.0, ___}, {110.0, ___}, {115.0, ___}, {120.0, ___}, {125.0, ___},<br>
+  &nbsp;&nbsp;{130.0, ___}, {135.0, ___}, {140.0, ___}, {145.0, ___}, {150.0, ___}, {155.0, ___},<br>
+  });
+  </div></li>
+  <li>Deploy, then <strong>verify</strong>: drive to a few random far spots and confirm it scores (the model interpolates between points).</li>
+  <li><strong>Commit</strong> ("far shot table retuned, 18 pts").</li>
+</ol>
+
+<h2>Keep it honest</h2>
+<ol start="18">
+  <li>Same ball condition and battery state throughout &mdash; a tired battery mid-session skews the far numbers worst.</li>
+  <li>Quick check once: at a parked spot, the <code>Standby Dist (in)</code> telemetry should match your tape within an inch or two (match aims off odometry; you measure with tape).</li>
+</ol>
+
+</body>
+</html>

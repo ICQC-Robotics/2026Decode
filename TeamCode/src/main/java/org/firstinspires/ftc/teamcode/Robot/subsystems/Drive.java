@@ -123,6 +123,13 @@ public class Drive extends SubsystemBase {
 
         telemetry.addData("X", this.getX());
         telemetry.addData("Y", this.getY());
-        telemetry.addData("Heading", this.getHeading());
+        telemetry.addData("Heading (deg)", this.getHeadingDeg());
+    }
+
+    /** Heading in degrees, wrapped to [0, 360). */
+    public double getHeadingDeg() {
+        double deg = Math.toDegrees(getHeading()) % 360.0;
+        if (deg < 0) deg += 360.0;
+        return deg;
     }
 }

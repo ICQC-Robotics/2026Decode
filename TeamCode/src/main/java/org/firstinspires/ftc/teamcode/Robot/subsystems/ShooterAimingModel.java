@@ -66,18 +66,20 @@ public class ShooterAimingModel {
                     {40.0, 2600.0},
                     {50.0, 2800.0}
             }),
-            new Profile("HOOD_0_25", 0.35, 50.0, 60.0, new double[][] {
-                    {54.5, 2700.0},
-                    {56.0, 2850.0},
-                    {58.0, 2900.0},
-                    {62.5, 2800.0},
+            new Profile("HOOD_0_40", 0.4, 50.0, 70.0, new double[][] {
+                    {54.5, 2700.0},   // kept (was tuned at hood 0.35)
+                    {56.0, 2700.0},   // updated -> your new 56" point
+                    {58.0, 2900.0},   // kept (was tuned at hood 0.35)
+                    {62.5, 2800.0},   // kept (was tuned at hood 0.35)
+                    {67.0, 2850.0}    // new (moved off the 0.7 profile)
             }),
-            new Profile("HOOD_0_70", 0.7, 70.0, 145.0, new double[][] {
-                    {67, 3160.0},
+            new Profile("HOOD_0_70", 0.7, 70.0, 155.0, new double[][] {
                     {80.0, 3230.0},
                     {97.5, 3400.0},
-                    {115.5, 3700.0},
-                    {133.5, 4000.0}
+                    {118.0, 3675.0},  // +125 total (was undershooting far)
+                    {135.0, 3950.0},  // +125 total
+                    {144.0, 3925.0},  // +125 total
+                    {154.0, 4000.0}   // +125 total
             })
     };
 

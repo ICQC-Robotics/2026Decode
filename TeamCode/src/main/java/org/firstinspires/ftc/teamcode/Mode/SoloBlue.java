@@ -47,6 +47,7 @@ public class SoloBlue extends CommandOpMode {
         //setting position
         if (Robot.LAST_POSE != null) {
             negabot.drive.follower.setPose(Robot.LAST_POSE.copy());
+            negabot.turret.setCurrentAngleDeg(Robot.LAST_TURRET_DEG);   // restore turret from auto
             poseLocked = true;
         }
         else {

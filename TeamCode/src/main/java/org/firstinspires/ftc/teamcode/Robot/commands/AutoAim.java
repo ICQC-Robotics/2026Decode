@@ -149,9 +149,11 @@ public class AutoAim extends SequentialCommandGroup {
         // Pose heading is typically radians in pedro (double-check, but usually yes)
         double headingRad = robot.getHeading();
 
-        // shift center -> turret pivot (forward along heading)
-        double turretX = x + Turret.FORWARD_OFFSET_IN * Math.cos(headingRad);
-        double turretY = y + Turret.FORWARD_OFFSET_IN * Math.sin(headingRad);
+        // shift center -> turret pivot: forward along heading + lateral to the left
+        double turretX = x + Turret.FORWARD_OFFSET_IN * Math.cos(headingRad)
+                           - Turret.LATERAL_OFFSET_IN * Math.sin(headingRad);
+        double turretY = y + Turret.FORWARD_OFFSET_IN * Math.sin(headingRad)
+                           + Turret.LATERAL_OFFSET_IN * Math.cos(headingRad);
 
         double dx = goalX - turretX;
         double dy = goalY - turretY;
