@@ -13,7 +13,6 @@ import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.DriveCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.PPTracking;
-import org.firstinspires.ftc.teamcode.Robot.commands.Relocalize;
 import org.firstinspires.ftc.teamcode.Robot.commands.ShootCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.ShooterStandBy;
 
@@ -137,8 +136,6 @@ public class SoloBlue extends CommandOpMode {
         if (!shooterStandby && opModeIsActive() && !turretTracking) {
             negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, negabot.drive));
             negabot.turret.setDefaultCommand(ppTracking);
-            negabot.vision.setDefaultCommand(new Relocalize(negabot.drive, negabot.vision, negabot.turret));
-
             turretTracking = true;
             shooterStandby = true;
         }
