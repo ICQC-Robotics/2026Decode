@@ -1,9 +1,9 @@
 package org.firstinspires.ftc.teamcode.Mode.PedroAutos;
 
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
-import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.pedropathing.follower.Follower;
@@ -13,10 +13,10 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.teamcode.PP.FieldConstants;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Turret;
-import org.firstinspires.ftc.teamcode.PP.FieldConstants;
 
 /**
  * 24-Artifact Close Autonomous — DECODE 2025-2026.
@@ -26,17 +26,19 @@ import org.firstinspires.ftc.teamcode.PP.FieldConstants;
  *   B  →  RED
  *
  * Cycle order (8 total):
- *   1. Preload     — fire pre-loaded artifacts at the shoot spot
- *   2. Middle row  — sweep row at y ≈ 62
- *   3. Gate        — sweep gate area
- *   4. Top row     — sweep row at y ≈ 84
- *   5. Gate        — sweep gate area (second pass)
- *   6. Bottom row  — sweep row at y ≈ 37
- *   7. Gate        — sweep gate area (third pass)
- *   8. Gate        — sweep gate area (fourth pass)
+ *   1. Preload     — fire pre-loaded artifacts at (40,90) @ 2950 RPM
+ *   2. Middle row  — sweep row at y ≈ 60; return to (52,90) @ 3050 RPM
+ *   3. Gate        — sweep gate area; return to (52,90) @ 3050 RPM
+ *   4. Top row     — sweep row at y ≈ 84; return to (40,90) @ 2950 RPM
+ *   5. Gate        — sweep gate area (second pass); return to (52,90) @ 3050 RPM
+ *   6. Bottom row  — sweep row at y ≈ 36; return to (40,90) @ 2950 RPM
+ *   7. Gate        — sweep gate area (third pass); return to (52,90) @ 3050 RPM
+ *   8. Gate        — sweep gate area (fourth pass); return to (52,90) @ 3050 RPM
  *   → Park
  *
- * Gate paths are shared objects reused across all four gate cycles.
+ * Two gate-going paths: toGate (from 40,90) for cycles 5 & 7; toGateFar (from 52,90)
+ * for cycles 3 & 8. toShoot1 and toShootFromGate both end at (52,90) so the robot
+ * shoots there without any extra transit.
  * Blue is the primary coordinate frame; red is mirrored across x = 72.
  */
 @Autonomous(name = "CloseAuto24", group = "Close")
@@ -46,75 +48,67 @@ public class CloseAuto24 extends CommandOpMode {
     boolean isBlue = true;
 
     // ── Shooting-station tuning ─────────────────────────────────────────────
-    static final double SHOOT_POS_X       = 52;    // shoot spot x (inches, blue) — +x to clear the top ball line on to/from paths
-    static final double SHOOT_POS_Y       = 94;    // shoot spot y (inches)
-    static final double SHOOT_HEADING_DEG = 30.0;    // robot heading at shoot spot (blue) — turret auto-aims, so tune this for a smooth gate transition (keep >= ~20°)
-    static final double SHOOT_VELOCITY    = 3400.0;  // flywheel target velocity (RPM)
-    static final double SHOOT_HOOD        = 0.15;    // hood servo position for shooting (0–1)
-    // Turret now auto-aims at the goal from the shoot pose (see shootTurretDeg()).
-    // This is just a fine correction added on top (deg, + = CW) if shots drift sideways.
+    // Near spot (40,90): preload, top row, bottom row  @ SHOOT_VELOCITY.
+    // Far spot  (52,90): middle row + all gate cycles  @ SHOOT_VELOCITY_FAR.
+    // Return paths already pass through (52,90), so far shots cost zero extra travel.
+    static final double SHOOT_POS_X        = 40.0;
+    static final double SHOOT_POS_X_FAR    = 52.0;
+    static final double SHOOT_POS_Y        = 90.0;
+    static final double SHOOT_HEADING_DEG  = 30.0;
+    static final double SHOOT_VELOCITY     = 2950.0;
+    static final double SHOOT_VELOCITY_FAR = SHOOT_VELOCITY + 100.0;  // 3050 RPM
+    static final double SHOOT_HOOD         = 0.15;
     static final double SHOOT_TURRET_OFFSET_DEG = 0.0;
 
     // ── Init / push-to-start ────────────────────────────────────────────────
-    // Robot is initialized here, then PUSHED to the real start during INIT;
-    // odometry tracks the push and toShoot0 is built from the live pose.
-    // INIT_HEADING_DEG MUST match the heading you physically place it at.
-    static final double INIT_X           = 48.0;
-    static final double INIT_Y           = 120.0;
-    static final double INIT_HEADING_DEG = 90.0;
+    static final double INIT_X           = 40.8;
+    static final double INIT_Y           = 137.8;
+    static final double INIT_HEADING_DEG = 180.0;
 
     // ── Gate-intake-station tuning ──────────────────────────────────────────
-    // Robot returns to the shoot spot to fire after each gate cycle,
-    // so GATE_HOOD matches SHOOT_HOOD (same shooting distance).
-    static final double GATE_POS_X       = 9.5;     // gate intake x (inches, blue)
-    static final double GATE_POS_Y       = 61.0;    // gate intake y (inches) — 2" less y
-    static final double GATE_HEADING_DEG = 330.0;   // robot heading at the gate (blue)
-    static final double GATE_APPROACH_X  = 14.0;    // x to reach before driving straight in along -x (also -6)
-    static final double GATE_HOOD        = 0.15;    // hood servo position after gate cycle
+    static final double GATE_POS_X       = 9.5;
+    static final double GATE_POS_Y       = 61.0;
+    static final double GATE_HEADING_DEG = 330.0;
+    static final double GATE_APPROACH_X  = 14.0;
 
-    // ── Magazine cover positions ────────────────────────────────────────────
-    static final double COVER_OPEN  = 1.0;   // swapped: servo was inverted
-    static final double COVER_CLOSE = 0.1;
+    // ── Magazine cover positions ─────────────────────────────────────────────
+    static final double COVER_OPEN  = .75;
+    static final double COVER_CLOSE = .5;
 
-    // Intake runs continuously in this direction all auto (blocker gates the shooter).
-    // Flip the sign if it runs the wrong way.
+    // ── Intake direction ─────────────────────────────────────────────────────
     static final double INTAKE_ON = -1.0;
 
-    // ── Burst timing ───────────────────────────────────────────────────────
-    // Intake runs backward for BURST_MS to fire all loaded artifacts (~3 × 500 ms each).
-    static final long BURST_MS = 1000;
+    // ── Timing ──────────────────────────────────────────────────────────────
+    static final long BURST_MS     = 750;
+    static final long GATE_WAIT_MS = 1250;
 
-    // Let the blocker servo physically reach OPEN before the intake feeds.
-    static final long COVER_SETTLE_MS = 250;
-
-    // Time spent sitting at the gate to collect artifacts before returning to shoot.
-    static final long GATE_WAIT_MS = 2000;
-
-    // ── Path declarations ───────────────────────────────────────────────────
-    PathChain toShoot0;                                  // 1: start → shoot (preload)
-    PathChain toMiddleA, toMiddleB, toShoot1;            // 2: middle row y≈62
-    PathChain toGateApproach, toGateSweep, toShootFromGate; // 3,5,7,8: gate (reused 4×)
-    PathChain toTopSweep, toShootFromTop;                // 4: top row y≈84
-    PathChain toBottomA, toBottomB, toShootFromBottom;   // 6: bottom row y≈37
+    // ── Path declarations ────────────────────────────────────────────────────
+    // toGate: from (40,90) — cycles 5 & 7.
+    // toGateFar: from (52,90) — cycles 3 & 8.
+    // toShoot1 and toShootFromGate both end at (52,90).
+    PathChain toShoot0;
+    PathChain toMiddle,   toShoot1;
+    PathChain toGate,     toGateFar,    toShootFromGate;
+    PathChain toTopSweep, toShootFromTop;
+    PathChain toBottom,   toShootFromBottom;
     PathChain park;
 
     @Override
     public void initialize() {
-        // ── Alliance selection (gamepad, before START) ────────────────────
-        // Created up front so the Pinpoint tracks the push during INIT.
+        // ── Alliance selection ────────────────────────────────────────────
         negabot = new Robot(hardwareMap, telemetry, initPose());
-        negabot.shooter.setMagazineCover(COVER_CLOSE);   // blocker closed during init/push
+        negabot.shooter.setMagazineCover(COVER_CLOSE);
         Robot.Alliance shown = Robot.Alliance.BLUE;
 
         while (!isStarted() && !isStopRequested()) {
             if (gamepad1.x) isBlue = true;
             if (gamepad1.b) isBlue = false;
             Robot.Alliance sel = isBlue ? Robot.Alliance.BLUE : Robot.Alliance.RED;
-            if (sel != shown) {                              // alliance changed
-                negabot.drive.follower.setPose(initPose());  // re-zero init pose
+            if (sel != shown) {
+                negabot.drive.follower.setPose(initPose());
                 shown = sel;
             }
-            negabot.drive.follower.update();                 // track the push
+            negabot.drive.follower.update();
             Pose live = negabot.drive.follower.getPose();
             telemetry.addLine("=== SELECT ALLIANCE (X/B), THEN PUSH TO START ===");
             telemetry.addData("Selected", isBlue ? ">>> BLUE <<<" : ">>>  RED <<<");
@@ -125,122 +119,132 @@ public class CloseAuto24 extends CommandOpMode {
         }
         if (isStopRequested()) return;
 
-        // ── Robot initialization ──────────────────────────────────────────
+        // ── Initialization ────────────────────────────────────────────────
         Robot.ALLIANCE = isBlue ? Robot.Alliance.BLUE : Robot.Alliance.RED;
-
         negabot.turret.resetEncoder();
 
         Follower f = negabot.drive.follower;
         buildPaths(f);
 
-        double shootTurret = shootTurretDeg();
+        //final double shootTurret = shootTurretDeg();
+        final double shootTurret = 30;
+
+        // double[] lets the lambda read the current value on every tick.
+        final double[] shootVel = { SHOOT_VELOCITY };
+
+        // ── Default commands ──────────────────────────────────────────────
+        negabot.shooter.setDefaultCommand(new CommandBase() {
+            { addRequirements(negabot.shooter); }
+            @Override public void execute()       { negabot.shooter.setVelocity(shootVel[0]); }
+            @Override public boolean isFinished() { return false; }
+        });
+
+        negabot.turret.setDefaultCommand(new CommandBase() {
+            { addRequirements(negabot.turret); }
+            @Override public void execute()       { negabot.turret.setTargetDeg(shootTurret); }
+            @Override public boolean isFinished() { return false; }
+        });
 
         // ── Command schedule ──────────────────────────────────────────────
         negabot.schedule(
-            new InstantCommand(() -> negabot.shooter.setVelocity(SHOOT_VELOCITY)),
-            new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_CLOSE)),
             new InstantCommand(() -> negabot.shooter.setHoodPosition(SHOOT_HOOD)),
-            new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),   // intake always on
 
             new SequentialCommandGroup(
 
-                // ── 1: Preload — drive to shoot spot and fire ─────────────
-                shotPrep(f, toShoot0, shootTurret),
+                // ── 1: Preload — (40,90) @ 2950 RPM ─────────────────────
+                shotPrep(f, toShoot0),
                 burst(),
 
-                // ── 2: Middle row (y ≈ 62) ───────────────────────────────
+                // ── 2: Middle row (y≈60) — returns to (52,90) @ 3050 RPM ─
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
-                new FollowPathCommand(f, toMiddleA, true),
-                new FollowPathCommand(f, toMiddleB, true),
-                shotPrep(f, toShoot1, shootTurret),
-                //new WaitCommand(100),
+                new FollowPathCommand(f, toMiddle, true),
+                new InstantCommand(() -> negabot.intake.setSpeed(0)),
+                new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY_FAR),
+                new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
+                shotPrep(f, toShoot1),
                 burst(),
 
-                // ── 3: Gate (first pass) ──────────────────────────────────
+                // ── 3: Gate first pass — from (52,90), return to (52,90) @ 3050 RPM ─
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
-                new FollowPathCommand(f, toGateApproach, true),
-                new FollowPathCommand(f, toGateSweep, true),
+                new FollowPathCommand(f, toGateFar, true),
                 new WaitCommand(GATE_WAIT_MS),
-                shotPrep(f, toShootFromGate, shootTurret),
-                //new WaitCommand(100),
+                new InstantCommand(() -> negabot.intake.setSpeed(0)),
+                new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
+                shotPrep(f, toShootFromGate),
                 burst(),
 
-                // ── 4: Top row (y ≈ 84) ──────────────────────────────────
+                // ── 4: Top row (y≈84) — from (52,90), returns to (40,90) @ 2950 RPM ─
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
                 new FollowPathCommand(f, toTopSweep, true),
-                shotPrep(f, toShootFromTop, shootTurret),
-                //new WaitCommand(100),
+                new InstantCommand(() -> negabot.intake.setSpeed(0)),
+                new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY),
+                new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
+                shotPrep(f, toShootFromTop),
                 burst(),
 
-                // ── 5: Gate (second pass) ─────────────────────────────────
+                // ── 5: Gate second pass — from (40,90), return to (52,90) @ 3050 RPM ─
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
-                new FollowPathCommand(f, toGateApproach, true),
-                new FollowPathCommand(f, toGateSweep, true),
+                new FollowPathCommand(f, toGate, true),
                 new WaitCommand(GATE_WAIT_MS),
-                shotPrep(f, toShootFromGate, shootTurret),
-                //new WaitCommand(100),
+                new InstantCommand(() -> negabot.intake.setSpeed(0)),
+                new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY_FAR),
+                new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
+                shotPrep(f, toShootFromGate),
                 burst(),
 
-                // ── 6: Bottom row (y ≈ 37) ───────────────────────────────
+                // ── 6: Bottom row (y≈36) — from (52,90), returns to (40,90) @ 2950 RPM ─
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
-                new FollowPathCommand(f, toBottomA, true),
-                new FollowPathCommand(f, toBottomB, true),
-                shotPrep(f, toShootFromBottom, shootTurret),
-                //new WaitCommand(100),
+                new FollowPathCommand(f, toBottom, true),
+                new InstantCommand(() -> negabot.intake.setSpeed(0)),
+                new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY),
+                new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
+                shotPrep(f, toShootFromBottom),
                 burst(),
 
-                // ── 7: Gate (third pass) ──────────────────────────────────
+                // ── 7: Gate third pass — from (40,90), return to (52,90) @ 3050 RPM ─
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
-                new FollowPathCommand(f, toGateApproach, true),
-                new FollowPathCommand(f, toGateSweep, true),
+                new FollowPathCommand(f, toGate, true),
                 new WaitCommand(GATE_WAIT_MS),
-                shotPrep(f, toShootFromGate, shootTurret),
-                //new WaitCommand(100),
+                new InstantCommand(() -> negabot.intake.setSpeed(0)),
+                new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY_FAR),
+                new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
+                shotPrep(f, toShootFromGate),
                 burst(),
 
-                // ── 8: Gate (fourth pass) ─────────────────────────────────
+                // ── 8: Gate fourth pass — from (52,90), return to (52,90) @ 3050 RPM ─
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
-                new FollowPathCommand(f, toGateApproach, true),
-                new FollowPathCommand(f, toGateSweep, true),
+                new FollowPathCommand(f, toGateFar, true),
                 new WaitCommand(GATE_WAIT_MS),
-                shotPrep(f, toShootFromGate, shootTurret),
-                //new WaitCommand(100),
+                new InstantCommand(() -> negabot.intake.setSpeed(0)),
+                new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
+                shotPrep(f, toShootFromGate),
                 burst(),
 
-                // ── Park ──────────────────────────────────────────────────
+                // ── Park — from (52,90) ───────────────────────────────────
                 new FollowPathCommand(f, park, true)
             )
         );
     }
 
-    // ── burst: open blocker, fire all loaded artifacts, close blocker ───────
-    // The blocker is opened ONLY here (right before feeding) and closed right
-    // after — shotPrep no longer touches it.
     Command burst() {
         return new SequentialCommandGroup(
             new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
-            new WaitCommand(COVER_SETTLE_MS),   // open the blocker; the always-on intake feeds
+            new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
             new WaitCommand(BURST_MS),
+            new InstantCommand(() -> negabot.intake.setSpeed(0)),
             new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_CLOSE))
         );
     }
 
-    // ── shotPrep: drive to shoot spot and aim the turret ────────────────────
-    // Hood + velocity are set once at start and never touched; the blocker stays
-    // closed through the whole approach and is opened by burst() right before
-    // firing — so there is nothing else to prep here.
-    Command shotPrep(Follower f, PathChain path, double turretDeg) {
-        return new ParallelCommandGroup(
-            new FollowPathCommand(f, path, true),
-            new InstantCommand(() -> negabot.turret.setTargetDeg(turretDeg))
-        );
+    Command shotPrep(Follower f, PathChain path) {
+        return new FollowPathCommand(f, path, true);
     }
 
-    // ── buildPaths ───────────────────────────────────────────────────────────
     void buildPaths(Follower f) {
 
-        // ── 1: Preload — start position → shoot spot ────────────────────────
-        Pose pushedStart = f.getPose();   // actual start after the push
+        Pose pushedStart = f.getPose();
+
+        // ── Start → near shoot spot ──────────────────────────────────────────
         toShoot0 = f.pathBuilder()
             .addPath(new BezierLine(
                 new Pose(pushedStart.getX(), pushedStart.getY()),
@@ -248,51 +252,68 @@ public class CloseAuto24 extends CommandOpMode {
             .setLinearHeadingInterpolation(pushedStart.getHeading(), hr(SHOOT_HEADING_DEG))
             .build();
 
-        // ── 2: Middle row (y ≈ 62) — approach diagonal, then sweep left ─────
-        toMiddleA = f.pathBuilder()
-            .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(36.0, 60.0)))
+        // ── Middle row (y ≈ 60) ──────────────────────────────────────────────
+        // 4-pt cubic: (40,90)→(52,90)→(52,60)→(36,60). Crosses y=84 at x≈47,
+        // clearing the top-row artifact zone (x=18–36).
+        toMiddle = f.pathBuilder()
+            .addPath(new BezierCurve(
+                sp(SHOOT_POS_X,     SHOOT_POS_Y),
+                sp(SHOOT_POS_X_FAR, SHOOT_POS_Y),
+                sp(SHOOT_POS_X_FAR, 60.0),
+                sp(36.0,            60.0)))
             .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(0))
-            .build();
-
-        toMiddleB = f.pathBuilder()
             .addPath(new BezierLine(sp(36.0, 60.0), sp(18.0, 60.0)))
             .setLinearHeadingInterpolation(hr(0), hr(0))
             .build();
 
+        // 3-pt return: (18,60)→ctrl(52,60)→(52,90). Ends at far shoot spot.
         toShoot1 = f.pathBuilder()
-            .addPath(new BezierLine(sp(18.0, 60.0), sp(SHOOT_POS_X, SHOOT_POS_Y)))
+            .addPath(new BezierCurve(
+                sp(18.0,            60.0),
+                sp(SHOOT_POS_X_FAR, 60.0),
+                sp(SHOOT_POS_X_FAR, SHOOT_POS_Y)))
             .setLinearHeadingInterpolation(hr(0), hr(SHOOT_HEADING_DEG))
             .build();
 
-        // ── Gate paths — shared across cycles 3, 5, 7, 8 ───────────────────
-        // Approach: shoot spot → gate entry, ending already at the gate heading
-        toGateApproach = f.pathBuilder()
-            .addPath(new BezierLine(
-                sp(SHOOT_POS_X, SHOOT_POS_Y),
+        // ── Gate (y ≈ 61) ───────────────────────────────────────────────────
+        // toGate: 4-pt cubic from (40,90). Crosses y=84 at x≈47. Used cycles 5 & 7.
+        toGate = f.pathBuilder()
+            .addPath(new BezierCurve(
+                sp(SHOOT_POS_X,     SHOOT_POS_Y),
+                sp(SHOOT_POS_X_FAR, SHOOT_POS_Y),
+                sp(SHOOT_POS_X_FAR, GATE_POS_Y),
                 sp(GATE_APPROACH_X, GATE_POS_Y)))
             .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(GATE_HEADING_DEG))
-            .build();
-
-        // Drive straight into the gate parallel to the x-axis (heading held)
-        toGateSweep = f.pathBuilder()
-            .addPath(new BezierLine(
-                sp(GATE_APPROACH_X, GATE_POS_Y),
-                sp(GATE_POS_X, GATE_POS_Y)))
+            .addPath(new BezierLine(sp(GATE_APPROACH_X, GATE_POS_Y), sp(GATE_POS_X, GATE_POS_Y)))
             .setLinearHeadingInterpolation(hr(GATE_HEADING_DEG), hr(GATE_HEADING_DEG))
             .build();
 
-        // Return: straight back to shoot spot
+        // toGateFar: 3-pt quadratic from (52,90). Drops straight down then sweeps left.
+        // Crosses y=84 at x≈52 — clear of artifacts. Used cycles 3 & 8.
+        toGateFar = f.pathBuilder()
+            .addPath(new BezierCurve(
+                sp(SHOOT_POS_X_FAR, SHOOT_POS_Y),
+                sp(SHOOT_POS_X_FAR, GATE_POS_Y),
+                sp(GATE_APPROACH_X, GATE_POS_Y)))
+            .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(GATE_HEADING_DEG))
+            .addPath(new BezierLine(sp(GATE_APPROACH_X, GATE_POS_Y), sp(GATE_POS_X, GATE_POS_Y)))
+            .setLinearHeadingInterpolation(hr(GATE_HEADING_DEG), hr(GATE_HEADING_DEG))
+            .build();
+
+        // 3-pt return: (9.5,61)→ctrl(52,61)→(52,90). Ends at far shoot spot.
         toShootFromGate = f.pathBuilder()
-            .addPath(new BezierLine(
-                sp(GATE_POS_X, GATE_POS_Y),
-                sp(SHOOT_POS_X, SHOOT_POS_Y)))
+            .addPath(new BezierCurve(
+                sp(GATE_POS_X,      GATE_POS_Y),
+                sp(SHOOT_POS_X_FAR, GATE_POS_Y),
+                sp(SHOOT_POS_X_FAR, SHOOT_POS_Y)))
             .setLinearHeadingInterpolation(hr(GATE_HEADING_DEG), hr(SHOOT_HEADING_DEG))
             .build();
 
-        // ── 4: Top row (y ≈ 84) — single lateral sweep from shoot spot ──────
-        // The shoot spot is at y=85, so this sweeps the adjacent row in one pass.
+        // ── Top row (y ≈ 84) — starts from (52,90) after gate cycle 3 ────────
+        // Control point (42,84) keeps path above y=84 until endpoint (36,84).
         toTopSweep = f.pathBuilder()
-            .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(36.0, 84.0)))
+            .addPath(new BezierCurve(
+                sp(SHOOT_POS_X_FAR, SHOOT_POS_Y), sp(42.0, 84.0), sp(36.0, 84.0)))
             .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(0))
             .addPath(new BezierLine(sp(36.0, 84.0), sp(18.0, 84.0)))
             .setLinearHeadingInterpolation(hr(0), hr(0))
@@ -303,13 +324,11 @@ public class CloseAuto24 extends CommandOpMode {
             .setLinearHeadingInterpolation(hr(0), hr(SHOOT_HEADING_DEG))
             .build();
 
-        // ── 6: Bottom row (y ≈ 37) — approach diagonal, then sweep left ─────
-        toBottomA = f.pathBuilder()
-            .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(36.0, 36.0)))
+        // ── Bottom row (y ≈ 36) — starts from (52,90) after gate cycle 5 ─────
+        toBottom = f.pathBuilder()
+            .addPath(new BezierCurve(
+                sp(SHOOT_POS_X_FAR, SHOOT_POS_Y), sp(42.0, 36.0), sp(36.0, 36.0)))
             .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(0))
-            .build();
-
-        toBottomB = f.pathBuilder()
             .addPath(new BezierLine(sp(36.0, 36.0), sp(18.0, 36.0)))
             .setLinearHeadingInterpolation(hr(0), hr(0))
             .build();
@@ -319,9 +338,9 @@ public class CloseAuto24 extends CommandOpMode {
             .setLinearHeadingInterpolation(hr(0), hr(SHOOT_HEADING_DEG))
             .build();
 
-        // ── Park ─────────────────────────────────────────────────────────────
+        // ── Park — from (52,90) after last gate shot ──────────────────────────
         park = f.pathBuilder()
-            .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(47.0, 75.2)))
+            .addPath(new BezierLine(sp(SHOOT_POS_X_FAR, SHOOT_POS_Y), sp(47.0, 75.2)))
             .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(SHOOT_HEADING_DEG))
             .build();
     }
@@ -336,27 +355,22 @@ public class CloseAuto24 extends CommandOpMode {
 
     // ── Alliance-aware pose/heading helpers ─────────────────────────────────
 
-    /** Field pose: blue coordinates direct, red x-mirrored. */
     private Pose sp(double x, double y) {
         return isBlue ? new Pose(x, y) : new Pose(mx(x), y);
     }
 
-    /** Init pose the robot is placed at before being pushed (mirrored for red). */
     private Pose initPose() {
         return isBlue ? new Pose(INIT_X, INIT_Y, hr(INIT_HEADING_DEG))
                       : new Pose(mx(INIT_X), INIT_Y, hr(INIT_HEADING_DEG));
     }
 
-    /** Heading in radians, mirrored for red. */
     private double hr(double deg) {
         return isBlue ? Math.toRadians(deg) : Math.toRadians(mhd(deg));
     }
 
     /**
-     * Turret angle that aims at the alliance goal from the shoot spot, for the
-     * current SHOOT_HEADING_DEG. Because this is computed (not a fixed constant),
-     * the robot heading can be chosen freely (e.g. to flow into the gate) and the
-     * turret still hits. Same convention as PPTracking: turret = 135 − deflection.
+     * Computes the turret angle (deg) that points at the alliance goal from the
+     * shoot pose. Matches TurretTracking's formula exactly.
      */
     double shootTurretDeg() {
         Pose shoot = sp(SHOOT_POS_X, SHOOT_POS_Y);
@@ -369,26 +383,11 @@ public class CloseAuto24 extends CommandOpMode {
         return Turret.clampDeg(135.0 - deflectionDeg + SHOOT_TURRET_OFFSET_DEG);
     }
 
-    /** Wrap an angle to (−180, 180]. */
     private static double wrap180(double a) {
         a = ((a + 180.0) % 360.0 + 360.0) % 360.0;
         return a - 180.0;
     }
 
-    // ── Mirror math (same convention as RedSideClose.java) ──────────────────
-
-    /** Mirror x across the field centre (x = 72). */
-    private static double mx(double x) {
-        return 144.0 - x;
-    }
-
-    /** Mirror a heading in degrees across the vertical axis: θ → (180 − θ). */
-    private static double mhd(double deg) {
-        return ((180.0 - deg) % 360.0 + 360.0) % 360.0;
-    }
-
-    /** Mirror a turret angle around the 135° forward axis: t → (270° − t). */
-    private static double mt(double turretDeg) {
-        return ((270.0 - turretDeg) % 360.0 + 360.0) % 360.0;
-    }
+    private static double mx(double x)    { return 144.0 - x; }
+    private static double mhd(double deg) { return ((180.0 - deg) % 360.0 + 360.0) % 360.0; }
 }
