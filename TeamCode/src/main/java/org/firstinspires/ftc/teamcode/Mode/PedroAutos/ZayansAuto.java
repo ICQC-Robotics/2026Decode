@@ -15,7 +15,7 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
-import org.firstinspires.ftc.teamcode.Robot.commands.ClampedPPTracking;
+import org.firstinspires.ftc.teamcode.Robot.commands.TurretTracking;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
@@ -129,13 +129,7 @@ public class ZayansAuto extends CommandOpMode {
     public Command followTracked(PathChain path, double centerDeg, double windowDeg) {
         return new ParallelDeadlineGroup(
                 new FollowPathCommand(f, path, true),
-                new ClampedPPTracking(
-                        t,
-                        d,
-                        Robot.Alliance.BLUE,   // change if this auto should be RED
-                        centerDeg - windowDeg,
-                        centerDeg + windowDeg
-                )
+                new TurretTracking(t, d, Robot.Alliance.BLUE)
         );
     }
 
@@ -143,13 +137,7 @@ public class ZayansAuto extends CommandOpMode {
         return new ParallelDeadlineGroup(
                 new FollowPathCommand(f, path, true),
 
-                new ClampedPPTracking(
-                        t,
-                        d,
-                        Robot.Alliance.BLUE,   // change if this auto should be RED
-                        turretAngle - windowDeg,
-                        turretAngle + windowDeg
-                ),
+                new TurretTracking(t, d, Robot.Alliance.BLUE),
 
                 new SequentialCommandGroup(
                         new InstantCommand(() -> intake.setSpeed(0)),

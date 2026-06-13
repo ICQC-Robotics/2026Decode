@@ -150,8 +150,8 @@ public class ShootOnMove extends SequentialCommandGroup {
         double gY = goal.getY();
 
         double headingRad = robot.getHeading();
-        double turretX = robot.getX() + PPTracking.TURRET_FORWARD_OFFSET_IN * Math.cos(headingRad);
-        double turretY = robot.getY() + PPTracking.TURRET_FORWARD_OFFSET_IN * Math.sin(headingRad);
+        double turretX = robot.getX() + Turret.FORWARD_OFFSET_IN * Math.cos(headingRad);
+        double turretY = robot.getY() + Turret.FORWARD_OFFSET_IN * Math.sin(headingRad);
         double vx = (vel == null) ? 0.0 : vel.getXComponent();
         double vy = (vel == null) ? 0.0 : vel.getYComponent();
 

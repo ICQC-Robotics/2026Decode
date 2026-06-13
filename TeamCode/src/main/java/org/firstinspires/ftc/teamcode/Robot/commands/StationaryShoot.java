@@ -113,8 +113,8 @@ public class StationaryShoot extends SequentialCommandGroup {
 
         Pose goal = FieldConstants.goalAimPointForAlliance(Robot.ALLIANCE == Robot.Alliance.BLUE);
         double headingRad = robot.getHeading();
-        double turretX = robot.getX() + PPTracking.TURRET_FORWARD_OFFSET_IN * Math.cos(headingRad);
-        double turretY = robot.getY() + PPTracking.TURRET_FORWARD_OFFSET_IN * Math.sin(headingRad);
+        double turretX = robot.getX() + Turret.FORWARD_OFFSET_IN * Math.cos(headingRad);
+        double turretY = robot.getY() + Turret.FORWARD_OFFSET_IN * Math.sin(headingRad);
 
         double aimX = goal.getX() - turretX;
         double aimY = goal.getY() - turretY;

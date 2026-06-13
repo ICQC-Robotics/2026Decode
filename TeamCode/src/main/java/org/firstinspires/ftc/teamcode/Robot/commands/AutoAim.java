@@ -149,8 +149,8 @@ public class AutoAim extends SequentialCommandGroup {
         double headingRad = robot.getHeading();
 
         // shift center -> turret pivot (forward along heading)
-        double turretX = x + PPTracking.TURRET_FORWARD_OFFSET_IN * Math.cos(headingRad);
-        double turretY = y + PPTracking.TURRET_FORWARD_OFFSET_IN * Math.sin(headingRad);
+        double turretX = x + Turret.FORWARD_OFFSET_IN * Math.cos(headingRad);
+        double turretY = y + Turret.FORWARD_OFFSET_IN * Math.sin(headingRad);
 
         double dx = goalX - turretX;
         double dy = goalY - turretY;

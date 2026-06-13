@@ -8,58 +8,59 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 public class Turret extends SubsystemBase {
 
+    // 0° = full left, 135° = forward, 270° = full right. Increasing encoder = CW.
+    // Encoder is zeroed with the turret physically at FORWARD_DEG before each match.
     public static final double MIN_DEG = 0.0;
     public static final double MAX_DEG = 270.0;
-    public static final double GEAR_RATIO = 2.77272727;
+    public static final double FORWARD_DEG = 135.0;
 
+    // Distance from robot center to turret pivot, along robot forward axis.
+    public static final double FORWARD_OFFSET_IN = 3.0;
+
+    private static final double GEAR_RATIO    = 2.77272727;
     private static final double TICKS_PER_REV = 384.5;
-    private static final double TICKS_PER_DEG = (TICKS_PER_REV * GEAR_RATIO) / 360.0;
+    public  static final double TICKS_PER_DEG = (TICKS_PER_REV * GEAR_RATIO) / 360.0; // ≈ 2.96
 
     private final DcMotorEx motor;
-    private final PIDFCoefficients pidf;
+    private double targetDeg = FORWARD_DEG;
 
-    private double angleOffsetDeg = 135.0;
-    private double targetDeg = 135.0;
-    // Tracks whether the motor has been given power since the last reset so that
-    // setPower(1.0) is only sent once rather than every loop iteration (repeated
-    // setPower calls in RUN_TO_POSITION can cause brief PIDF re-initialisation on
-    // the REV Hub, producing the random bidirectional jitter we want to eliminate).
-    private boolean motorEnabled = false;
+    // setPower(1.0) is sent once per enable cycle. Calling it on every loop in
+    // RUN_TO_POSITION mode briefly re-initialises the REV Hub PIDF, causing the
+    // random bidirectional jitter we want to eliminate.
+    private boolean powered = false;
 
     public Turret(DcMotorEx motor, DcMotorSimple.Direction direction, PIDFCoefficients pidf) {
         this.motor = motor;
-        this.pidf = pidf;
 
         motor.setDirection(direction);
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor.setTargetPosition(0);
         motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motor.setPower(0.0);
 
         setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
-        setTargetDeg(clamp(getAngleDeg(), MIN_DEG, MAX_DEG));
     }
 
-    public void setPIDF(double p, double i, double d, double f) {
-        pidf.p = p; pidf.i = i; pidf.d = d; pidf.f = f;
-        motor.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION,
-                new PIDFCoefficients(p, i, d, f));
-        // Math.round so we get 3 ticks (~1.01°) not 2 ticks (~0.68°) from truncation.
-        motor.setTargetPositionTolerance((int) Math.round(1.0 * TICKS_PER_DEG));
-    }
+    // ── targeting ──────────────────────────────────────────────────────────────
 
+    /** Set the desired turret angle. Values outside [MIN_DEG, MAX_DEG] are clamped. */
     public void setTargetDeg(double deg) {
-        targetDeg = nearestReachableDeg(deg);
-        motor.setTargetPosition(degToTicks(targetDeg - angleOffsetDeg));
-        if (!motorEnabled) {
+        targetDeg = clampDeg(deg);
+        motor.setTargetPosition((int) Math.round((targetDeg - FORWARD_DEG) * TICKS_PER_DEG));
+        if (!powered) {
             motor.setPower(1.0);
-            motorEnabled = true;
+            powered = true;
         }
     }
 
+    public void holdCurrentAngle() {
+        setTargetDeg(getAngleDeg());
+    }
+
+    // ── state queries ──────────────────────────────────────────────────────────
+
     public double getAngleDeg() {
-        return (motor.getCurrentPosition() / TICKS_PER_DEG) + angleOffsetDeg;
+        return motor.getCurrentPosition() / TICKS_PER_DEG + FORWARD_DEG;
     }
 
     public double getTargetDeg() {
@@ -70,61 +71,39 @@ public class Turret extends SubsystemBase {
         return Math.abs(targetDeg - getAngleDeg()) <= toleranceDeg;
     }
 
-    public void holdCurrentAngle() {
-        setTargetDeg(getAngleDeg());
-    }
+    // ── calibration ────────────────────────────────────────────────────────────
 
+    /** Re-home the encoder. Only call this when the turret is physically at FORWARD_DEG. */
     public void resetEncoder() {
+        powered = false;
         motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor.setTargetPosition(0);
         motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motor.setPower(0.0);
-        motorEnabled = false;
-        angleOffsetDeg = 135.0;
-        targetDeg = 135.0;
-        setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
-        setTargetDeg(clamp(getAngleDeg(), MIN_DEG, MAX_DEG));
+        targetDeg = FORWARD_DEG;
     }
 
-    public void setCurrentAsZeroButStartAtAngleDeg(double startupAngleDeg) {
-        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motor.setTargetPosition(0);
-        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motor.setPower(0.0);
-        motorEnabled = false;
-        angleOffsetDeg = clamp(startupAngleDeg, MIN_DEG, MAX_DEG);
-        targetDeg = angleOffsetDeg;
-        setTargetDeg(targetDeg);
+    public void setPIDF(double p, double i, double d, double f) {
+        motor.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION,
+                new PIDFCoefficients(p, i, d, f));
+        // 1° ≈ 3 ticks. Math.round avoids the (int) truncation that gives 2 ticks instead.
+        motor.setTargetPositionTolerance((int) Math.round(TICKS_PER_DEG));
+    }
+
+    // ── geometry ───────────────────────────────────────────────────────────────
+
+    /**
+     * Clamps a turret angle to [MIN_DEG, MAX_DEG].
+     * Values outside the range snap to whichever endpoint is closest (short circular arc).
+     * Public so TurretTracking (and callers that compute raw angles) can use it.
+     */
+    public static double clampDeg(double deg) {
+        deg = ((deg % 360.0) + 360.0) % 360.0;   // normalise to [0, 360)
+        if (deg <= MAX_DEG) return deg;            // in [0°, 270°] — in range
+        // deg is in (270°, 360°): closer to MIN (0°) or MAX (270°)?
+        return (360.0 - deg) <= (deg - MAX_DEG) ? MIN_DEG : MAX_DEG;
     }
 
     @Override
     public void periodic() {}
-
-    // ── helpers ────────────────────────────────────────────────────────────────
-
-    private int degToTicks(double deg) {
-        return (int) Math.round(deg * TICKS_PER_DEG);
-    }
-
-    private static double nearestReachableDeg(double desired) {
-        double d = wrap360(desired);
-        if (d >= MIN_DEG && d <= MAX_DEG) return d;
-        return circularDistanceDeg(d, MIN_DEG) <= circularDistanceDeg(d, MAX_DEG)
-                ? MIN_DEG : MAX_DEG;
-    }
-
-    private static double circularDistanceDeg(double a, double b) {
-        double diff = Math.abs(wrap360(a) - wrap360(b)) % 360.0;
-        return Math.min(diff, 360.0 - diff);
-    }
-
-    private static double wrap360(double a) {
-        a %= 360.0;
-        if (a < 0) a += 360.0;
-        return a;
-    }
-
-    private static double clamp(double v, double lo, double hi) {
-        return Math.max(lo, Math.min(hi, v));
-    }
 }

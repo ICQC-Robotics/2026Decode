@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.DriveCommand;
-import org.firstinspires.ftc.teamcode.Robot.commands.PPTracking;
+import org.firstinspires.ftc.teamcode.Robot.commands.TurretTracking;
 import org.firstinspires.ftc.teamcode.Robot.commands.ShootCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.ShooterStandBy;
 
@@ -31,7 +31,7 @@ public class SoloBlue extends CommandOpMode {
     private Robot.Alliance alliance = Robot.Alliance.BLUE;
 
     // make this a field so your DPAD buttons can access it
-    private PPTracking ppTracking;
+    private TurretTracking ppTracking;
 
     @Override
     public void initialize() {
@@ -91,12 +91,12 @@ public class SoloBlue extends CommandOpMode {
                 null
         );
 
-        // create PPTracking ONCE (do not set as default)
-        ppTracking = new PPTracking(negabot.turret, negabot.drive, alliance);
+        // create TurretTracking ONCE (do not set as default)
+        ppTracking = new TurretTracking(negabot.turret, negabot.drive, alliance);
         ppTracking.resetDegOffset();
 
         // Right trigger: shoot. ShootCommand only requires intake so the drive,
-        // turret-tracking (PPTracking), and shooter standby keep running — the
+        // turret-tracking (TurretTracking), and shooter standby keep running — the
         // driver can still translate freely while the sequence waits for ready.
         new Trigger(() -> g.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
                 .whenActive(new ShootCommand(

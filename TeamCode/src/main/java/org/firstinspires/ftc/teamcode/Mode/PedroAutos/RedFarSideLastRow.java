@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Vision.IntakeColorProcessing;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
-import org.firstinspires.ftc.teamcode.Robot.commands.PPTracking;
+import org.firstinspires.ftc.teamcode.Robot.commands.TurretTracking;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Turret;
@@ -36,7 +36,7 @@ public class RedFarSideLastRow extends CommandOpMode {
     // Mirror rules:
     // Mirror about x = 72 => x' = 144 - x
     // Heading mirror      => heading' = pi - heading
-    // Turret: 135 forward => turret' = 270 - turret   (NOTE: PPTracking handles turret; no direct turret angles here)
+    // Turret: 135 forward => turret' = 270 - turret   (NOTE: TurretTracking handles turret; no direct turret angles here)
 
     private static double mx(double x) { return 144.0 - x; }
 
@@ -60,7 +60,7 @@ public class RedFarSideLastRow extends CommandOpMode {
     private IntakeColorProcessing.Zone latchedZone = null;
 
     // Track goal ALL THE TIME during the auto
-    private PPTracking ppTrack;
+    private TurretTracking ppTrack;
 
     @Override
     public void initialize() {
@@ -78,7 +78,7 @@ public class RedFarSideLastRow extends CommandOpMode {
         Robot.ALLIANCE = Robot.Alliance.RED;
 
         // Create once and schedule to run continuously
-        ppTrack = new PPTracking(t, d, Robot.Alliance.RED);
+        ppTrack = new TurretTracking(t, d, Robot.Alliance.RED);
 
         path(f);
 
@@ -89,7 +89,7 @@ public class RedFarSideLastRow extends CommandOpMode {
                 ppTrack,
 
                 // mirror shouldn't change this call; if decDeg() is a "trim" direction that assumes non-mirrored,
-                // you may need to swap to incDeg() depending on what decDeg() means in your PPTracking.
+                // you may need to swap to incDeg() depending on what decDeg() means in your TurretTracking.
                 new InstantCommand(() -> { ppTrack.incDeg(); }),
 
                 // Everything else runs in parallel with tracking

@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.Vision.IntakeColorProcessing;
 import org.firstinspires.ftc.teamcode.Robot.commands.ArtifactSeekCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
-import org.firstinspires.ftc.teamcode.Robot.commands.PPTracking;
+import org.firstinspires.ftc.teamcode.Robot.commands.TurretTracking;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Turret;
@@ -46,7 +46,7 @@ public class BlueFarSideLastRow extends CommandOpMode {
     private IntakeColorProcessing.Zone latchedZone = null;
 
     // Track goal ALL THE TIME during the auto
-    private PPTracking ppTrack;
+    private TurretTracking ppTrack;
 
     @Override
     public void initialize() {
@@ -61,7 +61,7 @@ public class BlueFarSideLastRow extends CommandOpMode {
         Robot.ALLIANCE = Robot.Alliance.BLUE;
 
         // Create once and schedule to run continuously
-        ppTrack = new PPTracking(t, d, Robot.Alliance.BLUE);
+        ppTrack = new TurretTracking(t, d, Robot.Alliance.BLUE);
 
         path(f);
 

@@ -14,10 +14,10 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
 public class HoldCommand extends CommandBase {
     private final Drive drive;
     private final Follower follower;
-    PPTracking p;
+    TurretTracking p;
     Pose holdPose = null;
     GamepadEx g;
-    public HoldCommand(Drive drive, GamepadEx g, PPTracking p) {
+    public HoldCommand(Drive drive, GamepadEx g, TurretTracking p) {
         this.drive = drive;
         this.follower = drive.follower;
         this.g = g;
