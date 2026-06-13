@@ -71,6 +71,10 @@ public class Turret extends SubsystemBase {
         return Math.abs(targetDeg - getAngleDeg()) <= toleranceDeg;
     }
 
+    public int getMotorTicks() {
+        return motor.getCurrentPosition();
+    }
+
     // ── calibration ────────────────────────────────────────────────────────────
 
     /** Re-home the encoder. Only call this when the turret is physically at FORWARD_DEG. */
