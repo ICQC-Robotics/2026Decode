@@ -62,17 +62,32 @@ public class Vision extends SubsystemBase {
         Pose3D pose = r.getBotpose();
         if (pose == null) return null;
 
+        // p is the camera pose in field coordinates (Limelight without a robot-body
+        // transform configured, so it reports the camera center as the "bot" position).
         Pose p = new Pose(
                 pose.getPosition().x * 39.37007874,
                 pose.getPosition().y * 39.37007874,
                 pose.getOrientation().getYaw(AngleUnit.RADIANS)
         );
 
-        p.setHeading(p.getHeading() + tRad);
-        p = p.withX(p.getX() + turretRadius * Math.sin(tRad));
-        p = p.withY(p.getY() - turretRadius * Math.cos(tRad));
+        // The turret rotates CW (positive t) relative to robot forward, which decreases
+        // the camera's field heading. So: camera_heading = robot_heading - tRad.
+        // Recover robot heading before modifying p, since withX/withY need camHeadRad.
+        double camHeadRad = p.getHeading();
+        p.setHeading(camHeadRad + tRad);  // robot heading
 
-        return p.withX(p.getX() - turretOffsetX).withY(p.getY() - turretOffsetY);
+        // Move from camera center to turret center: camera is turretRadius inches ahead
+        // of the turret pivot along the camera's boresight direction in field coordinates.
+        p = p.withX(p.getX() - turretRadius * Math.cos(camHeadRad));
+        p = p.withY(p.getY() - turretRadius * Math.sin(camHeadRad));
+
+        // Move from turret center to robot center: turret pivot is turretOffsetY inches
+        // ahead of robot center along the robot's forward direction in field coordinates.
+        double robotHeadRad = p.getHeading();
+        p = p.withX(p.getX() - turretOffsetY * Math.cos(robotHeadRad));
+        p = p.withY(p.getY() - turretOffsetY * Math.sin(robotHeadRad));
+
+        return p;
     }
 
     public void updateRobotYawDeg(double robotYawDeg) {
