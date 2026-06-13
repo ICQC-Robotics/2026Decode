@@ -55,7 +55,7 @@ public class CloseAuto24 extends CommandOpMode {
     // Robot returns to the shoot spot to fire after each gate cycle,
     // so GATE_HOOD matches SHOOT_HOOD (same shooting distance).
     static final double GATE_POS_X       = 14.0;    // gate area approach x (inches, blue)
-    static final double GATE_POS_Y       = 60.0;    // gate area approach y (inches)
+    static final double GATE_POS_Y       = 65.0;    // gate area approach y (inches)
     static final double GATE_HEADING_DEG = -20.0;   // robot heading while sweeping gate (blue)
     static final double GATE_HOOD        = 0.15;    // hood servo position after gate cycle
 
@@ -65,7 +65,7 @@ public class CloseAuto24 extends CommandOpMode {
 
     // ── Burst timing ───────────────────────────────────────────────────────
     // Intake runs backward for BURST_MS to fire all loaded artifacts (~3 × 500 ms each).
-    static final long BURST_MS = 1500;
+    static final long BURST_MS = 1000;
 
     // ── Path declarations ───────────────────────────────────────────────────
     PathChain toShoot0;                                  // 1: start → shoot (preload)
@@ -216,12 +216,12 @@ public class CloseAuto24 extends CommandOpMode {
 
         // ── 2: Middle row (y ≈ 62) — approach diagonal, then sweep left ─────
         toMiddleA = f.pathBuilder()
-            .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(42.0, 62.5)))
+            .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(42.0, 67.5)))
             .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(0))
             .build();
 
         toMiddleB = f.pathBuilder()
-            .addPath(new BezierLine(sp(42.0, 62.5), sp(15.5, 61.5)))
+            .addPath(new BezierLine(sp(42.0, 62.5), sp(15.5, 66.5)))
             .setLinearHeadingInterpolation(hr(0), hr(0))
             .build();
 
