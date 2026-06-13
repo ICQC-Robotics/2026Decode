@@ -34,8 +34,10 @@ public class ShootCommand extends SequentialCommandGroup {
     public ShootCommand(Shooter shooter, Turret turret, Intake intake) {
         addCommands(
                 // Open the cover so the ring has a path out
-                new InstantCommand(() ->
-                        shooter.setMagazineCover(AutoAim.Positions.OPEN_COVER.getPos())),
+                new InstantCommand(() -> {
+                        shooter.setRefineActive(true);   // standby switches to exact distance
+                        shooter.setMagazineCover(AutoAim.Positions.OPEN_COVER.getPos());
+                }),
 
                 // Gate: wait for flywheel at speed + turret on target + cover open time
                 new CommandBase() {
@@ -83,6 +85,7 @@ public class ShootCommand extends SequentialCommandGroup {
                 new InstantCommand(() -> {
                     shooter.setMagazineCover(AutoAim.Positions.CLOSED_COVER.getPos());
                     intake.setSpeed(0);
+                    shooter.setRefineActive(false);   // back to pre-spin preset
                 })
         );
         // The group's only hard requirement is intake — drive/shooter/turret keep running.
@@ -92,8 +95,10 @@ public class ShootCommand extends SequentialCommandGroup {
     /** Use this when there is no turret (fires as soon as flywheel is at speed). */
     public ShootCommand(Shooter shooter, Intake intake) {
         addCommands(
-                new InstantCommand(() ->
-                        shooter.setMagazineCover(AutoAim.Positions.OPEN_COVER.getPos())),
+                new InstantCommand(() -> {
+                        shooter.setRefineActive(true);   // standby switches to exact distance
+                        shooter.setMagazineCover(AutoAim.Positions.OPEN_COVER.getPos());
+                }),
 
                 new CommandBase() {
                     private final ElapsedTime coverTimer = new ElapsedTime();
@@ -137,6 +142,7 @@ public class ShootCommand extends SequentialCommandGroup {
                 new InstantCommand(() -> {
                     shooter.setMagazineCover(AutoAim.Positions.CLOSED_COVER.getPos());
                     intake.setSpeed(0);
+                    shooter.setRefineActive(false);   // back to pre-spin preset
                 })
         );
         addRequirements(intake);

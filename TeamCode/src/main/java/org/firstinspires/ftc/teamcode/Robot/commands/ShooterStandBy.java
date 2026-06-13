@@ -30,8 +30,13 @@ public class ShooterStandBy extends CommandBase {
     @Override
     public void execute() {
         double distIn = AutoAim.calculateDistanceIn(drive);
-        shooter.standbyForDistance(distIn);
+        if (shooter.isRefineActive()) {
+            shooter.aimForDistance(distIn);     // exact distance while a shot is firing
+        } else {
+            shooter.applyStandbyPreset();        // pre-spin to the operator-selected zone
+        }
 
+        drive.telemetry.addData("Standby Zone",       shooter.getStandbyZone());
         drive.telemetry.addData("Standby Dist (in)",  distIn);
         drive.telemetry.addData("Standby Profile",    shooter.getLastProfileName());
         drive.telemetry.addData("Standby Target RPM", shooter.getTargetVelocity());

@@ -13,6 +13,13 @@ public class Shooter extends SubsystemBase {
     // Bang-bang hysteresis band (±RPM around target). Tune via FTC Dashboard.
     public static double BANG_BAND_RPM = 25.0;
 
+    // Teleop standby pre-spin presets (RPM + hood) per zone. Operator picks one on
+    // gamepad 2; the flywheel idles here so far/close shots barely have to spin.
+    public static double CLOSE_STANDBY_RPM  = 2700.0;
+    public static double CLOSE_STANDBY_HOOD = 0.2;
+    public static double FAR_STANDBY_RPM    = 3700.0;
+    public static double FAR_STANDBY_HOOD   = 0.7;
+
     private static final double TICKS_PER_REV = 28.0;
     private static final double MIN_VALID_RPM = 1.0;
     private static final double TARGET_CHANGE_RESET_RPM = 50.0;
@@ -36,6 +43,10 @@ public class Shooter extends SubsystemBase {
 
     private double lastDistanceIn = 0.0;
     private ShooterAimingModel.Solution lastSolution;
+
+    public enum StandbyZone { CLOSE, FAR }
+    private StandbyZone standbyZone = StandbyZone.FAR;
+    private boolean refineActive = false;
 
     public Shooter(
             DcMotorEx rightShooter, DcMotorSimple.Direction rightDir,
@@ -121,6 +132,26 @@ public class Shooter extends SubsystemBase {
     /** Identical to {@link #aimForDistance} — kept for call-site readability. */
     public ShooterAimingModel.Solution standbyForDistance(double distanceIn) {
         return aimForDistance(distanceIn);
+    }
+
+    // ── standby zone (teleop pre-spin) ───────────────────────────────────────
+
+    public void setStandbyZone(StandbyZone zone) { standbyZone = zone; }
+    public StandbyZone getStandbyZone() { return standbyZone; }
+
+    /** While true, ShooterStandBy uses the exact shot distance instead of the preset. */
+    public void setRefineActive(boolean active) { refineActive = active; }
+    public boolean isRefineActive() { return refineActive; }
+
+    /** Pre-spin the flywheel + hood to the selected zone preset. */
+    public void applyStandbyPreset() {
+        if (standbyZone == StandbyZone.FAR) {
+            setHoodPosition(FAR_STANDBY_HOOD);
+            setVelocity(FAR_STANDBY_RPM);
+        } else {
+            setHoodPosition(CLOSE_STANDBY_HOOD);
+            setVelocity(CLOSE_STANDBY_RPM);
+        }
     }
 
     // ── servo control ──────────────────────────────────────────────────────────

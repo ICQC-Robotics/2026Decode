@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.Robot.commands.DriveCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.TurretTracking;
 import org.firstinspires.ftc.teamcode.Robot.commands.ShootCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.ShooterStandBy;
+import org.firstinspires.ftc.teamcode.Robot.subsystems.Shooter;
 
 @TeleOp(group=".")
 public class SoloRed extends CommandOpMode {
@@ -35,6 +36,7 @@ public class SoloRed extends CommandOpMode {
     @Override
     public void initialize() {
         g = new GamepadEx(gamepad1);
+        GamepadEx g2 = new GamepadEx(gamepad2);
         negabot = new Robot(hardwareMap, telemetry, new Pose(0,0, 0));
         negabot.reset();
 
@@ -65,6 +67,12 @@ public class SoloRed extends CommandOpMode {
                 new AutoIntake(negabot.intake, negabot.wait).reject(),
                 new AutoIntake(negabot.intake, negabot.wait).finish()
         );
+
+        // Gamepad 2: standby pre-spin zone — RB = FAR, LB = CLOSE
+        negabot.Action(g2, GamepadKeys.Button.RIGHT_BUMPER,
+                new InstantCommand(() -> negabot.shooter.setStandbyZone(Shooter.StandbyZone.FAR)), null);
+        negabot.Action(g2, GamepadKeys.Button.LEFT_BUMPER,
+                new InstantCommand(() -> negabot.shooter.setStandbyZone(Shooter.StandbyZone.CLOSE)), null);
 
         /*
 
