@@ -15,6 +15,7 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
+import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.ClampedPPTracking;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
@@ -26,7 +27,7 @@ public class ZayansAuto extends CommandOpMode {
     Robot negabot;
     PathChain pre, r1, r1b, r2, r2b, r3, r3b, gate, gate1, gate2, gate3, gateB, gateB0, gateB1, leave;
 
-    Pose startPose = new Pose(34.539759705535104, (136.42016806722688 - 1.5), Math.toRadians(0));
+    Pose startPose = new Pose(32.848346636259976, (134.4310148232611), Math.toRadians(90));
 
     Pose shoot = new Pose(51.49942594718714, 90.61882893226179, Math.toRadians(24));
     Pose gateIntake = new Pose(13.5, 62, Math.toRadians(-30));
@@ -40,8 +41,8 @@ public class ZayansAuto extends CommandOpMode {
     double firstBallx = 42;
     double lastBallx = 20;
 
-    final double COVER_OPEN = 0.25;
-    final double COVER_CLOSE = 1.0;
+    final double COVER_OPEN = AutoAim.Positions.OPEN_COVER.getPos();
+    final double COVER_CLOSE = AutoAim.Positions.CLOSED_COVER.getPos();
 
     Intake intake;
     Drive d;
