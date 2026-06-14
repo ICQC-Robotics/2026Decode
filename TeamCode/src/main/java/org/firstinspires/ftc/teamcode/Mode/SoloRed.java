@@ -37,22 +37,15 @@ public class SoloRed extends CommandOpMode {
     public void initialize() {
         g = new GamepadEx(gamepad1);
         GamepadEx g2 = new GamepadEx(gamepad2);
-        negabot = new Robot(hardwareMap, telemetry, new Pose(0,0, 0));
+        // resetTurret = false: keep the encoder count from auto so restoreFromAuto() can
+        // re-anchor the saved turret angle instead of zeroing it.
+        negabot = new Robot(hardwareMap, telemetry, new Pose(0,0, 0), false);
         negabot.reset();
 
         Robot.ALLIANCE = Robot.Alliance.RED;
 
-
-
-        //setting position
-        if (Robot.LAST_POSE != null) {
-            negabot.drive.follower.setPose(Robot.LAST_POSE.copy());
-            negabot.turret.setCurrentAngleDeg(Robot.LAST_TURRET_DEG);   // restore turret from auto
-            poseLocked = true;
-        }
-        else {
-            negabot.drive.follower.setPose(new Pose(0,0, 0));
-        }
+        // Restore the pose + turret angle saved at the end of auto (no encoder reset).
+        poseLocked = negabot.restoreFromAuto();
 
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g));
 

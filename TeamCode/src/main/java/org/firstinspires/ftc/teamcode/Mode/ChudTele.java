@@ -24,8 +24,13 @@ public class ChudTele extends CommandOpMode {
     @Override
     public void initialize() {
         g = new GamepadEx(gamepad1);
-        negabot = new Robot(hardwareMap, telemetry, new Pose(0,0, 0));
+        // resetTurret = false so the turret encoder is preserved for the auto carryover.
+        negabot = new Robot(hardwareMap, telemetry, new Pose(0,0, 0), false);
         negabot.reset();
+
+        // Restore the pose + turret angle saved at the end of auto (no encoder reset).
+        negabot.restoreFromAuto();
+
         negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, negabot.drive));
         negabot.drive.setDefaultCommand(new DriveCommand(negabot.drive, g));
 

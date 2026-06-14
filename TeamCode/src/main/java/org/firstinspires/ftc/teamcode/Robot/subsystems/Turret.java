@@ -38,12 +38,29 @@ public class Turret extends SubsystemBase {
     private boolean powered = false;
 
     public Turret(DcMotorEx motor, DcMotorSimple.Direction direction, PIDFCoefficients pidf) {
+        this(motor, direction, pidf, true);
+    }
+
+    /**
+     * @param resetEncoder true to zero the encoder at construction — the turret must be
+     *        physically at FORWARD_DEG (used by auto). false to keep the existing encoder
+     *        count so an angle saved at the end of auto survives into teleop; the caller
+     *        re-anchors the reference afterwards with {@link #setCurrentAngleDeg(double)}.
+     */
+    public Turret(DcMotorEx motor, DcMotorSimple.Direction direction, PIDFCoefficients pidf,
+                  boolean resetEncoder) {
         this.motor = motor;
 
         motor.setDirection(direction);
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motor.setTargetPosition(0);
+        if (resetEncoder) {
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motor.setTargetPosition(0);
+        } else {
+            // Preserve the carried-over count; hold the current position until
+            // setCurrentAngleDeg()/setTargetDeg() re-anchors the angle reference.
+            motor.setTargetPosition(motor.getCurrentPosition());
+        }
         motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);

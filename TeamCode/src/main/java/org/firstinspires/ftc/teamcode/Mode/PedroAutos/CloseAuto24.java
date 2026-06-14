@@ -4,6 +4,8 @@ import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelDeadlineGroup;
+import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.pedropathing.follower.Follower;
@@ -55,9 +57,9 @@ public class CloseAuto24 extends CommandOpMode {
     static final double SHOOT_POS_X_FAR    = 52.0;
     static final double SHOOT_POS_Y        = 90.0;
     static final double SHOOT_HEADING_DEG  = 30.0;
-    static final double SHOOT_VELOCITY     = 2950.0;
+    static final double SHOOT_VELOCITY     = 2850.0;
     static final double SHOOT_VELOCITY_FAR = SHOOT_VELOCITY + 100.0;  // 3050 RPM
-    static final double SHOOT_HOOD         = 0.15;
+    static final double SHOOT_HOOD         = 0.5;
     static final double SHOOT_TURRET_OFFSET_DEG = 0.0;
 
     // ── Init / push-to-start ────────────────────────────────────────────────
@@ -67,7 +69,7 @@ public class CloseAuto24 extends CommandOpMode {
 
     // ── Gate-intake-station tuning ──────────────────────────────────────────
     static final double GATE_POS_X       = 9.5;
-    static final double GATE_POS_Y       = 61.0;
+    static final double GATE_POS_Y       = 60.0;
     static final double GATE_HEADING_DEG = 330.0;
     static final double GATE_APPROACH_X  = 14.0;
 
@@ -79,7 +81,7 @@ public class CloseAuto24 extends CommandOpMode {
     static final double INTAKE_ON = -1.0;
 
     // ── Timing ──────────────────────────────────────────────────────────────
-    static final long BURST_MS     = 750;
+    static final long BURST_MS     = 550;   // feed time — was 750; matched to Zayan's ~500
     static final long GATE_WAIT_MS = 1250;
 
     // ── Path declarations ────────────────────────────────────────────────────
@@ -89,6 +91,7 @@ public class CloseAuto24 extends CommandOpMode {
     PathChain toShoot0;
     PathChain toMiddle,   toShoot1;
     PathChain toGate,     toGateFar,    toShootFromGate;
+    PathChain toGateFarStraight, toShootFromGateStraight;   // straight versions once top row is gone
     PathChain toTopSweep, toShootFromTop;
     PathChain toBottom,   toShootFromBottom;
     PathChain park;
@@ -152,12 +155,13 @@ public class CloseAuto24 extends CommandOpMode {
             new SequentialCommandGroup(
 
                 // ── 1: Preload — (40,90) @ 2950 RPM ─────────────────────
+                new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
                 shotPrep(f, toShoot0),
                 burst(),
 
                 // ── 2: Middle row (y≈60) — returns to (52,90) @ 3050 RPM ─
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
-                new FollowPathCommand(f, toMiddle, true),
+                new FollowPathCommand(f, toMiddle, false),   // flow into the return, don't brake/hold
                 new InstantCommand(() -> negabot.intake.setSpeed(0)),
                 new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY_FAR),
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
@@ -175,7 +179,7 @@ public class CloseAuto24 extends CommandOpMode {
 
                 // ── 4: Top row (y≈84) — from (52,90), returns to (40,90) @ 2950 RPM ─
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
-                new FollowPathCommand(f, toTopSweep, true),
+                new FollowPathCommand(f, toTopSweep, false),   // flow into the return, don't brake/hold
                 new InstantCommand(() -> negabot.intake.setSpeed(0)),
                 new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY),
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
@@ -189,12 +193,12 @@ public class CloseAuto24 extends CommandOpMode {
                 new InstantCommand(() -> negabot.intake.setSpeed(0)),
                 new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY_FAR),
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
-                shotPrep(f, toShootFromGate),
+                shotPrep(f, toShootFromGateStraight),
                 burst(),
 
                 // ── 6: Bottom row (y≈36) — from (52,90), returns to (40,90) @ 2950 RPM ─
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
-                new FollowPathCommand(f, toBottom, true),
+                new FollowPathCommand(f, toBottom, false),   // flow into the return, don't brake/hold
                 new InstantCommand(() -> negabot.intake.setSpeed(0)),
                 new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY),
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
@@ -208,16 +212,16 @@ public class CloseAuto24 extends CommandOpMode {
                 new InstantCommand(() -> negabot.intake.setSpeed(0)),
                 new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY_FAR),
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
-                shotPrep(f, toShootFromGate),
+                shotPrep(f, toShootFromGateStraight),
                 burst(),
 
                 // ── 8: Gate fourth pass — from (52,90), return to (52,90) @ 3050 RPM ─
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
-                new FollowPathCommand(f, toGateFar, true),
+                new FollowPathCommand(f, toGateFarStraight, true),
                 new WaitCommand(GATE_WAIT_MS),
                 new InstantCommand(() -> negabot.intake.setSpeed(0)),
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
-                shotPrep(f, toShootFromGate),
+                shotPrep(f, toShootFromGateStraight),
                 burst(),
 
                 // ── Park — from (52,90) ───────────────────────────────────
@@ -237,7 +241,26 @@ public class CloseAuto24 extends CommandOpMode {
     }
 
     Command shotPrep(Follower f, PathChain path) {
-        return new FollowPathCommand(f, path, true);
+        // Drive to the shoot spot while the turret continuously aims at the goal from
+        // the live pose — so the chassis can be at ANY heading and the turret is
+        // already on-target (pre-aimed during the drive) by the time we arrive.
+        return new ParallelDeadlineGroup(
+            new FollowPathCommand(f, path, true),
+            new RunCommand(this::aimTurretAtGoal, negabot.turret)
+        );
+    }
+
+    /** Aim the turret at the alliance goal from the robot's live pose (works at any heading). */
+    void aimTurretAtGoal() {
+        Pose p = negabot.drive.follower.getPose();
+        if (p == null) return;
+        double h = p.getHeading();
+        double tx = p.getX() + Turret.FORWARD_OFFSET_IN * Math.cos(h) - Turret.LATERAL_OFFSET_IN * Math.sin(h);
+        double ty = p.getY() + Turret.FORWARD_OFFSET_IN * Math.sin(h) + Turret.LATERAL_OFFSET_IN * Math.cos(h);
+        Pose goal = FieldConstants.goalAimPointForAlliance(isBlue);
+        double bearingDeg    = Math.toDegrees(Math.atan2(goal.getY() - ty, goal.getX() - tx));
+        double deflectionDeg = wrap180(bearingDeg - Math.toDegrees(h));
+        negabot.turret.setTargetDeg(Turret.clampDeg(135.0 - deflectionDeg + SHOOT_TURRET_OFFSET_DEG));
     }
 
     void buildPaths(Follower f) {
@@ -277,12 +300,9 @@ public class CloseAuto24 extends CommandOpMode {
 
         // ── Gate (y ≈ 61) ───────────────────────────────────────────────────
         // toGate: 4-pt cubic from (40,90). Crosses y=84 at x≈47. Used cycles 5 & 7.
+        // Straight: top row is already collected by cycles 5 & 7, so go direct.
         toGate = f.pathBuilder()
-            .addPath(new BezierCurve(
-                sp(SHOOT_POS_X,     SHOOT_POS_Y),
-                sp(SHOOT_POS_X_FAR, SHOOT_POS_Y),
-                sp(SHOOT_POS_X_FAR, GATE_POS_Y),
-                sp(GATE_APPROACH_X, GATE_POS_Y)))
+            .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(GATE_APPROACH_X, GATE_POS_Y)))
             .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(GATE_HEADING_DEG))
             .addPath(new BezierLine(sp(GATE_APPROACH_X, GATE_POS_Y), sp(GATE_POS_X, GATE_POS_Y)))
             .setLinearHeadingInterpolation(hr(GATE_HEADING_DEG), hr(GATE_HEADING_DEG))
@@ -309,11 +329,23 @@ public class CloseAuto24 extends CommandOpMode {
             .setLinearHeadingInterpolation(hr(GATE_HEADING_DEG), hr(SHOOT_HEADING_DEG))
             .build();
 
+        // ── Straight gate paths — used by cycles 5, 7, 8 (top row already gone) ──
+        toGateFarStraight = f.pathBuilder()
+            .addPath(new BezierLine(sp(SHOOT_POS_X_FAR, SHOOT_POS_Y), sp(GATE_APPROACH_X, GATE_POS_Y)))
+            .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(GATE_HEADING_DEG))
+            .addPath(new BezierLine(sp(GATE_APPROACH_X, GATE_POS_Y), sp(GATE_POS_X, GATE_POS_Y)))
+            .setLinearHeadingInterpolation(hr(GATE_HEADING_DEG), hr(GATE_HEADING_DEG))
+            .build();
+
+        toShootFromGateStraight = f.pathBuilder()
+            .addPath(new BezierLine(sp(GATE_POS_X, GATE_POS_Y), sp(SHOOT_POS_X_FAR, SHOOT_POS_Y)))
+            .setLinearHeadingInterpolation(hr(GATE_HEADING_DEG), hr(SHOOT_HEADING_DEG))
+            .build();
+
         // ── Top row (y ≈ 84) — starts from (52,90) after gate cycle 3 ────────
         // Control point (42,84) keeps path above y=84 until endpoint (36,84).
         toTopSweep = f.pathBuilder()
-            .addPath(new BezierCurve(
-                sp(SHOOT_POS_X_FAR, SHOOT_POS_Y), sp(42.0, 84.0), sp(36.0, 84.0)))
+            .addPath(new BezierLine(sp(SHOOT_POS_X_FAR, SHOOT_POS_Y), sp(36.0, 84.0)))
             .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(0))
             .addPath(new BezierLine(sp(36.0, 84.0), sp(18.0, 84.0)))
             .setLinearHeadingInterpolation(hr(0), hr(0))
@@ -326,8 +358,7 @@ public class CloseAuto24 extends CommandOpMode {
 
         // ── Bottom row (y ≈ 36) — starts from (52,90) after gate cycle 5 ─────
         toBottom = f.pathBuilder()
-            .addPath(new BezierCurve(
-                sp(SHOOT_POS_X_FAR, SHOOT_POS_Y), sp(42.0, 36.0), sp(36.0, 36.0)))
+            .addPath(new BezierLine(sp(SHOOT_POS_X_FAR, SHOOT_POS_Y), sp(36.0, 36.0)))
             .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(0))
             .addPath(new BezierLine(sp(36.0, 36.0), sp(18.0, 36.0)))
             .setLinearHeadingInterpolation(hr(0), hr(0))
