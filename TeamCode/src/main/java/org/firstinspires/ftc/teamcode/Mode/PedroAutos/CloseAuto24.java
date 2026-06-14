@@ -53,25 +53,30 @@ public class CloseAuto24 extends CommandOpMode {
     // Near spot (40,90): preload, top row, bottom row  @ SHOOT_VELOCITY.
     // Far spot  (52,90): middle row + all gate cycles  @ SHOOT_VELOCITY_FAR.
     // Return paths already pass through (52,90), so far shots cost zero extra travel.
-    static final double SHOOT_POS_X        = 40.0;
-    static final double SHOOT_POS_X_FAR    = 52.0;
-    static final double SHOOT_POS_Y        = 90.0;
-    static final double SHOOT_HEADING_DEG  = 30.0;
-    static final double SHOOT_VELOCITY     = 2850.0;
-    static final double SHOOT_VELOCITY_FAR = SHOOT_VELOCITY + 100.0;  // 3050 RPM
+    static final double SHOOT_POS_X        = 50;
+    static final double SHOOT_POS_X_FAR    = 50;
+    static final double SHOOT_POS_Y        = 80;
+    static final double SHOOT_HEADING_DEG  = 0;
+    static final double SHOOT_VELOCITY    = 2950.0;
+    static final double SHOOT_VELOCITY_FAR = SHOOT_VELOCITY + 100.0;
+    static final double SHOOT_VELOCITY_PRELOAD = SHOOT_VELOCITY + 300;
     static final double SHOOT_HOOD         = 0.5;
     static final double SHOOT_TURRET_OFFSET_DEG = 0.0;
 
     // ── Init / push-to-start ────────────────────────────────────────────────
-    static final double INIT_X           = 40.8;
-    static final double INIT_Y           = 137.8;
-    static final double INIT_HEADING_DEG = 180.0;
+    static final double INIT_X           = 48;
+    static final double INIT_Y           = 120;
+    static final double INIT_HEADING_DEG = 180;
+
+    // ── Spike-row intake reach ──────────────────────────────────────────────
+    // X the robot drives to when sweeping the artifact rows (middle/top/bottom).
+    static final double spikeXintake = 10;
 
     // ── Gate-intake-station tuning ──────────────────────────────────────────
-    static final double GATE_POS_X       = 9.5;
-    static final double GATE_POS_Y       = 60.0;
+    static final double GATE_POS_X       = 10;
+    static final double GATE_POS_Y       = 57;
     static final double GATE_HEADING_DEG = 330.0;
-    static final double GATE_APPROACH_X  = 14.0;
+    static final double GATE_APPROACH_X  = 15;
 
     // ── Magazine cover positions ─────────────────────────────────────────────
     static final double COVER_OPEN  = .75;
@@ -81,8 +86,8 @@ public class CloseAuto24 extends CommandOpMode {
     static final double INTAKE_ON = -1.0;
 
     // ── Timing ──────────────────────────────────────────────────────────────
-    static final long BURST_MS     = 550;   // feed time — was 750; matched to Zayan's ~500
-    static final long GATE_WAIT_MS = 1250;
+   static final long BURST_MS     = 550;   // feed time — was 750; matched to Zayan's ~500
+    static final long GATE_WAIT_MS = 800;
 
     // ── Path declarations ────────────────────────────────────────────────────
     // toGate: from (40,90) — cycles 5 & 7.
@@ -150,14 +155,14 @@ public class CloseAuto24 extends CommandOpMode {
 
         // ── Command schedule ──────────────────────────────────────────────
         negabot.schedule(
-            new InstantCommand(() -> negabot.shooter.setHoodPosition(SHOOT_HOOD)),
+            new InstantCommand(() -> negabot.shooter.setHoodPosition(SHOOT_HOOD)),   // normal hood for the preload too
 
             new SequentialCommandGroup(
 
-                // ── 1: Preload — (40,90) @ 2950 RPM ─────────────────────
+                // ── 1: Preload — drive to the shoot spot, then shoot normally ──
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
-                shotPrep(f, toShoot0),
-                burst(),
+                shotPrep(f, toShoot0),   // drive to the spot while auto-aiming the turret
+                burst(),                 // stop, then fire like every other cycle
 
                 // ── 2: Middle row (y≈60) — returns to (52,90) @ 3050 RPM ─
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
@@ -285,14 +290,14 @@ public class CloseAuto24 extends CommandOpMode {
                 sp(SHOOT_POS_X_FAR, 60.0),
                 sp(36.0,            60.0)))
             .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(0))
-            .addPath(new BezierLine(sp(36.0, 60.0), sp(18.0, 60.0)))
+            .addPath(new BezierLine(sp(36.0, 57), sp(spikeXintake, 57)))
             .setLinearHeadingInterpolation(hr(0), hr(0))
             .build();
 
         // 3-pt return: (18,60)→ctrl(52,60)→(52,90). Ends at far shoot spot.
         toShoot1 = f.pathBuilder()
             .addPath(new BezierCurve(
-                sp(18.0,            60.0),
+                sp(spikeXintake,    60.0),
                 sp(SHOOT_POS_X_FAR, 60.0),
                 sp(SHOOT_POS_X_FAR, SHOOT_POS_Y)))
             .setLinearHeadingInterpolation(hr(0), hr(SHOOT_HEADING_DEG))
@@ -347,12 +352,12 @@ public class CloseAuto24 extends CommandOpMode {
         toTopSweep = f.pathBuilder()
             .addPath(new BezierLine(sp(SHOOT_POS_X_FAR, SHOOT_POS_Y), sp(36.0, 84.0)))
             .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(0))
-            .addPath(new BezierLine(sp(36.0, 84.0), sp(18.0, 84.0)))
+            .addPath(new BezierLine(sp(36.0, 84.0), sp(spikeXintake, 84.0)))
             .setLinearHeadingInterpolation(hr(0), hr(0))
             .build();
 
         toShootFromTop = f.pathBuilder()
-            .addPath(new BezierLine(sp(18.0, 84.0), sp(SHOOT_POS_X, SHOOT_POS_Y)))
+            .addPath(new BezierLine(sp(spikeXintake, 84.0), sp(SHOOT_POS_X, SHOOT_POS_Y)))
             .setLinearHeadingInterpolation(hr(0), hr(SHOOT_HEADING_DEG))
             .build();
 
@@ -360,12 +365,12 @@ public class CloseAuto24 extends CommandOpMode {
         toBottom = f.pathBuilder()
             .addPath(new BezierLine(sp(SHOOT_POS_X_FAR, SHOOT_POS_Y), sp(36.0, 36.0)))
             .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(0))
-            .addPath(new BezierLine(sp(36.0, 36.0), sp(18.0, 36.0)))
+            .addPath(new BezierLine(sp(36.0, 36.0), sp(spikeXintake, 36.0)))
             .setLinearHeadingInterpolation(hr(0), hr(0))
             .build();
 
         toShootFromBottom = f.pathBuilder()
-            .addPath(new BezierLine(sp(18.0, 36.0), sp(SHOOT_POS_X, SHOOT_POS_Y)))
+            .addPath(new BezierLine(sp(spikeXintake, 36.0), sp(SHOOT_POS_X, SHOOT_POS_Y)))
             .setLinearHeadingInterpolation(hr(0), hr(SHOOT_HEADING_DEG))
             .build();
 
