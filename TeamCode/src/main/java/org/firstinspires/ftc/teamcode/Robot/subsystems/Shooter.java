@@ -10,6 +10,7 @@ public class Shooter extends SubsystemBase {
 
     private final DcMotorEx rightShooter, leftShooter;
     public final Servo Cover;
+    public final Servo Hood;
 
     // Keep pidf if you still want the motor controller's internal velocity PIDF (optional)
     private final PIDFCoefficients pidf;
@@ -30,12 +31,13 @@ public class Shooter extends SubsystemBase {
     public Shooter(
             DcMotorEx rightShooter, DcMotorSimple.Direction rightDir,
             DcMotorEx leftShooter, DcMotorSimple.Direction leftDir,
-            Servo Cover,
+            Servo Cover, Servo Hood,
             PIDFCoefficients pidf
     ) {
         this.rightShooter = rightShooter;
         this.leftShooter = leftShooter;
         this.Cover = Cover;
+        this.Hood = Hood;
         this.pidf = pidf;
 
         this.rightShooter.setDirection(rightDir);
