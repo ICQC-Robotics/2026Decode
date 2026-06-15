@@ -25,11 +25,12 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Turret;
 @Autonomous
 public class ZayansAuto extends CommandOpMode {
     Robot negabot;
-    PathChain pre, r1, r1b, r2, r2b, r3, r3b, gate, gate1, gate2, gate3, gateB, gateB0, gateB1, leave;
+    PathChain pre, r1, r1b, r21, r22, r23, r2b, r3, r3b, gate, gate1, gate2, gate3, gateB, gateB0, gateB1, leave;
 
     Pose startPose = new Pose(32.848346636259976, (134.4310148232611), Math.toRadians(90));
 
-    Pose shoot = new Pose(51.49942594718714, 90.61882893226179, Math.toRadians(24));
+    Pose shoot = new Pose(58.0672708, 71.57207864719906, Math.toRadians(24));
+    Pose shootPre = new Pose(startPose.getX(), 105, Math.toRadians(90));
     Pose gateIntake = new Pose(12, 62-3, Math.toRadians(-20));
     Pose gateIntake1 = new Pose(12, 62.4-3, Math.toRadians(-20));
     Pose gateIntake2 = new Pose(12, 62.4-3, Math.toRadians(-20));
@@ -65,9 +66,9 @@ public class ZayansAuto extends CommandOpMode {
         waitForStart();
 
         negabot.schedule(
-                new InstantCommand(() -> negabot.shooter.setVelocity(3355)),
+                new InstantCommand(() -> negabot.shooter.setVelocity(2600)),
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_CLOSE)),
-                new InstantCommand(() -> negabot.shooter.setHood(0.7)),
+                new InstantCommand(() -> negabot.shooter.setHood(0.2)),
                 new SequentialCommandGroup(
                         new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
 
@@ -75,8 +76,13 @@ public class ZayansAuto extends CommandOpMode {
                         followTracked(pre, 22, 0),
                         shoot(),
 
+                        new InstantCommand(() -> negabot.shooter.setVelocity(3335)),
+                        new InstantCommand(() -> negabot.shooter.setHood(0.7)),
+
                         // row 2
-                        new FollowPathCommand(f, r2, true),
+                        new FollowPathCommand(f, r21, true),
+                        new FollowPathCommand(f, r22, true),
+                        new FollowPathCommand(f, r23, true),
                         shotPrep(r2b, 22, 0, 0.1),
                         shoot(),
 
@@ -165,9 +171,9 @@ public class ZayansAuto extends CommandOpMode {
         pre = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(startPose.getX(), startPose.getY()),
-                                new Pose(shoot.getX(), shoot.getY())
+                                new Pose(shootPre.getX(), shootPre.getY())
                         )
-                ).setLinearHeadingInterpolation(startPose.getHeading(), shoot.getHeading())
+                ).setLinearHeadingInterpolation(startPose.getHeading(), shootPre.getHeading())
                 .build();
 
         r1 = follower.pathBuilder().addPath(
@@ -186,13 +192,27 @@ public class ZayansAuto extends CommandOpMode {
                 ).setLinearHeadingInterpolation(Math.toRadians(0), shoot.getHeading())
                 .build();
 
-        r2 = follower.pathBuilder().addPath(
-                        new BezierCurve(
-                                new Pose(shoot.getX(), shoot.getY()),
-                                new Pose(54, 54.490605427974955),
-                                new Pose((lastBallx) - 2, row2y)
+        r21 = follower.pathBuilder().addPath(
+                        new BezierLine(
+                                new Pose(shootPre.getX(), shootPre.getY()),
+                                new Pose(48.738882554161904, 89.8392246294185)
                         )
-                ).setLinearHeadingInterpolation(shoot.getHeading(), Math.toRadians(0), 0.4)
+                ).setLinearHeadingInterpolation(shootPre.getHeading(), Math.toRadians(90))
+                .build();
+        r22 = follower.pathBuilder().addPath(
+                        new BezierLine(
+                                new Pose(48.738882554161904, 89.8392246294185),
+                                new Pose(48.738882554161904, 60.296465222348914)
+                        )
+                ).setLinearHeadingInterpolation(shootPre.getHeading(), Math.toRadians(90))
+                .build();
+
+        r23 = follower.pathBuilder().addPath(
+                        new BezierLine(
+                                new Pose(48.738882554161904, 60.296465222348914),
+                                new Pose(18.06157354618016, 60.296465222348914)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
 
         r2b = follower.pathBuilder().addPath(
