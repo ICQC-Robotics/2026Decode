@@ -34,6 +34,8 @@ public class Vision extends SubsystemBase {
     // inches from robot center
     private static final double CAMERA_FORWARD_OFFSET = 4.0;
     private static final double CAMERA_LEFT_OFFSET = 0.0;
+    int index = 0;
+    double[] ta = new double[6];
 
     public Vision(Limelight3A vision, HardwareMap hardwareMap, String cameraName) {
         limelight = vision;
@@ -49,7 +51,11 @@ public class Vision extends SubsystemBase {
 
     @Override
     public void periodic() {
+        limelight.pipelineSwitch(index + 1);
         lastResult = limelight.getLatestResult();
+        ta[lastResult.getPipelineIndex()] = lastResult.getTa();
+        index++;
+        index %= 6;
     }
 
     public Pose getBotposeMT1(double t) {
@@ -221,5 +227,14 @@ public class Vision extends SubsystemBase {
                 fieldY,
                 robotHeading
         );
+    }
+    public int getArtifactPath(){
+        double one = ta[0] + ta[3];
+        double two = ta[1] + ta[4];
+        double three = ta[2] + ta[5];
+        limelight.pipelineSwitch(0);
+        if(one > two && one > three) return 1;
+        else if (two > three) return 2;
+        return 3;
     }
 }
