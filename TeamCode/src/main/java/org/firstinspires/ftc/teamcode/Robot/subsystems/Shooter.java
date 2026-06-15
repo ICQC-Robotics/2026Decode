@@ -110,7 +110,7 @@ public class Shooter extends SubsystemBase {
         leftShooter.setPower(out);
     }
 
-    public void setHood(int num) {
+    public void setHood(double num) {
         Hood.setPosition(num);
     }
 

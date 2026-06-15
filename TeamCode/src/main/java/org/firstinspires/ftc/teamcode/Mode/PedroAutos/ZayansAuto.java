@@ -67,6 +67,7 @@ public class ZayansAuto extends CommandOpMode {
         negabot.schedule(
                 new InstantCommand(() -> negabot.shooter.setVelocity(3355)),
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_CLOSE)),
+                new InstantCommand(() -> negabot.shooter.setHood(0.7)),
                 new SequentialCommandGroup(
                         new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
 
