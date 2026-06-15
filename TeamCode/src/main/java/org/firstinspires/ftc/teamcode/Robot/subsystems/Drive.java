@@ -99,7 +99,7 @@ public class Drive extends SubsystemBase {
 
         telemetry.addData("X", this.getX());
         telemetry.addData("Y", this.getY());
-        telemetry.addData("Heading", this.getHeading());
+        telemetry.addData("Heading", Math.toDegrees(this.getHeading()));
         telemetry.update();
     }
 }
