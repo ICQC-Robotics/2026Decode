@@ -31,7 +31,9 @@ public class ShooterStandBy extends CommandBase {
     public void execute() {
         double d = AutoAim.calculateDistanceIn(drive);
         double rpm = clamp(AutoAim.getRpmForDistance(d), MIN_V, MAX_V);
+        double hood = clamp(AutoAim.getHoodForDistance(d), 0.19, 0.71);
         shooter.setVelocity(rpm);
+        shooter.setHood(hood);
     }
 
     @Override

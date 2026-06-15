@@ -38,25 +38,43 @@ public class AutoAim extends SequentialCommandGroup {
     public static final double MIN_V = 2820;
     public static final double MAX_V = 4300 - 100;
 
-    private static final double[][] RPM_LUT = new double[][] {
+    private static class Profile {
+        final String name;
+        final double hood;
+        final double minDistanceIn;
+        final double maxDistanceIn;
+        final double[][] rpmLut;
 
-            {  49, 3700 },
-            {  65, 3150 },
-            {  78, 3350 },
-            {  95, 3550 },
-            {  128, 3980 },
-            {  135, 4050 },
-            {  139, 4090 },
-            {  144, 4170 },
+        Profile(String name, double hood, double minDistanceIn, double maxDistanceIn, double[][] rpmLut) {
+            this.name = name;
+            this.hood = hood;
+            this.minDistanceIn = minDistanceIn;
+            this.maxDistanceIn = maxDistanceIn;
+            this.rpmLut = rpmLut;
+        }
 
+    }
 
-    };
-
-    private static final double[][] HOOD_LUT = new double[][] {
-            {  49, 0.20 },
-            {  65, 0.40 },
-            {  80, 0.70 },
-            { 144, 0.70 },
+    private static final Profile[] PROFILES = new Profile[] {
+            new Profile("HOOD_0_20", 0.2, 35.0, 52.0, new double[][] {
+                    {40.0, 2600.0},
+                    {50.0, 2800.0}
+            }),
+            new Profile("HOOD_0_40", 0.4, 50.0, 70.0, new double[][] {
+                    {54.5, 2700.0},
+                    {56.0, 2700.0},
+                    {58.0, 2900.0},
+                    {62.5, 2800.0},
+                    {67.0, 2850.0}
+            }),
+            new Profile("HOOD_0_70", 0.7, 70.0, 155.0, new double[][] {
+                    {80.0, 3230.0},
+                    {97.5, 3400.0},
+                    {118.0, 3675.0},
+                    {135.0, 3950.0},
+                    {144.0, 3925.0},
+                    {154.0, 4000.0}
+            })
     };
 
     private double spinUpRPM = MIN_V;
@@ -170,18 +188,39 @@ public class AutoAim extends SequentialCommandGroup {
 
 
     /**
-     * Distance -> RPM mapping using lookup table + linear interpolation between points.
+     * Distance -> RPM mapping. Hood is selected as a fixed profile first,
+     * then RPM is linearly interpolated only inside that profile's velocity table.
      */
     public static double getRpmForDistance(double distanceIn) {
-        return lookupInterpolated(clamp(distanceIn, MIN_DIST, MAX_DIST), RPM_LUT);
+        Profile profile = getProfileForDistance(distanceIn);
+        return lookupInterpolated(clamp(distanceIn, profile.minDistanceIn, profile.maxDistanceIn), profile.rpmLut);
     }
+
+    /**
+     * Distance -> hood mapping. This is intentionally NOT interpolated.
+     */
     public static double getHoodForDistance(double distanceIn) {
-        return lookupInterpolated(clamp(distanceIn, MIN_DIST, MAX_DIST), HOOD_LUT);
+        return getProfileForDistance(distanceIn).hood;
     }
 
+    private static Profile getProfileForDistance(double distanceIn) {
+        for (int i = 0; i < PROFILES.length; i++) {
+            Profile profile = PROFILES[i];
+            boolean isLastProfile = i == PROFILES.length - 1;
 
+            if (distanceIn >= profile.minDistanceIn
+                    && (distanceIn < profile.maxDistanceIn
+                    || (isLastProfile && distanceIn <= profile.maxDistanceIn))) {
+                return profile;
+            }
+        }
 
+        if (distanceIn < PROFILES[0].minDistanceIn) {
+            return PROFILES[0];
+        }
 
+        return PROFILES[PROFILES.length - 1];
+    }
 
     /**
      * Generic table lookup with linear interpolation.
