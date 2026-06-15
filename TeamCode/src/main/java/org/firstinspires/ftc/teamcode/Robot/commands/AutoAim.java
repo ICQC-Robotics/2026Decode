@@ -32,29 +32,12 @@ public class AutoAim extends SequentialCommandGroup {
 
     private static final double RPM_TOLERANCE = 20; // TODO: change if needed
     private static final double FEED_TIME_S = .6;
-
-    private static final double BUMP_NEAR = 0.02;
-    private static final double BUMP_FAR  = 0.07;
-
-    /**
-     * Distance window we care about for lookup/limiting.
-     * These are public so other commands (e.g. ShooterStandBy) can reuse them.
-     */
     public static final double MIN_DIST = 20;
     public static final double MAX_DIST = 150;
 
-    /** Velocity bounds (rpm). Keep these as the single source of truth. */
     public static final double MIN_V = 2820;
     public static final double MAX_V = 4300 - 100;
 
-    /**
-     * Lookup tables (distance inches -> value).
-     *
-     * NOTE: The current values match your old linear interpolation (so behavior is unchanged),
-     * but now you can tune any point without re-deriving a formula.
-     *
-     * Tables MUST be sorted by distance ascending.
-     */
     private static final double[][] RPM_LUT = new double[][] {
 
             {  49, 3700 },
@@ -69,11 +52,12 @@ public class AutoAim extends SequentialCommandGroup {
 
     };
 
-    // Hood LUT used only for d <= 75 (to preserve your original piecewise behavior)
-
-
-    // Cover-bump LUT used only for d <= 120 (to preserve your original cap at > 120)
-
+    private static final double[][] HOOD_LUT = new double[][] {
+            {  49, 0.20 },
+            {  65, 0.40 },
+            {  80, 0.70 },
+            { 144, 0.70 },
+    };
 
     private double spinUpRPM = MIN_V;
 
@@ -87,13 +71,12 @@ public class AutoAim extends SequentialCommandGroup {
     private SequentialCommandGroup shootSequence(Drive drive, Shooter shooter, Intake intake, Wait wait) {
         return new SequentialCommandGroup(
 
-                // Start opening the cover immediately
-                new InstantCommand(() ->
-                        shooter.setMagazineCover(Positions.OPEN_COVER.getPos()), shooter),
+                new InstantCommand(() -> {
+                    double d = calculateDistanceIn(drive);
+                    shooter.setMagazineCover(Positions.OPEN_COVER.getPos());
+                    shooter.setHood(getHoodForDistance(d));
+                }, shooter),
 
-                // Wait for BOTH:
-                // 1) shooter to reach velocity
-                // 2) cover to have had 0.5s to open
                 new ParallelCommandGroup(
 
                         new CommandBase() {
@@ -117,10 +100,8 @@ public class AutoAim extends SequentialCommandGroup {
                         new WaitCommand(wait, 0.1)
                 ),
 
-                // Only starts after BOTH parallel commands above are done
                 new InstantCommand(() -> intake.setSpeed(-1), intake),
 
-                // Feed for FEED_TIME_S while maintaining shooter RPM
                 new CommandBase() {
                     {
                         addRequirements(shooter, intake);
@@ -149,7 +130,6 @@ public class AutoAim extends SequentialCommandGroup {
                     }
                 },
 
-                // Reset state
                 new InstantCommand(() -> {
                     shooter.setMagazineCover(Positions.CLOSED_COVER.getPos());
                     intake.setSpeed(0);
@@ -195,6 +175,10 @@ public class AutoAim extends SequentialCommandGroup {
     public static double getRpmForDistance(double distanceIn) {
         return lookupInterpolated(clamp(distanceIn, MIN_DIST, MAX_DIST), RPM_LUT);
     }
+    public static double getHoodForDistance(double distanceIn) {
+        return lookupInterpolated(clamp(distanceIn, MIN_DIST, MAX_DIST), HOOD_LUT);
+    }
+
 
 
 
