@@ -32,8 +32,7 @@ public class SoloBlue extends CommandOpMode {
 
     private boolean poseLocked = false;
 
-    private Pose blueReset = new Pose(26.241, 133.326, Math.toRadians(54));
-
+    private Pose blueReset = new Pose(32.848346636259976, (134.4310148232611), Math.toRadians(90));
     private Robot.Alliance alliance = Robot.Alliance.BLUE;
 
     // make this a field so your DPAD buttons can access it
