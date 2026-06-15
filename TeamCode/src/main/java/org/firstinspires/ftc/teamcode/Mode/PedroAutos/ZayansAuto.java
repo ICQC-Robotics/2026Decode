@@ -30,13 +30,13 @@ public class ZayansAuto extends CommandOpMode {
     Pose startPose = new Pose(32.848346636259976, (134.4310148232611), Math.toRadians(90));
 
     Pose shoot = new Pose(51.49942594718714, 90.61882893226179, Math.toRadians(24));
-    Pose gateIntake = new Pose(13.5, 62, Math.toRadians(-30));
-    Pose gateIntake1 = new Pose(13.5, 62.4, Math.toRadians(-30));
-    Pose gateIntake2 = new Pose(13.5, 62.4, Math.toRadians(-30));
-    Pose gateIntake3 = new Pose(13.5, 62.4, Math.toRadians(-30));
+    Pose gateIntake = new Pose(12, 62-3, Math.toRadians(-20));
+    Pose gateIntake1 = new Pose(12, 62.4-3, Math.toRadians(-20));
+    Pose gateIntake2 = new Pose(12, 62.4-3, Math.toRadians(-20));
+    Pose gateIntake3 = new Pose(12, 62.4-3, Math.toRadians(-20));
 
     double row1y = 85;
-    double row2y = 59;
+    double row2y = 59-1.5;
     double row3y = 35;
     double firstBallx = 42;
     double lastBallx = 20;
