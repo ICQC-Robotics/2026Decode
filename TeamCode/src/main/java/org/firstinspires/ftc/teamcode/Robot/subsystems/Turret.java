@@ -22,6 +22,15 @@ public class Turret extends SubsystemBase {
     private static final double TX_DEADBAND_DEG = 0.1;
     private double angleOffsetDeg = 135.0;
 
+    // ── zone-based aim correction (BLUE frame) ──
+    public static double ZONE_X_MIN      =  21.5;
+    public static double ZONE_X_MAX      = 120;
+    public static double ZONE_Y_MIN      =  0.0;
+    public static double ZONE_Y_MAX      = 72;
+    public static double ZONE_HEADING_MIN_DEG = 100;
+    public static double ZONE_HEADING_MAX_DEG = 360;
+    public static double ZONE_OFFSET_DEG =  7;   // + = CW. Set 0 to disable.
+
     public Turret(DcMotorEx turretMotor,
                   DcMotorSimple.Direction direction,
                   PIDFCoefficients pidf) {
@@ -69,6 +78,7 @@ public class Turret extends SubsystemBase {
 
         setTargetDeg(targetDeg);
     }
+
 
 
     public void assumeCurrentAngleDeg(double angleDeg) {

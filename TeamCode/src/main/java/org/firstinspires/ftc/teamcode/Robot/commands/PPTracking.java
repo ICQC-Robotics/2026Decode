@@ -14,10 +14,6 @@ public class PPTracking extends CommandBase {
 
     private Robot.Alliance alliance;
 
-    private static final double DEADBAND_DEG = 1;//tune this
-    private static final double FORWARD_DEG = 135;
-
-
     static final double TURRET_FORWARD_OFFSET_IN = 3;
 
     public double offset = 0;
@@ -66,10 +62,7 @@ public class PPTracking extends CommandBase {
 
         double deflectionDeg = wrap180(bearingDeg - headingDeg);
 
-        // Turret mapping:
-        // 135 = straight forward, and increasing turret angle turns RIGHT (CW)
-        // so: right deflection (negative) -> turret angle increases
-        double turretDeg = wrap360(135.0 - deflectionDeg + offset);
+        double turretDeg = wrap360(135.0 - deflectionDeg + offset + zoneOffset(x, y, headingRad));
 
         return turretDeg;
     }
@@ -90,10 +83,30 @@ public class PPTracking extends CommandBase {
         return a - 180.0;
     }
 
-    private double normalizeRad(double angle) {
-        while (angle > Math.PI)  angle -= 2.0 * Math.PI;
-        while (angle < -Math.PI) angle += 2.0 * Math.PI;
-        return angle;
+    private double zoneOffset(double x, double y, double headingRad) {
+        if (Turret.ZONE_OFFSET_DEG == 0.0) return 0.0;
+
+        boolean blue = (alliance == Robot.Alliance.BLUE);
+
+        double checkX       = blue ? x : 144.0 - x;
+        double checkHeadDeg = wrap180(blue
+                ? Math.toDegrees(headingRad)
+                : 180.0 - Math.toDegrees(headingRad));
+
+        boolean inRect = checkX >= Turret.ZONE_X_MIN
+                && checkX <= Turret.ZONE_X_MAX
+                && y      >= Turret.ZONE_Y_MIN
+                && y      <= Turret.ZONE_Y_MAX;
+        if (!inRect) return 0.0;
+
+        double lo = Turret.ZONE_HEADING_MIN_DEG;
+        double hi = Turret.ZONE_HEADING_MAX_DEG;
+        boolean headingInWindow = (lo <= hi)
+                ? (checkHeadDeg >= lo && checkHeadDeg <= hi)
+                : (checkHeadDeg >= lo || checkHeadDeg <= hi);
+        if (!headingInWindow) return 0.0;
+
+        return blue ? Turret.ZONE_OFFSET_DEG : -Turret.ZONE_OFFSET_DEG;
     }
 }
 
