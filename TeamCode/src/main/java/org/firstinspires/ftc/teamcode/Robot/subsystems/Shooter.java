@@ -110,6 +110,10 @@ public class Shooter extends SubsystemBase {
         leftShooter.setPower(out);
     }
 
+    public void setHood(int num) {
+        Hood.setPosition(num);
+    }
+
     public void setMagazineCover(double pos) {
         Cover.setPosition(pos);
     }
