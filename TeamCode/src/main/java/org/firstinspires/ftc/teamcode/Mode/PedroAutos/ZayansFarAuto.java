@@ -32,7 +32,7 @@ public class ZayansFarAuto extends CommandOpMode {
     static final double SHOOT_HEADING_DEG  = 0.0;
     static final double SHOOT_VELOCITY     = 4050;
     static final double SHOOT_HOOD         = 0.7;
-    static final double SHOOT_TURRET_ANGLE = 108.4;
+    static final double SHOOT_TURRET_ANGLE = 26.6;
 
     static final double INIT_X           = 48;
     static final double INIT_Y           = 24;

@@ -30,12 +30,9 @@ public class Zayans24Auto extends CommandOpMode {
     // Return paths already pass through (52,90), so far shots cost zero extra travel.
     static final double SHOOT_POS_X        = 61.845686512758206;
     static final double SHOOT_POS_Y        = 66.26002430133657;
-    static final double SHOOT_HEADING_DEG  = 0;
     static final double SHOOT_VELOCITY    = 2950.0;
     static final double SHOOT_HOOD         = 0.5;
-    static final double SHOOT_TURRET_ANGLE = 128.2 - 12.8;
-    static final double SHOOT_TOP_TURRET_ANGLE = 0.0;   // tune from (49.1, 109.1)
-    static final double SHOOT_TOP_VELOCITY     = 2950.0; // tune from (49.1, 109.1)
+    static final double SHOOT_TURRET_ANGLE = 19.6;
 
     // ── Init / push-to-start ────────────────────────────────────────────────
     static final double INIT_X           = 48;
@@ -108,11 +105,11 @@ public class Zayans24Auto extends CommandOpMode {
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_CLOSE)),
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
                 new SequentialCommandGroup(
-                        shotPrep(f, toShoot0, SHOOT_TURRET_ANGLE + 2.3),
+                        shotPrep(f, toShoot0, SHOOT_TURRET_ANGLE - 2.3),
                         burst(),
 
                         new FollowPathCommand(f, toMiddle, false),
-                        shotPrep(f, toShoot1, SHOOT_TURRET_ANGLE + 2.3),
+                        shotPrep(f, toShoot1, SHOOT_TURRET_ANGLE - 2.3),
                         burst(),
 
                         new FollowPathCommand(f, toGate, true),
@@ -141,11 +138,11 @@ public class Zayans24Auto extends CommandOpMode {
                         burst(),
 
                         //TODO: These values are different, need to be tuned
-                        new InstantCommand(() -> negabot.turret.setTargetDeg(144 - 47.8)),
+                        new InstantCommand(() -> negabot.turret.setTargetDeg(38.8)),
                         new InstantCommand(() -> negabot.shooter.setVelocity(2600)),
                         new InstantCommand(() -> negabot.shooter.setHood(.35)),
                         new FollowPathCommand(f, toTopSweep, false),
-                        shotPrep(f, toShootFromTop, 144 - 47.8),
+                        shotPrep(f, toShootFromTop, 38.8),
                         burst()
                 )
         );
