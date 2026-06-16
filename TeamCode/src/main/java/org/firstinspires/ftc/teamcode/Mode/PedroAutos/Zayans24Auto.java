@@ -59,7 +59,7 @@ public class Zayans24Auto extends CommandOpMode {
 
     // ── Timing ──────────────────────────────────────────────────────────────
     static final long BURST_MS     = 400;
-    static final long GATE_WAIT_MS = 500;
+    static final long GATE_WAIT_MS = 1200;
 
     PathChain toShoot0;
     PathChain toMiddle,   toShoot1;
