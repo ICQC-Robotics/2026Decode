@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Mode.PedroAutos;
 
 import com.arcrobotics.ftclib.command.Command;
-import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
@@ -20,8 +19,8 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
 
 
-@Autonomous(name = "Ts will also work trust")
-public class ZayansFarAuto extends CommandOpMode {
+@Autonomous(name = "no claude allowed grrrr")
+public class TestZayansFarAuto extends CommandOpMode {
 
     Robot negabot;
     boolean isBlue   = true;
@@ -30,9 +29,9 @@ public class ZayansFarAuto extends CommandOpMode {
     static final double SHOOT_POS_X        = 45.0;
     static final double SHOOT_POS_Y        = 9.0;
     static final double SHOOT_HEADING_DEG  = 0.0;
-    static final double SHOOT_VELOCITY     = 3950;
+    static final double SHOOT_VELOCITY     = 4050;
     static final double SHOOT_HOOD         = 0.7;
-    static final double SHOOT_TURRET_ANGLE = 26.6;
+    static final double SHOOT_TURRET_ANGLE = 22;
 
     static final double INIT_X           = 48;
     static final double INIT_Y           = 24;
@@ -44,7 +43,7 @@ public class ZayansFarAuto extends CommandOpMode {
     static final double SWEEP_CP_Y  = 19.5;
     static final double SWEEP_EXIT_HEADING_DEG = 271.1;
 
-    static final long BURST_MS        = 600;
+    static final long BURST_MS        = 400;
     static final long INTAKE_WAIT_MS  = 300;
 
     static final double COVER_OPEN  = 0.75;
@@ -97,27 +96,41 @@ public class ZayansFarAuto extends CommandOpMode {
                         new WaitCommand(500),
                         burst(),
 
+                        // HP
                         new FollowPathCommand(f, toHP, true),
                         new WaitCommand(INTAKE_WAIT_MS),
                         shotPrep(f, toShootFromHP, SHOOT_TURRET_ANGLE),
                         burst(),
 
-                        new ConditionalCommand(
-                                new SequentialCommandGroup(
-                                        new FollowPathCommand(f, to3rdRow, false),
-                                        new WaitCommand(INTAKE_WAIT_MS),
-                                        shotPrep(f, toShootFrom3rdRow, SHOOT_TURRET_ANGLE),
-                                        burst()
-                                ),
-                                new InstantCommand(() -> {}),
-                                () -> do3rdRow
-                        ),
+                        // 3rd row
+                        new FollowPathCommand(f, to3rdRow, false),
+                        new WaitCommand(INTAKE_WAIT_MS),
+                        shotPrep(f, toShootFrom3rdRow, SHOOT_TURRET_ANGLE),
+                        burst(),
 
-                        cycle(f),
-                        cycle(f),
-                        cycle(f),
-                        cycle(f),
-                        cycle(f)
+                        // Zone 1
+                        new FollowPathCommand(f, toZone1, false),
+                        new WaitCommand(INTAKE_WAIT_MS),
+                        shotPrep(f, toShootFromZone1, SHOOT_TURRET_ANGLE),
+                        burst(),
+
+                        // Zone 2
+                        new FollowPathCommand(f, toZone2, false),
+                        new WaitCommand(INTAKE_WAIT_MS),
+                        shotPrep(f, toShootFromZone2, SHOOT_TURRET_ANGLE),
+                        burst(),
+
+                        // Zone 3
+                        new FollowPathCommand(f, toZone3, false),
+                        new WaitCommand(INTAKE_WAIT_MS),
+                        shotPrep(f, toShootFromZone3, SHOOT_TURRET_ANGLE),
+                        burst(),
+
+                        // Sweep
+                        new FollowPathCommand(f, toSweep, false),
+                        new WaitCommand(INTAKE_WAIT_MS),
+                        shotPrep(f, toShootFromSweep, SHOOT_TURRET_ANGLE),
+                        burst()
                 )
         );
     }

@@ -30,7 +30,7 @@ public class Zayans24Auto extends CommandOpMode {
     // Return paths already pass through (52,90), so far shots cost zero extra travel.
     static final double SHOOT_POS_X        = 61.845686512758206;
     static final double SHOOT_POS_Y        = 66.26002430133657;
-    static final double SHOOT_VELOCITY    = 2950.0;
+    static final double SHOOT_VELOCITY    = 3050;
     static final double SHOOT_HOOD         = 0.5;
     static final double SHOOT_TURRET_ANGLE = 19.6;
 
@@ -41,22 +41,22 @@ public class Zayans24Auto extends CommandOpMode {
 
 
     // ── Gate-intake-station tuning ──────────────────────────────────────────
-    static final double GATE_POS_X       = 12.551032806804374;
-    static final double GATE_POS_Y       = 55.70595382746051;
-    static final double GATE_HEADING_DEG = 340.0;
+    static final double GATE_POS_X       = 10.5;
+    static final double GATE_POS_Y       = 59;
+    static final double GATE_HEADING_DEG = 333;
 
     static final double GATE_PATH_ANGLE = 12.85;
 
     // ── Magazine cover positions ─────────────────────────────────────────────
-    static final double COVER_OPEN  = .75;
-    static final double COVER_CLOSE = .6;
+    static final double COVER_OPEN  = .8;
+    static final double COVER_CLOSE = .5;
 
     // ── Intake direction ─────────────────────────────────────────────────────
     static final double INTAKE_ON = -1.0;
 
     // ── Timing ──────────────────────────────────────────────────────────────
     static final long BURST_MS     = 400;
-    static final long GATE_WAIT_MS = 1200;
+    static final long GATE_WAIT_MS = 800;
 
     PathChain toShoot0;
     PathChain toMiddle,   toShoot1;
@@ -99,11 +99,11 @@ public class Zayans24Auto extends CommandOpMode {
 
         // ── Command schedule ──────────────────────────────────────────────
         negabot.schedule(
+                new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
                 new InstantCommand(() -> negabot.turret.setTargetDeg(SHOOT_TURRET_ANGLE)),
                 new InstantCommand(() -> negabot.shooter.setVelocity(SHOOT_VELOCITY)),
                 new InstantCommand(() -> negabot.shooter.setHood(SHOOT_HOOD)),
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_CLOSE)),
-                new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
                 new SequentialCommandGroup(
                         shotPrep(f, toShoot0, SHOOT_TURRET_ANGLE - 2.3),
                         burst(),
@@ -151,6 +151,7 @@ public class Zayans24Auto extends CommandOpMode {
     Command burst() {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
+                new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
                 new WaitCommand(BURST_MS),
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_CLOSE))
         );
@@ -175,7 +176,7 @@ public class Zayans24Auto extends CommandOpMode {
                 .build();
 
         toMiddle = f.pathBuilder()
-                .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(21.570777450847295, 58.801756299208385)))
+                .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(19.570777450847295, 58.801756299208385)))
                 .setTangentHeadingInterpolation().setReversed()
                 .build();
 
@@ -188,7 +189,7 @@ public class Zayans24Auto extends CommandOpMode {
 
         toGate = f.pathBuilder()
                 .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(GATE_POS_X, GATE_POS_Y)))
-                .setLinearHeadingInterpolation(hr(GATE_PATH_ANGLE), hr(GATE_HEADING_DEG), 0.9, 0.7)
+                .setLinearHeadingInterpolation(hr(GATE_PATH_ANGLE), hr(GATE_HEADING_DEG))
                 .build();
 
         toShootFromGate = f.pathBuilder()

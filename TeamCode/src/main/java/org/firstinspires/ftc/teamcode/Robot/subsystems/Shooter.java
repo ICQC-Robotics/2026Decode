@@ -54,7 +54,7 @@ public class Shooter extends SubsystemBase {
         // but since we're doing pure bang-bang on setPower(), this doesn't really matter.
         this.setPIDF(pidf.p, pidf.i, pidf.d, pidf.f);
 
-        this.setMagazineCover(1);
+        this.setMagazineCover(.5);
         targetVelocityRPM = 0;
     }
 
