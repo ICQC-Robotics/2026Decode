@@ -41,7 +41,7 @@ import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
  * shoots there without any extra transit.
  * Blue is the primary coordinate frame; red is mirrored across x = 72.
  */
-@Autonomous(name = "CloseAuto24", group = "Close")
+@Autonomous(name = "CloseAuto18Leave", group = "Close")
 public class CloseAuto18Leave extends CommandOpMode {
 
     Robot negabot;

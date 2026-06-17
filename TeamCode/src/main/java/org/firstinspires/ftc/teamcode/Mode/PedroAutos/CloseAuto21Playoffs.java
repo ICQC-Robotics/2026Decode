@@ -41,7 +41,7 @@ import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
  * shoots there without any extra transit.
  * Blue is the primary coordinate frame; red is mirrored across x = 72.
  */
-@Autonomous(name = "CloseAuto24", group = "Close")
+@Autonomous(name = "CloseAuto21Playoffs", group = "Close")
 public class CloseAuto21Playoffs extends CommandOpMode {
 
     Robot negabot;
@@ -192,6 +192,15 @@ public class CloseAuto21Playoffs extends CommandOpMode {
                         shotPrep(f, toShootFromGateStraight, DEFAULT_TURRET_DEG),
                         burst(),
 
+                        // ── 4: Top row (y≈84) — from (52,90), returns to (40,90) @ 2950 RPM ─
+                        new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
+                        new FollowPathCommand(f, toTopSweep, false),   // flow into the return, don't brake/hold
+                        new InstantCommand(() -> negabot.intake.setSpeed(0)),
+                        new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY),
+                        new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
+                        shotPrep(f, toShootFromTop, DEFAULT_TURRET_DEG),
+                        burst(),
+
 
                         // ── 7: Gate third pass — from (40,90), return to (52,90) @ 3050 RPM ─
                         new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
@@ -203,18 +212,15 @@ public class CloseAuto21Playoffs extends CommandOpMode {
                         shotPrep(f, toShootFromGateStraight, DEFAULT_TURRET_DEG),
                         burst(),
 
-
-                        // ── 4: Top row (y≈84) — from (52,90), returns to (40,90) @ 2950 RPM ─
+                        // ── 7: Gate third pass — from (40,90), return to (52,90) @ 3050 RPM ─
                         new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
-                        new FollowPathCommand(f, toTopSweep, false),   // flow into the return, don't brake/hold
+                        new FollowPathCommand(f, toGate, true),
+                        new WaitCommand(GATE_WAIT_MS),
                         new InstantCommand(() -> negabot.intake.setSpeed(0)),
-                        new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY),
+                        new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY_FAR),
                         new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
-                        shotPrep(f, toShootFromTop, DEFAULT_TURRET_DEG),
-                        burst(),
-
-                        // ── Park — from (52,90) ───────────────────────────────────
-                        new FollowPathCommand(f, park, true)
+                        shotPrep(f, toShootFromGateStraight, DEFAULT_TURRET_DEG),
+                        burst()
                 )
         );
     }
@@ -325,10 +331,8 @@ public class CloseAuto21Playoffs extends CommandOpMode {
                 .build();
 
         toShootFromTop = f.pathBuilder()
-                .addPath(new BezierLine(sp(spikeXintake, 84.0), sp(spikeXintake+5, 84.0)))
-                .setLinearHeadingInterpolation(hr(0), hr(65))
-                .addPath(new BezierLine(sp(spikeXintake+5, 84.0), sp(40.91533180778032, 127.08466819221968)))
-                .setLinearHeadingInterpolation(hr(65), hr(65))
+                .addPath(new BezierLine(sp(spikeXintake+11, 84.0), sp(SHOOT_POS_X_FAR, SHOOT_POS_Y)))
+                .setLinearHeadingInterpolation(hr(0), hr(SHOOT_HEADING_DEG))
                 .build();
 
         // ── Bottom row (y ≈ 36) — starts from (52,90) after gate cycle 5 ─────
