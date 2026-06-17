@@ -79,7 +79,7 @@ public class CloseAuto24 extends CommandOpMode {
     static final double GATE_POS_X       = 11;
     static final double GATE_POS_Y       = 62.4-2;
     static final double GATE_HEADING_DEG = -15;
-    static final double GATE_APPROACH_X  = 13;
+    static final double GATE_APPROACH_X  = 19;
 
     // ── Magazine cover positions ─────────────────────────────────────────────
     static final double COVER_OPEN  = .75;
@@ -358,21 +358,23 @@ public class CloseAuto24 extends CommandOpMode {
                 .build();
 
         toShootFromTop = f.pathBuilder()
-                .addPath(new BezierLine(sp(spikeXintake, 84.0), sp(40.91533180778032, 127.08466819221968)))
+                .addPath(new BezierLine(sp(spikeXintake, 84.0), sp(spikeXintake+5, 84.0)))
+                .setLinearHeadingInterpolation(hr(0), hr(65))
+                .addPath(new BezierLine(sp(spikeXintake+5, 84.0), sp(40.91533180778032, 127.08466819221968)))
                 .setLinearHeadingInterpolation(hr(65), hr(65))
                 .build();
 
         // ── Bottom row (y ≈ 36) — starts from (52,90) after gate cycle 5 ─────
         toBottom = f.pathBuilder()
                 .addPath(new BezierLine(sp(SHOOT_POS_X_FAR, SHOOT_POS_Y), sp(36.0, 36.0)))
-                .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(0))
+                .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(SHOOT_HEADING_DEG))
                 .addPath(new BezierLine(sp(36.0, 36.0), sp(spikeXintake, 36.0)))
                 .setLinearHeadingInterpolation(hr(0), hr(0))
                 .build();
 
         toShootFromBottom = f.pathBuilder()
                 .addPath(new BezierLine(sp(spikeXintake, 36.0), sp(SHOOT_POS_X, SHOOT_POS_Y)))
-                .setLinearHeadingInterpolation(hr(0), hr(SHOOT_HEADING_DEG))
+                .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(SHOOT_HEADING_DEG))
                 .build();
 
         // ── Park — from (52,90) after last gate shot ──────────────────────────
