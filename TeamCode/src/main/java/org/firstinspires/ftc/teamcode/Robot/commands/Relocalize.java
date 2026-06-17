@@ -33,7 +33,7 @@ public class Relocalize extends CommandBase {
     @Override
     public void initialize() {
 
-        Pose llPose = limelight.getBotposeMT1(turret.getAngleDeg());
+        Pose llPose = new Pose(0,0) ;//imelight.getBotposeMT1(turret.getAngleDeg());
 
         if (llPose == null) {
             drive.telemetry.addLine("llPose NULL");
