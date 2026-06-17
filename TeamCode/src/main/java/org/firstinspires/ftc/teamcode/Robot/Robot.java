@@ -63,8 +63,7 @@ public class Robot {
         );
 
         vision = new Vision(
-                h.get(Limelight3A.class, "ll"),
-                h, "webcam"
+                h.get(Limelight3A.class, "ll")
         );
 
         wait = new Wait();

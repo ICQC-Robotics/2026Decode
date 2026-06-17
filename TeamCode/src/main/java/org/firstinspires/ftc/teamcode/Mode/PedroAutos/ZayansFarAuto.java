@@ -175,9 +175,13 @@ public class ZayansFarAuto extends CommandOpMode {
 
     //TODO: Implement
     private int getZone() {
-        return zoneResult;
+        int z = negabot.vision.scanArtifactZone(isBlue);
+        double[] d = negabot.vision.getLastDensity();
+        telemetry.addData("density z1/z2/z3", "%.1f / %.1f / %.1f", d[1], d[2], d[3]);
+        telemetry.addData("-> zone", z == 0 ? "SWEEP" : z);
+        telemetry.update();
+        return z;
     }
-
     void buildPaths(Follower f) {
         Pose pushedStart = f.getPose();
 

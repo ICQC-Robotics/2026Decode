@@ -15,7 +15,6 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import org.firstinspires.ftc.teamcode.PP.FieldConstants;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Turret;
@@ -62,9 +61,10 @@ public class CloseAuto24 extends CommandOpMode {
     static final double SHOOT_HEADING_DEG  = 46;
     static final double SHOOT_VELOCITY    = 2950.0;
     static final double SHOOT_VELOCITY_FAR = SHOOT_VELOCITY + 100.0;
-    static final double SHOOT_VELOCITY_PRELOAD = SHOOT_VELOCITY + 300;
     static final double SHOOT_HOOD         = 0.5;
-    static final double SHOOT_TURRET_OFFSET_DEG = 0.0;
+    static final double DEFAULT_TURRET_DEG = 30;
+    static final double PRELOAD_TURRET_DEG = 5;
+
 
     // ── Init / push-to-start ────────────────────────────────────────────────
     static final double INIT_X           = 48;
@@ -76,7 +76,7 @@ public class CloseAuto24 extends CommandOpMode {
     static final double spikeXintake = 10;
 
     // ── Gate-intake-station tuning ──────────────────────────────────────────
-    static final double GATE_POS_X       = 11;
+    static final double GATE_POS_X       = 13;
     static final double GATE_POS_Y       = 62.4-2;
     static final double GATE_HEADING_DEG = -15;
     static final double GATE_APPROACH_X  = 19;
@@ -137,9 +137,6 @@ public class CloseAuto24 extends CommandOpMode {
         Follower f = negabot.drive.follower;
         buildPaths(f);
 
-        //final double shootTurret = shootTurretDeg();
-        final double shootTurret = 30;
-
         // double[] lets the lambda read the current value on every tick.
         final double[] shootVel = { SHOOT_VELOCITY };
 
@@ -152,7 +149,7 @@ public class CloseAuto24 extends CommandOpMode {
 
         negabot.turret.setDefaultCommand(new CommandBase() {
             { addRequirements(negabot.turret); }
-            @Override public void execute()       { negabot.turret.setTargetDeg(shootTurret); }
+            @Override public void execute()       { negabot.turret.setTargetDeg(30); }
             @Override public boolean isFinished() { return false; }
         });
 
@@ -164,7 +161,7 @@ public class CloseAuto24 extends CommandOpMode {
 
                         // ── 1: Preload — drive to the shoot spot, then shoot normally ──
                         new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
-                        shotPrep(f, toShoot0),   // drive to the spot while auto-aiming the turret
+                        shotPrep(f, toShoot0, PRELOAD_TURRET_DEG),   // drive to the spot while auto-aiming the turret
                         burst(),                 // stop, then fire like every other cycle
 
                         // ── 2: Middle row (y≈60) — returns to (52,90) @ 3050 RPM ─
@@ -173,7 +170,7 @@ public class CloseAuto24 extends CommandOpMode {
                         new InstantCommand(() -> negabot.intake.setSpeed(0)),
                         new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY_FAR),
                         new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
-                        shotPrep(f, toShoot1),
+                        shotPrep(f, toShoot1, DEFAULT_TURRET_DEG),
                         burst(),
 
                         // ── 3: Gate first pass — from (52,90), return to (52,90) @ 3050 RPM ─
@@ -182,7 +179,7 @@ public class CloseAuto24 extends CommandOpMode {
                         new WaitCommand(GATE_WAIT_MS),
                         new InstantCommand(() -> negabot.intake.setSpeed(0)),
                         new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
-                        shotPrep(f, toShootFromGate),
+                        shotPrep(f, toShootFromGate, DEFAULT_TURRET_DEG),
                         burst(),
 
                         // ── 5: Gate second pass — from (40,90), return to (52,90) @ 3050 RPM ─
@@ -192,7 +189,7 @@ public class CloseAuto24 extends CommandOpMode {
                         new InstantCommand(() -> negabot.intake.setSpeed(0)),
                         new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY_FAR),
                         new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
-                        shotPrep(f, toShootFromGateStraight),
+                        shotPrep(f, toShootFromGateStraight, DEFAULT_TURRET_DEG),
                         burst(),
 
                         // ── 6: Bottom row (y≈36) — from (52,90), returns to (40,90) @ 2950 RPM ─
@@ -201,7 +198,7 @@ public class CloseAuto24 extends CommandOpMode {
                         new InstantCommand(() -> negabot.intake.setSpeed(0)),
                         new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY),
                         new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
-                        shotPrep(f, toShootFromBottom),
+                        shotPrep(f, toShootFromBottom, DEFAULT_TURRET_DEG),
                         burst(),
 
                         // ── 7: Gate third pass — from (40,90), return to (52,90) @ 3050 RPM ─
@@ -211,7 +208,7 @@ public class CloseAuto24 extends CommandOpMode {
                         new InstantCommand(() -> negabot.intake.setSpeed(0)),
                         new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY_FAR),
                         new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
-                        shotPrep(f, toShootFromGateStraight),
+                        shotPrep(f, toShootFromGateStraight, DEFAULT_TURRET_DEG),
                         burst(),
 
 
@@ -221,7 +218,7 @@ public class CloseAuto24 extends CommandOpMode {
                         new InstantCommand(() -> negabot.intake.setSpeed(0)),
                         new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY),
                         new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
-                        shotPrep(f, toShootFromTop),
+                        shotPrep(f, toShootFromTop, DEFAULT_TURRET_DEG),
                         burst(),
 
                         // ── Park — from (52,90) ───────────────────────────────────
@@ -240,36 +237,14 @@ public class CloseAuto24 extends CommandOpMode {
         );
     }
 
-    Command shotPrep(Follower f, PathChain path) {
-        // Drive to the shoot spot while the turret continuously aims at the goal from
-        // the live pose — so the chassis can be at ANY heading and the turret is
-        // already on-target (pre-aimed during the drive) by the time we arrive.
+    Command shotPrep(Follower f, PathChain path, double turretDeg) {
         return new ParallelDeadlineGroup(
                 new FollowPathCommand(f, path, true),
-                new RunCommand(this::aimTurretAtGoal, negabot.turret)
+                new RunCommand(() -> negabot.turret.setTargetDeg(turretDeg), negabot.turret)
         );
     }
 
     /** Aim the turret at the alliance goal from the robot's live pose (works at any heading). */
-    void aimTurretAtGoal() {
-        Pose p = negabot.drive.follower.getPose();
-        if (p == null) return;
-        double h = p.getHeading();
-        double tx = p.getX() + 3 * Math.cos(h) - 3 * Math.sin(h);
-        double ty = p.getY() + 0 * Math.sin(h) + 0 * Math.cos(h);
-        Pose goal;
-        if (isBlue)
-        {
-            goal = new Pose(FieldConstants.BLUE_GOAL_X, FieldConstants.BLUE_GOAL_Y);
-        }
-        else {
-            goal = new Pose(FieldConstants.RED_GOAL_X, FieldConstants.RED_GOAL_Y);
-        }
-
-        double bearingDeg    = Math.toDegrees(Math.atan2(goal.getY() - ty, goal.getX() - tx));
-        double deflectionDeg = wrap180(bearingDeg - Math.toDegrees(h));
-        negabot.turret.setTargetDeg(135.0 - deflectionDeg + SHOOT_TURRET_OFFSET_DEG);
-    }
 
     void buildPaths(Follower f) {
 
@@ -411,12 +386,6 @@ public class CloseAuto24 extends CommandOpMode {
      * Computes the turret angle (deg) that points at the alliance goal from the
      * shoot pose. Matches TurretTracking's formula exactly.
      */
-
-
-    private static double wrap180(double a) {
-        a = ((a + 180.0) % 360.0 + 360.0) % 360.0;
-        return a - 180.0;
-    }
 
     private static double mx(double x)    { return 144.0 - x; }
     private static double mhd(double deg) { return ((180.0 - deg) % 360.0 + 360.0) % 360.0; }
