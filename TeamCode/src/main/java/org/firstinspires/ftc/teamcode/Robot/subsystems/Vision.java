@@ -35,12 +35,14 @@ public class Vision extends SubsystemBase {
     public static final int GREEN_PIPELINE  = 0;   // tuned green color pipeline
     public static final int PURPLE_PIPELINE = 1;   // tuned purple color pipeline
 
-    // tx bearing (deg) to a SINGLE ball sitting in each zone, read from the shoot pose. CALIBRATE.
-    private static final double[] TX_ZONE   = {0, 2.0, -17.0, -32.0};  // [1]=z1 [2]=z2 [3]=z3
+    // tx bearing (deg) to a SINGLE ball sitting in each zone, read from the shoot pose.
+    // Computed from limelight at (38, 9) facing -x; camera right = robot right = -y globally.
+    // Positive tx = right of camera center. CALIBRATE on robot to fine-tune.
+    private static final double[] TX_ZONE   = {0, 1.9, -20.4, -38.0};  // [1]=z1 [2]=z2 [3]=z3
     // apparent area (%) of ONE ball in each zone — normalizes density for distance. CALIBRATE.
     private static final double[] BALL_AREA = {0, 0.9,  0.7,  0.5};
-    // rough shoot->zone travel cost, used only to break ties. lower = nearer = preferred.
-    private static final double[] ZONE_DIST = {0, 37.0, 38.6, 43.6};
+    // shoot-position -> zone endpoint distances (inches), used only to break ties.
+    private static final double[] ZONE_DIST = {0, 36.5, 38.1, 43.1};
 
     private static final double TX_TOL      = 8.0;   // half-width of each zone's tx band (deg)
     private static final double NOISE_AREA  = 0.15;  // ignore blobs smaller than this (% area)

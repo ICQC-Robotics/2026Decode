@@ -6,6 +6,7 @@ import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelDeadlineGroup;
+import com.arcrobotics.ftclib.command.ParallelRaceGroup;
 import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
@@ -18,6 +19,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
+import org.firstinspires.ftc.teamcode.Robot.commands.StallTimeoutCommand;
+import org.firstinspires.ftc.teamcode.Robot.commands.WaitToShoot;
 
 
 @Autonomous(name = "Ts will also work trust")
@@ -25,30 +28,31 @@ public class ZayansFarAuto extends CommandOpMode {
 
     Robot negabot;
     boolean isBlue   = true;
-    boolean do3rdRow = false;
+    boolean do3rdRow = true;
     private int zoneResult = 0;
     static final double SHOOT_POS_X        = 45.0;
     static final double SHOOT_POS_Y        = 9.0;
     static final double SHOOT_HEADING_DEG  = 0.0;
     static final double SHOOT_VELOCITY     = 3950;
     static final double SHOOT_HOOD         = 0.7;
-    static final double SHOOT_TURRET_ANGLE = 26.6;
+    static final double SHOOT_TURRET_ANGLE = 24;
 
     static final double INIT_X           = 48;
     static final double INIT_Y           = 24;
     static final double INIT_HEADING_DEG = 0;
 
-    static final double SWEEP_END_X = 9.0;
+    static final double SWEEP_END_X = 8.0;
     static final double SWEEP_END_Y = 45.0;
-    static final double SWEEP_CP_X  = 9.5;
+    static final double SWEEP_CP_X  = 8.5;
     static final double SWEEP_CP_Y  = 19.5;
     static final double SWEEP_EXIT_HEADING_DEG = 271.1;
 
-    static final long BURST_MS        = 600;
-    static final long INTAKE_WAIT_MS  = 300;
+    static final long BURST_MS           = 400;
+    static final long INTAKE_WAIT_MS     = 0;
+    static final long STALL_TIMEOUT_MS   = 200;
 
     static final double COVER_OPEN  = 0.75;
-    static final double COVER_CLOSE = 0.5;
+    static final double COVER_CLOSE = 0.55;
     static final double INTAKE_ON   = -1.0;
 
     PathChain toHP, toShootFromHP, to3rdRow, toShootFrom3rdRow, toZone1, toShootFromZone1, toZone2, toShootFromZone2, toZone3, toShootFromZone3, toSweep, toShootFromSweep;
@@ -94,17 +98,17 @@ public class ZayansFarAuto extends CommandOpMode {
                 new InstantCommand(() -> negabot.shooter.setVelocity(SHOOT_VELOCITY)),
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
                 new SequentialCommandGroup(
-                        new WaitCommand(500),
+                        new WaitToShoot(negabot.intake, negabot.shooter, 3000),
                         burst(),
 
-                        new FollowPathCommand(f, toHP, true),
+                        followGuarded(f, toHP, true),
                         new WaitCommand(INTAKE_WAIT_MS),
                         shotPrep(f, toShootFromHP, SHOOT_TURRET_ANGLE),
                         burst(),
 
                         new ConditionalCommand(
                                 new SequentialCommandGroup(
-                                        new FollowPathCommand(f, to3rdRow, false),
+                                        followGuarded(f, to3rdRow, false),
                                         new WaitCommand(INTAKE_WAIT_MS),
                                         shotPrep(f, toShootFrom3rdRow, SHOOT_TURRET_ANGLE),
                                         burst()
@@ -113,6 +117,7 @@ public class ZayansFarAuto extends CommandOpMode {
                                 () -> do3rdRow
                         ),
 
+                        cycle(f),
                         cycle(f),
                         cycle(f),
                         cycle(f),
@@ -127,24 +132,24 @@ public class ZayansFarAuto extends CommandOpMode {
                 new InstantCommand(() -> zoneResult = getZone()),
                 new ConditionalCommand(
                         new SequentialCommandGroup(
-                                new FollowPathCommand(f, toZone1, false),
+                                followGuarded(f, toZone1, false),
                                 new WaitCommand(INTAKE_WAIT_MS),
                                 new FollowPathCommand(f, toShootFromZone1, true)
                         ),
                         new ConditionalCommand(
                                 new SequentialCommandGroup(
-                                        new FollowPathCommand(f, toZone2, false),
+                                        followGuarded(f, toZone2, false),
                                         new WaitCommand(INTAKE_WAIT_MS),
                                         new FollowPathCommand(f, toShootFromZone2, true)
                                 ),
                                 new ConditionalCommand(
                                         new SequentialCommandGroup(
-                                                new FollowPathCommand(f, toZone3, false),
+                                                followGuarded(f, toZone3, false),
                                                 new WaitCommand(INTAKE_WAIT_MS),
                                                 new FollowPathCommand(f, toShootFromZone3, true)
                                         ),
                                         new SequentialCommandGroup(
-                                                new FollowPathCommand(f, toSweep, false),
+                                                followGuarded(f, toSweep, false),
                                                 new WaitCommand(INTAKE_WAIT_MS),
                                                 new FollowPathCommand(f, toShootFromSweep, true)
                                         ),
@@ -155,6 +160,13 @@ public class ZayansFarAuto extends CommandOpMode {
                         () -> zoneResult == 1
                 ),
                 burst()
+        );
+    }
+
+    private Command followGuarded(Follower f, PathChain path, boolean holdEnd) {
+        return new ParallelRaceGroup(
+                new FollowPathCommand(f, path, holdEnd),
+                new StallTimeoutCommand(f, STALL_TIMEOUT_MS)
         );
     }
 
@@ -173,7 +185,6 @@ public class ZayansFarAuto extends CommandOpMode {
         );
     }
 
-    //TODO: Implement
     private int getZone() {
         int z = negabot.vision.scanArtifactZone(isBlue);
         double[] d = negabot.vision.getLastDensity();
@@ -187,12 +198,16 @@ public class ZayansFarAuto extends CommandOpMode {
 
 
         toHP = f.pathBuilder()
-                .addPath(new BezierLine(new Pose(pushedStart.getX(), pushedStart.getY()), sp(8, 9)))
+                .addPath(new BezierLine(new Pose(pushedStart.getX(), pushedStart.getY()), sp(8.5, 9)))
                 .setLinearHeadingInterpolation(pushedStart.getHeading(), hr(0))
+                .addPath(new BezierLine(sp(8.5, 9), sp(11.5, 9)))
+                .setLinearHeadingInterpolation(hr(0), hr(0))
+                .addPath(new BezierLine(sp(11.5, 9), sp(8.5, 9)))
+                .setLinearHeadingInterpolation(hr(0), hr(0))
                 .build();
 
         toShootFromHP = f.pathBuilder()
-                .addPath(new BezierLine(sp(8, 9), sp(SHOOT_POS_X, SHOOT_POS_Y)))
+                .addPath(new BezierLine(sp(8.5, 9), sp(SHOOT_POS_X, SHOOT_POS_Y)))
                 .setLinearHeadingInterpolation(hr(0), hr(0))
                 .build();
 
@@ -201,42 +216,54 @@ public class ZayansFarAuto extends CommandOpMode {
                 .addPath(new BezierCurve(
                         sp(SHOOT_POS_X, SHOOT_POS_Y),
                         sp(43.56,   30),
-                        sp(24.7,  34.1)))
+                        sp(20,  38)))
                 .setTangentHeadingInterpolation().setReversed()
                 .build();
 
         toShootFrom3rdRow = f.pathBuilder()
-                .addPath(new BezierLine(sp(24.7, 34.1), sp(SHOOT_POS_X, SHOOT_POS_Y)))
+                .addPath(new BezierLine(sp(20, 38), sp(SHOOT_POS_X, SHOOT_POS_Y)))
                 .setLinearHeadingInterpolation(hr(-12.4), hr(0))
                 .build();
 
         // Zone 1 — HP corner (y ≈ 8)
         toZone1 = f.pathBuilder()
-                .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(8, 8)))
+                .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(8.5, 8)))
+                .setLinearHeadingInterpolation(hr(0), hr(0))
+                .addPath(new BezierLine(sp(8.5, 8), sp(11.5, 8)))
+                .setLinearHeadingInterpolation(hr(0), hr(0))
+                .addPath(new BezierLine(sp(11.5, 8), sp(8.5, 8)))
                 .setLinearHeadingInterpolation(hr(0), hr(0))
                 .build();
         toShootFromZone1 = f.pathBuilder()
-                .addPath(new BezierLine(sp(8, 8), sp(SHOOT_POS_X, SHOOT_POS_Y)))
+                .addPath(new BezierLine(sp(8.5, 8), sp(SHOOT_POS_X, SHOOT_POS_Y)))
                 .setLinearHeadingInterpolation(hr(0), hr(0))
                 .build();
 
         // Zone 2 (y = 20)
         toZone2 = f.pathBuilder()
-                .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(8, 20)))
+                .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(8.5, 20)))
+                .setLinearHeadingInterpolation(hr(0), hr(0))
+                .addPath(new BezierLine(sp(8.5, 20), sp(11.5, 20)))
+                .setLinearHeadingInterpolation(hr(0), hr(0))
+                .addPath(new BezierLine(sp(11.5, 20), sp(8.5, 20)))
                 .setLinearHeadingInterpolation(hr(0), hr(0))
                 .build();
         toShootFromZone2 = f.pathBuilder()
-                .addPath(new BezierLine(sp(8, 20), sp(SHOOT_POS_X, SHOOT_POS_Y)))
+                .addPath(new BezierLine(sp(8.5, 20), sp(SHOOT_POS_X, SHOOT_POS_Y)))
                 .setLinearHeadingInterpolation(hr(0), hr(0))
                 .build();
 
         // Zone 3 (y = 32)
         toZone3 = f.pathBuilder()
-                .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(8, 32)))
+                .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(8.5, 32)))
+                .setLinearHeadingInterpolation(hr(0), hr(0))
+                .addPath(new BezierLine(sp(8.5, 32), sp(11.5, 32)))
+                .setLinearHeadingInterpolation(hr(0), hr(0))
+                .addPath(new BezierLine(sp(11.5, 32), sp(8.5, 32)))
                 .setLinearHeadingInterpolation(hr(0), hr(0))
                 .build();
         toShootFromZone3 = f.pathBuilder()
-                .addPath(new BezierLine(sp(8, 32), sp(SHOOT_POS_X, SHOOT_POS_Y)))
+                .addPath(new BezierLine(sp(8.5, 32), sp(SHOOT_POS_X, SHOOT_POS_Y)))
                 .setLinearHeadingInterpolation(hr(0), hr(0))
                 .build();
 
