@@ -5,7 +5,6 @@ import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelDeadlineGroup;
-import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.pedropathing.follower.Follower;
@@ -15,6 +14,7 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
+import org.firstinspires.ftc.teamcode.Robot.commands.ClampedPPTracking;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
 
 
@@ -28,11 +28,13 @@ public class Zayans24Auto extends CommandOpMode {
     // Near spot (40,90): preload, top row, bottom row  @ SHOOT_VELOCITY.
     // Far spot  (52,90): middle row + all gate cycles  @ SHOOT_VELOCITY_FAR.
     // Return paths already pass through (52,90), so far shots cost zero extra travel.
-    static final double SHOOT_POS_X        = 61.845686512758206;
-    static final double SHOOT_POS_Y        = 66.26002430133657;
-    static final double SHOOT_VELOCITY    = 3050;
+    static final double SHOOT_POS_X        = 54.0672708+2;
+    static final double SHOOT_POS_Y        = 71.57207864719906+5;
+    static final double SHOOT_HEADING_DEG  = 46;
+    static final double SHOOT_VELOCITY     = 2950.0 + 120;
     static final double SHOOT_HOOD         = 0.5;
-    static final double SHOOT_TURRET_ANGLE = 19.6;
+    static final double DEFAULT_TURRET_DEG = 49;
+    static final double TURRET_WINDOW      = 5;
 
     // ── Init / push-to-start ────────────────────────────────────────────────
     static final double INIT_X           = 48;
@@ -44,8 +46,6 @@ public class Zayans24Auto extends CommandOpMode {
     static final double GATE_POS_X       = 10.5;
     static final double GATE_POS_Y       = 59;
     static final double GATE_HEADING_DEG = 333;
-
-    static final double GATE_PATH_ANGLE = 12.85;
 
     // ── Magazine cover positions ─────────────────────────────────────────────
     static final double COVER_OPEN  = .8;
@@ -100,41 +100,41 @@ public class Zayans24Auto extends CommandOpMode {
         // ── Command schedule ──────────────────────────────────────────────
         negabot.schedule(
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
-                new InstantCommand(() -> negabot.turret.setTargetDeg(SHOOT_TURRET_ANGLE)),
+                new InstantCommand(() -> negabot.turret.setTargetDeg(DEFAULT_TURRET_DEG)),
                 new InstantCommand(() -> negabot.shooter.setVelocity(SHOOT_VELOCITY)),
                 new InstantCommand(() -> negabot.shooter.setHood(SHOOT_HOOD)),
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_CLOSE)),
                 new SequentialCommandGroup(
-                        shotPrep(f, toShoot0, SHOOT_TURRET_ANGLE - 2.3),
+                        shotPrep(f, toShoot0, DEFAULT_TURRET_DEG - 2.3, TURRET_WINDOW),
                         burst(),
 
                         new FollowPathCommand(f, toMiddle, false),
-                        shotPrep(f, toShoot1, SHOOT_TURRET_ANGLE - 2.3),
+                        shotPrep(f, toShoot1, DEFAULT_TURRET_DEG - 2.3, TURRET_WINDOW),
                         burst(),
 
                         new FollowPathCommand(f, toGate, true),
                         new WaitCommand(GATE_WAIT_MS),
-                        shotPrep(f, toShootFromGate, SHOOT_TURRET_ANGLE),
+                        shotPrep(f, toShootFromGate, DEFAULT_TURRET_DEG, TURRET_WINDOW),
                         burst(),
 
                         new FollowPathCommand(f, toGate, true),
                         new WaitCommand(GATE_WAIT_MS),
-                        shotPrep(f, toShootFromGate, SHOOT_TURRET_ANGLE),
+                        shotPrep(f, toShootFromGate, DEFAULT_TURRET_DEG, TURRET_WINDOW),
                         burst(),
 
                         new FollowPathCommand(f, toGate, true),
                         new WaitCommand(GATE_WAIT_MS),
-                        shotPrep(f, toShootFromGate, SHOOT_TURRET_ANGLE),
+                        shotPrep(f, toShootFromGate, DEFAULT_TURRET_DEG, TURRET_WINDOW),
                         burst(),
 
                         new FollowPathCommand(f, toGate, true),
                         new WaitCommand(GATE_WAIT_MS),
-                        shotPrep(f, toShootFromGate, SHOOT_TURRET_ANGLE),
+                        shotPrep(f, toShootFromGate, DEFAULT_TURRET_DEG, TURRET_WINDOW),
                         burst(),
 
                         new FollowPathCommand(f, toGate, true),
                         new WaitCommand(GATE_WAIT_MS),
-                        shotPrep(f, toShootFromGate, SHOOT_TURRET_ANGLE),
+                        shotPrep(f, toShootFromGate, DEFAULT_TURRET_DEG, TURRET_WINDOW),
                         burst(),
 
                         //TODO: These values are different, need to be tuned
@@ -142,7 +142,7 @@ public class Zayans24Auto extends CommandOpMode {
                         new InstantCommand(() -> negabot.shooter.setVelocity(2600)),
                         new InstantCommand(() -> negabot.shooter.setHood(.35)),
                         new FollowPathCommand(f, toTopSweep, false),
-                        shotPrep(f, toShootFromTop, 38.8),
+                        shotPrep(f, toShootFromTop, 38.8, TURRET_WINDOW),
                         burst()
                 )
         );
@@ -157,10 +157,16 @@ public class Zayans24Auto extends CommandOpMode {
         );
     }
 
-    Command shotPrep(Follower f, PathChain path, double d) {
+    Command shotPrep(Follower f, PathChain path, double centerDeg, double windowDeg) {
         return new ParallelDeadlineGroup(
                 new FollowPathCommand(f, path, true),
-                new RunCommand(() -> negabot.turret.setTargetDeg(d), negabot.turret)
+                new ClampedPPTracking(
+                        negabot.turret,
+                        negabot.drive,
+                        Robot.Alliance.BLUE,   // change if this auto should be RED
+                        centerDeg - windowDeg,
+                        centerDeg + windowDeg
+                )
         );
     }
 
@@ -172,7 +178,7 @@ public class Zayans24Auto extends CommandOpMode {
                 .addPath(new BezierLine(
                         new Pose(pushedStart.getX(), pushedStart.getY()),
                         sp(SHOOT_POS_X, SHOOT_POS_Y)))
-                .setLinearHeadingInterpolation(pushedStart.getHeading(), hr(8.39))
+                .setLinearHeadingInterpolation(pushedStart.getHeading(), hr(SHOOT_HEADING_DEG))
                 .build();
 
         toMiddle = f.pathBuilder()
@@ -180,26 +186,28 @@ public class Zayans24Auto extends CommandOpMode {
                 .setTangentHeadingInterpolation().setReversed()
                 .build();
 
+        // Start heading recomputed for the new shoot spot (straight-line tangent,
+        // continuous with toMiddle's reversed-tangent exit heading) — may need on-bot tuning.
         toShoot1 = f.pathBuilder()
                 .addPath(new BezierLine(
                         sp(21.570777450847295, 58.801756299208385),
                         sp(SHOOT_POS_X,     SHOOT_POS_Y)))
-                .setLinearHeadingInterpolation(hr(8.39), hr(GATE_PATH_ANGLE), 1, 0.7)
+                .setLinearHeadingInterpolation(hr(26.0), hr(SHOOT_HEADING_DEG), 1, 0.7)
                 .build();
 
         toGate = f.pathBuilder()
                 .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(GATE_POS_X, GATE_POS_Y)))
-                .setLinearHeadingInterpolation(hr(GATE_PATH_ANGLE), hr(GATE_HEADING_DEG))
+                .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(GATE_HEADING_DEG))
                 .build();
 
         toShootFromGate = f.pathBuilder()
                 .addPath(new BezierLine(sp(GATE_POS_X, GATE_POS_Y), sp(SHOOT_POS_X, SHOOT_POS_Y)))
-                .setLinearHeadingInterpolation(hr(GATE_HEADING_DEG), hr(GATE_PATH_ANGLE), 0.3, 0.1)
+                .setLinearHeadingInterpolation(hr(GATE_HEADING_DEG), hr(SHOOT_HEADING_DEG), 0.3, 0.1)
                 .build();
 
         toTopSweep = f.pathBuilder()
                 .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(24.586269744835963, 82.69907639732685)))
-                .setLinearHeadingInterpolation(hr(GATE_PATH_ANGLE), hr(-18.8), 0.3, 0)
+                .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(-18.8), 0.3, 0)
                 .build();
 
         toShootFromTop = f.pathBuilder()

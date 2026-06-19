@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Mode.PedroAutos;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.CommandOpMode;
+import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelDeadlineGroup;
 import com.arcrobotics.ftclib.command.RunCommand;
@@ -16,6 +17,7 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
+import org.firstinspires.ftc.teamcode.Robot.commands.ClampedPPTracking;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
 
 /**
@@ -46,6 +48,7 @@ public class CloseAuto18Leave extends CommandOpMode {
 
     Robot negabot;
     boolean isBlue = true;
+    boolean do3rdRow = true;
 
     // ── Shooting-station tuning ─────────────────────────────────────────────
     // Near spot (40,90): preload, top row, bottom row  @ SHOOT_VELOCITY.
@@ -63,6 +66,7 @@ public class CloseAuto18Leave extends CommandOpMode {
     static final double SHOOT_HOOD         = 0.5;
     static final double DEFAULT_TURRET_DEG = 49;
     static final double PRELOAD_TURRET_DEG = 135;
+    static final double TURRET_WINDOW = 5;
 
 
     // ── Init / push-to-start ────────────────────────────────────────────────
@@ -82,13 +86,13 @@ public class CloseAuto18Leave extends CommandOpMode {
 
     // ── Magazine cover positions ─────────────────────────────────────────────
     static final double COVER_OPEN  = .75;
-    static final double COVER_CLOSE = .5;
+    static final double COVER_CLOSE = .55;
 
     // ── Intake direction ─────────────────────────────────────────────────────
     static final double INTAKE_ON = -1.0;
 
     // ── Timing ──────────────────────────────────────────────────────────────
-    static final long BURST_MS     = 450;   // feed time — was 750; matched to Zayan's ~500
+    static final long BURST_MS     = 550;   // feed time — was 750; matched to Zayan's ~500
     static final long GATE_WAIT_MS = 950;
 
     // ── Path declarations ────────────────────────────────────────────────────
@@ -111,8 +115,10 @@ public class CloseAuto18Leave extends CommandOpMode {
         Robot.Alliance shown = Robot.Alliance.BLUE;
 
         while (!isStarted() && !isStopRequested()) {
-            if (gamepad1.x) isBlue = true;
-            if (gamepad1.b) isBlue = false;
+            if (gamepad1.x) isBlue   = true;
+            if (gamepad1.b) isBlue   = false;
+            if (gamepad1.y) do3rdRow = true;
+            if (gamepad1.a) do3rdRow = false;
             Robot.Alliance sel = isBlue ? Robot.Alliance.BLUE : Robot.Alliance.RED;
             if (sel != shown) {
                 negabot.drive.follower.setPose(initPose());
@@ -121,7 +127,8 @@ public class CloseAuto18Leave extends CommandOpMode {
             negabot.drive.follower.update();
             Pose live = negabot.drive.follower.getPose();
             telemetry.addLine("=== SELECT ALLIANCE (X/B), THEN PUSH TO START ===");
-            telemetry.addData("Selected", isBlue ? ">>> BLUE <<<" : ">>>  RED <<<");
+            telemetry.addData("Selected", isBlue   ? ">>> BLUE <<<" : ">>>  RED <<<");
+            telemetry.addData("3rd Row",  do3rdRow ? "ON  (A=disable)" : "OFF (Y=enable)");
             telemetry.addData("Live pose", String.format("x=%.1f y=%.1f h=%.0f",
                     live.getX(), live.getY(), Math.toDegrees(live.getHeading())));
             telemetry.update();
@@ -155,65 +162,55 @@ public class CloseAuto18Leave extends CommandOpMode {
         // ── Command schedule ──────────────────────────────────────────────
         negabot.schedule(
                 new InstantCommand(() -> negabot.shooter.setHood(SHOOT_HOOD)),   // normal hood for the preload too
+                new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),    // intake runs the whole auto
 
                 new SequentialCommandGroup(
 
                         // ── 1: Preload — drive to the shoot spot, then shoot normally ──
-                        new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
                         shotPrep(f, toShoot0, PRELOAD_TURRET_DEG),   // drive to the spot while auto-aiming the turret
                         new WaitCommand(500),
                         burst(),                 // stop, then fire like every other cycle
 
                         // ── 2: Middle row (y≈60) — returns to (52,90) @ 3050 RPM ─
-                        new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
                         new FollowPathCommand(f, toMiddle, false),   // flow into the return, don't brake/hold
-                        new InstantCommand(() -> negabot.intake.setSpeed(0)),
                         new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY_FAR),
-                        new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
-                        shotPrep(f, toShoot1, DEFAULT_TURRET_DEG),
+                        shotPrep(f, toShoot1, DEFAULT_TURRET_DEG, TURRET_WINDOW),
                         burst(),
 
                         // ── 3: Gate first pass — from (52,90), return to (52,90) @ 3050 RPM ─
-                        new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
                         new FollowPathCommand(f, toGateFar, true),
                         new WaitCommand(GATE_WAIT_MS),
-                        new InstantCommand(() -> negabot.intake.setSpeed(0)),
-                        new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
-                        shotPrep(f, toShootFromGateStraight, DEFAULT_TURRET_DEG),
+                        shotPrep(f, toShootFromGateStraight, DEFAULT_TURRET_DEG, TURRET_WINDOW),
                         burst(),
 
                         // ── 5: Gate second pass — from (40,90), return to (52,90) @ 3050 RPM ─
-                        new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
                         new FollowPathCommand(f, toGate, true),
                         new WaitCommand(GATE_WAIT_MS),
-                        new InstantCommand(() -> negabot.intake.setSpeed(0)),
                         new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY_FAR),
-                        new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
-                        shotPrep(f, toShootFromGateStraight, DEFAULT_TURRET_DEG),
+                        shotPrep(f, toShootFromGateStraight, DEFAULT_TURRET_DEG, TURRET_WINDOW),
                         burst(),
 
                         // ── 6: Bottom row (y≈36) — from (52,90), returns to (40,90) @ 2950 RPM ─
-                        new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
-                        new FollowPathCommand(f, toBottom, false),   // flow into the return, don't brake/hold
-                        new InstantCommand(() -> negabot.intake.setSpeed(0)),
-                        new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY),
-                        new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
-                        shotPrep(f, toShootFromBottom, DEFAULT_TURRET_DEG),
-                        burst(),
+                        new ConditionalCommand(
+                                new SequentialCommandGroup(
+                                        new FollowPathCommand(f, toBottom, false),   // flow into the return, don't brake/hold
+                                        new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY),
+                                        shotPrep(f, toShootFromBottom, DEFAULT_TURRET_DEG, TURRET_WINDOW),
+                                        burst()
+                                ),
+                                new InstantCommand(() -> {}),
+                                () -> do3rdRow
+                        ),
 
                         // ── 7: Gate third pass — from (40,90), return to (52,90) @ 3050 RPM ─
-                        new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
                         new FollowPathCommand(f, toGate, true),
                         new WaitCommand(GATE_WAIT_MS),
-                        new InstantCommand(() -> negabot.intake.setSpeed(0)),
                         new InstantCommand(() -> shootVel[0] = SHOOT_VELOCITY_FAR),
-                        new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
-                        shotPrep(f, toShootFromGateStraight, DEFAULT_TURRET_DEG),
+                        shotPrep(f, toShootFromGateStraight, DEFAULT_TURRET_DEG, TURRET_WINDOW),
                         burst(),
 
 
                         // ── 4: Top row (y≈84) — from (52,90), returns to (40,90) @ 2950 RPM ─
-                        new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
                         new FollowPathCommand(f, toTopSweep, false)   // flow into the return, don't brake/hold
 
                 )
@@ -223,9 +220,7 @@ public class CloseAuto18Leave extends CommandOpMode {
     Command burst() {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_OPEN)),
-                new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
                 new WaitCommand(BURST_MS),
-                new InstantCommand(() -> negabot.intake.setSpeed(0)),
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_CLOSE))
         );
     }
@@ -234,6 +229,18 @@ public class CloseAuto18Leave extends CommandOpMode {
         return new ParallelDeadlineGroup(
                 new FollowPathCommand(f, path, true),
                 new RunCommand(() -> negabot.turret.setTargetDeg(turretDeg), negabot.turret)
+        );
+    }
+    public Command shotPrep(Follower f, PathChain path, double centerDeg, double windowDeg) {
+        return new ParallelDeadlineGroup(
+                new FollowPathCommand(f, path, true),
+                new ClampedPPTracking(
+                        negabot.turret,
+                        negabot.drive,
+                        Robot.Alliance.BLUE,   // change if this auto should be RED
+                        centerDeg - windowDeg,
+                        centerDeg + windowDeg
+                )
         );
     }
 
@@ -334,14 +341,18 @@ public class CloseAuto18Leave extends CommandOpMode {
 
         // ── Bottom row (y ≈ 36) — starts from (52,90) after gate cycle 5 ─────
         toBottom = f.pathBuilder()
-                .addPath(new BezierLine(sp(SHOOT_POS_X_FAR, SHOOT_POS_Y), sp(45, 36.0)))
-                .setLinearHeadingInterpolation(hr(60), hr(60))
-                .addPath(new BezierLine(sp(45, 36.0), sp(spikeXintake, 36.0)))
-                .setLinearHeadingInterpolation(hr(0), hr(0))
+                .addPath(new BezierCurve(
+                        sp(SHOOT_POS_X_FAR, SHOOT_POS_Y),
+                        sp(45, 36.0),
+                        sp(spikeXintake, 36.0)))
+                .setTangentHeadingInterpolation().setReversed()
                 .build();
 
         toShootFromBottom = f.pathBuilder()
-                .addPath(new BezierLine(sp(spikeXintake, 36.0), sp(SHOOT_POS_X, SHOOT_POS_Y)))
+                .addPath(new BezierCurve(
+                        sp(spikeXintake, 36.0),
+                        sp(45, 36.0),
+                        sp(SHOOT_POS_X, SHOOT_POS_Y)))
                 .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(SHOOT_HEADING_DEG))
                 .build();
 

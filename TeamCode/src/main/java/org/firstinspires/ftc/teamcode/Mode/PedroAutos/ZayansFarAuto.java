@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.Robot.commands.StallTimeoutCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.WaitToShoot;
 
 
-@Autonomous(name = "Ts will also work trust")
+@Autonomous(name = ".Ts will also work trust")
 public class ZayansFarAuto extends CommandOpMode {
 
     Robot negabot;
@@ -35,7 +35,7 @@ public class ZayansFarAuto extends CommandOpMode {
     static final double SHOOT_HEADING_DEG  = 0.0;
     static final double SHOOT_VELOCITY     = 3950;
     static final double SHOOT_HOOD         = 0.7;
-    static final double SHOOT_TURRET_ANGLE = 24;
+    static final double SHOOT_TURRET_ANGLE = 23;
 
     static final double INIT_X           = 48;
     static final double INIT_Y           = 24;
@@ -108,7 +108,7 @@ public class ZayansFarAuto extends CommandOpMode {
 
                         new ConditionalCommand(
                                 new SequentialCommandGroup(
-                                        followGuarded(f, to3rdRow, false),
+                                        new FollowPathCommand(f, to3rdRow, false),
                                         new WaitCommand(INTAKE_WAIT_MS),
                                         shotPrep(f, toShootFrom3rdRow, SHOOT_TURRET_ANGLE),
                                         burst()
@@ -117,19 +117,20 @@ public class ZayansFarAuto extends CommandOpMode {
                                 () -> do3rdRow
                         ),
 
-                        cycle(f),
-                        cycle(f),
-                        cycle(f),
-                        cycle(f),
-                        cycle(f),
-                        cycle(f)
+                        cycle(f, 1),
+                        cycle(f, 1),
+                        cycle(f, 1),
+                        cycle(f, 2),
+                        cycle(f, 0),
+                        cycle(f, 0)
                 )
         );
     }
 
-    private Command cycle(Follower f) {
+    private Command cycle(Follower f, int i) {
         return new SequentialCommandGroup(
-                new InstantCommand(() -> zoneResult = getZone()),
+                //new InstantCommand(() -> zoneResult = getZone()),
+                new InstantCommand(() -> zoneResult = i),
                 new ConditionalCommand(
                         new SequentialCommandGroup(
                                 followGuarded(f, toZone1, false),
