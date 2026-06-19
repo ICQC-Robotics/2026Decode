@@ -41,7 +41,7 @@ public class ZayansFarAuto extends CommandOpMode {
     static final double INIT_Y           = 24;
     static final double INIT_HEADING_DEG = 0;
 
-    static final double SWEEP_END_X = 8.0;
+    static final double SWEEP_END_X = 8.5;
     static final double SWEEP_END_Y = 45.0;
     static final double SWEEP_CP_X  = 8.5;
     static final double SWEEP_CP_Y  = 19.5;
@@ -117,20 +117,19 @@ public class ZayansFarAuto extends CommandOpMode {
                                 () -> do3rdRow
                         ),
 
-                        cycle(f, 1),
-                        cycle(f, 1),
-                        cycle(f, 1),
-                        cycle(f, 2),
-                        cycle(f, 0),
-                        cycle(f, 0)
+                        cycle(f),
+                        cycle(f),
+                        cycle(f),
+                        cycle(f),
+                        cycle(f),
+                        cycle(f)
                 )
         );
     }
 
-    private Command cycle(Follower f, int i) {
+    private Command cycle(Follower f) {
         return new SequentialCommandGroup(
-                //new InstantCommand(() -> zoneResult = getZone()),
-                new InstantCommand(() -> zoneResult = i),
+                new InstantCommand(() -> zoneResult = getZone()),
                 new ConditionalCommand(
                         new SequentialCommandGroup(
                                 followGuarded(f, toZone1, false),
@@ -187,13 +186,14 @@ public class ZayansFarAuto extends CommandOpMode {
     }
 
     private int getZone() {
-        int z = negabot.vision.scanArtifactZone(isBlue);
-        double[] d = negabot.vision.getLastDensity();
-        telemetry.addData("density z1/z2/z3", "%.1f / %.1f / %.1f", d[1], d[2], d[3]);
+        int z = negabot.vision.getScannedZone(isBlue);
+        double[] d = negabot.vision.getLastDensity(isBlue);
+        telemetry.addData("density z1/z2/z3", "%.1f%% / %.1f%% / %.1f%%", d[1], d[2], d[3]);
         telemetry.addData("-> zone", z == 0 ? "SWEEP" : z);
         telemetry.update();
         return z;
     }
+
     void buildPaths(Follower f) {
         Pose pushedStart = f.getPose();
 

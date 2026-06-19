@@ -4,7 +4,7 @@ import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.arcrobotics.ftclib.command.button.GamepadButton;
@@ -62,9 +62,10 @@ public class Robot {
                 new PIDFCoefficients(25, 0, 0, 0)
         );
 
-        vision = new Vision(
-                h.get(Limelight3A.class, "ll")
-        );
+        // zoneCam not wired up on the robot yet -- re-enable once it's added to the config.
+        // vision = new Vision(
+        //         h.get(WebcamName.class, "zoneCam")
+        // );
 
         wait = new Wait();
     }
