@@ -104,7 +104,8 @@ public class SoloBlue extends CommandOpMode {
                                 negabot.drive,
                                 negabot.shooter,
                                 negabot.intake,
-                                negabot.wait
+                                negabot.wait,
+                                negabot.turret
                         )
                 );
 

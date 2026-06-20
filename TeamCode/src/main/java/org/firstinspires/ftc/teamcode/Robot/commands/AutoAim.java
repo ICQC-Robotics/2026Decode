@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Shooter;
+import org.firstinspires.ftc.teamcode.Robot.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
 
 public class AutoAim extends SequentialCommandGroup {
@@ -31,6 +32,9 @@ public class AutoAim extends SequentialCommandGroup {
     }
 
     private static final double RPM_TOLERANCE = 20; // TODO: change if needed
+    private static final double TURRET_TOLERANCE_DEG = 2.0;
+    // Safety cap so a noisy pose or an unreachable turret target can't hang the feed step forever.
+    private static final long AIM_TIMEOUT_MS = 500;
     private static final double FEED_TIME_S = .55;
     public static final double MIN_DIST = 20;
     public static final double MAX_DIST = 150;
@@ -79,14 +83,14 @@ public class AutoAim extends SequentialCommandGroup {
 
     private double spinUpRPM = MIN_V;
 
-    public AutoAim(Drive drive, Shooter shooter, Intake intake, Wait wait) {
+    public AutoAim(Drive drive, Shooter shooter, Intake intake, Wait wait, Turret turret) {
         addCommands(
-                shootSequence(drive, shooter, intake, wait)
+                shootSequence(drive, shooter, intake, wait, turret)
         );
         addRequirements(shooter, intake);
     }
 
-    private SequentialCommandGroup shootSequence(Drive drive, Shooter shooter, Intake intake, Wait wait) {
+    private SequentialCommandGroup shootSequence(Drive drive, Shooter shooter, Intake intake, Wait wait, Turret turret) {
         return new SequentialCommandGroup(
 
                 new InstantCommand(() -> {
@@ -112,6 +116,21 @@ public class AutoAim extends SequentialCommandGroup {
                             @Override
                             public boolean isFinished() {
                                 return Math.abs(shooter.getVelocity() - spinUpRPM) <= RPM_TOLERANCE;
+                            }
+                        },
+
+                        new CommandBase() {
+                            private long startMs;
+
+                            @Override
+                            public void initialize() {
+                                startMs = System.currentTimeMillis();
+                            }
+
+                            @Override
+                            public boolean isFinished() {
+                                return turret.atTarget(TURRET_TOLERANCE_DEG)
+                                        || System.currentTimeMillis() - startMs >= AIM_TIMEOUT_MS;
                             }
                         },
 
