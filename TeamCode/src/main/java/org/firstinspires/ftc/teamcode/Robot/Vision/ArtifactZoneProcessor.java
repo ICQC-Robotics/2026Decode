@@ -12,30 +12,29 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 /**
- * Splits the camera frame into 3 full-height vertical boxes, one per artifact pickup zone, and
- * reports how much green/purple artifact color is covering each box. Box edges are computed
- * (not hand-picked) from the camera's mount geometry and each zone's pickup-path endpoints, so
- * they line up with where a real artifact in that zone would appear on screen.
- *
- * Reports density purely by on-screen position (left/mid/right) -- it has no notion of alliance.
- * Vision.java maps left/mid/right to zone 1/2/3 based on alliance, since the field (and therefore
- * which physical zone appears on which side of the image) mirrors between red and blue.
+ * Splits the camera frame into 3 evenly-sized boxes, one per artifact pickup zone, and reports
+ * how much green/purple artifact color is covering each. Boxes tile the full frame edge-to-edge
+ * (no dead space) and, for RED alliance, zone1 is leftmost. For BLUE, the whole layout is
+ * mirrored horizontally (the field -- and therefore which physical zone the camera sees on which
+ * side -- mirrors between alliances), so call {@link #setAlliance(boolean)} whenever the
+ * alliance is known/changes.
  */
 public class ArtifactZoneProcessor implements VisionProcessor {
 
-    // ── Camera mount geometry, relative to the shoot pose (BLUE frame; matches ZayansFarAuto) ──
-    public static double SHOOT_POS_X = 45.0;
-    public static double SHOOT_POS_Y = 9.0;
-    public static double CAMERA_BACK_OFFSET_IN = 7.0;  // camera sits this far BEHIND robot center
+    // Layout, as fractions of frame width/height, for RED alliance. Mirrored for BLUE.
+    // Boxes tile the FULL frame edge-to-edge in both width and height -- no dead space.
+    private static final double BOX_START_FRAC  = 0.0;
+    private static final double BOX_WIDTH_FRAC  = 1.0 / 3.0;
+    private static final double BOX_HEIGHT_FRAC = 1.0;
 
-    // Pickup-path endpoints per zone (near/far corner the robot drives through), index 1..3.
-    private static final double[] ZONE_NEAR_X = {0, 8.5, 8.5, 8.5};
-    private static final double[] ZONE_FAR_X  = {0, 11.5, 11.5, 11.5};
-    private static final double[] ZONE_Y       = {0, 8.0, 20.0, 32.0};
-
-    // Horizontal field of view of the MOUNTED WEBCAM, in degrees. MUST be set to match the actual
-    // camera (check its spec sheet / run a calibration) -- this directly determines box placement.
-    public static double HORIZONTAL_FOV_DEG = 90.0;
+    // Left-edge fraction of each zone's box in the RED layout (index 1..3); zone1 is leftmost
+    // (camera is mounted flipped, so the left/right sense is reversed from a plain mirror).
+    private static final double[] ZONE_START_FRAC_RED = {
+            0,
+            BOX_START_FRAC,                          // zone1: leftmost box
+            BOX_START_FRAC + BOX_WIDTH_FRAC,         // zone2: middle box
+            BOX_START_FRAC + 2 * BOX_WIDTH_FRAC      // zone3: rightmost box
+    };
 
     // HSV thresholds for the two artifact colors (starting point carried over from
     // IntakeColorProcessing.java's tuned values -- re-verify under match lighting).
@@ -50,62 +49,40 @@ public class ArtifactZoneProcessor implements VisionProcessor {
     private final Mat combinedMask = new Mat();
 
     private int frameWidth, frameHeight;
-    // Pixel boundaries of the 3 on-screen regions, left to right.
-    private final int[] regionLeftPx  = new int[3];
-    private final int[] regionRightPx = new int[3];
+    private int boxTopPx, boxBottomPx;
+
+    private volatile boolean blueAlliance = true;
 
     // Published as a whole new array each frame so readers on another thread never see a
     // half-updated snapshot (safe publication via a volatile reference, no locking needed).
-    private volatile double[] regionDensityPct = {0, 0, 0};
+    private volatile double[] zoneDensityPct = {0, 0, 0, 0};  // index 1..3
 
     @Override
     public void init(int width, int height, CameraCalibration calibration) {
         frameWidth = width;
         frameHeight = height;
-        computeRegionBoundaries();
+        boxTopPx    = 0;
+        boxBottomPx = (int) Math.round(frameHeight * BOX_HEIGHT_FRAC);
     }
 
-    private void computeRegionBoundaries() {
-        double[] centerBearingDeg = new double[4];
-        for (int z = 1; z <= 3; z++) {
-            double bNear = bearingDeg(ZONE_NEAR_X[z], ZONE_Y[z]);
-            double bFar  = bearingDeg(ZONE_FAR_X[z],  ZONE_Y[z]);
-            centerBearingDeg[z] = (bNear + bFar) / 2.0;
-        }
-
-        // centerBearingDeg[1] > [2] > [3] (zone1 is slightly camera-right, zone3 far camera-left).
-        // Split the frame at the angular midpoint between neighboring zones; outer zones run to
-        // the frame edges so the 3 boxes always tile the whole width with no gaps/overlap.
-        double boundary12 = (centerBearingDeg[1] + centerBearingDeg[2]) / 2.0;
-        double boundary23 = (centerBearingDeg[2] + centerBearingDeg[3]) / 2.0;
-
-        int pxBoundary12 = bearingToPixel(boundary12);
-        int pxBoundary23 = bearingToPixel(boundary23);
-
-        regionLeftPx[0]  = 0;             regionRightPx[0] = pxBoundary23;   // leftmost  = zone3 side
-        regionLeftPx[1]  = pxBoundary23;  regionRightPx[1] = pxBoundary12;   // middle    = zone2 side
-        regionLeftPx[2]  = pxBoundary12;  regionRightPx[2] = frameWidth;     // rightmost = zone1 side
+    /** Call whenever the current alliance is known/changes -- flips the box layout to match. */
+    public void setAlliance(boolean isBlue) {
+        blueAlliance = isBlue;
     }
 
-    private static double cameraX() { return SHOOT_POS_X - CAMERA_BACK_OFFSET_IN; }
-    private static double cameraY() { return SHOOT_POS_Y; }
-
-    /** Bearing (deg) from the camera to a field point; camera faces -x, camera-right = -y. */
-    private static double bearingDeg(double targetX, double targetY) {
-        double forward = cameraX() - targetX;
-        double right   = cameraY() - targetY;
-        return Math.toDegrees(Math.atan2(right, forward));
+    private int zoneLeftPx(int z) {
+        return (int) Math.round(zoneStartFrac(z) * frameWidth);
     }
 
-    private int bearingToPixel(double bearingDegVal) {
-        double halfFovRad = Math.toRadians(HORIZONTAL_FOV_DEG / 2.0);
-        double norm = Math.tan(Math.toRadians(bearingDegVal)) / Math.tan(halfFovRad);  // -1..+1 across the FOV
-        int px = (int) Math.round(frameWidth / 2.0 + norm * frameWidth / 2.0);
-        return clamp(px, 0, frameWidth);
+    private int zoneRightPx(int z) {
+        return (int) Math.round((zoneStartFrac(z) + BOX_WIDTH_FRAC) * frameWidth);
     }
 
-    private static int clamp(int v, int lo, int hi) {
-        return Math.max(lo, Math.min(hi, v));
+    private double zoneStartFrac(int z) {
+        double startFrac = ZONE_START_FRAC_RED[z];
+        if (!blueAlliance) return startFrac;
+        // BLUE: mirror the box horizontally -- [start, start+width] -> [1-(start+width), 1-start].
+        return 1.0 - startFrac - BOX_WIDTH_FRAC;
     }
 
     @Override
@@ -115,26 +92,26 @@ public class ArtifactZoneProcessor implements VisionProcessor {
         Core.inRange(hsv, PURPLE_LOW, PURPLE_HIGH, maskPurple);
         Core.bitwise_or(maskGreen, maskPurple, combinedMask);
 
-        double[] pct = new double[3];
-        for (int i = 0; i < 3; i++) {
-            int left = regionLeftPx[i], right = regionRightPx[i];
+        double[] pct = new double[4];
+        double area = (frameWidth * BOX_WIDTH_FRAC) * (frameHeight * BOX_HEIGHT_FRAC);
+        for (int z = 1; z <= 3; z++) {
+            int left = zoneLeftPx(z), right = zoneRightPx(z);
             if (right <= left) continue;
 
-            Mat region = combinedMask.submat(0, frameHeight, left, right);
-            int litPixels = Core.countNonZero(region);
-            region.release();
+            Mat box = combinedMask.submat(boxTopPx, boxBottomPx, left, right);
+            int litPixels = Core.countNonZero(box);
+            box.release();
 
-            double area = (double) (right - left) * frameHeight;
-            pct[i] = 100.0 * litPixels / area;   // % of this box covered by artifact color
+            pct[z] = 100.0 * litPixels / area;  // % of this box covered by artifact color
         }
-        regionDensityPct = pct;
+        zoneDensityPct = pct;
 
         return null;
     }
 
-    /** % of each on-screen box (left/mid/right) covered by artifact color. Not alliance-aware. */
-    public double[] getRegionDensityPct() {
-        return regionDensityPct;
+    /** % of each zone's box covered by artifact color, index 1..3. Already alliance-correct. */
+    public double[] getZoneDensityPct() {
+        return zoneDensityPct;
     }
 
     @Override
@@ -144,12 +121,16 @@ public class ArtifactZoneProcessor implements VisionProcessor {
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(4 * scaleCanvasDensity);
         paint.setColor(Color.YELLOW);
+        paint.setTextSize(32 * scaleCanvasDensity);
 
-        double[] pct = regionDensityPct;
-        for (int i = 0; i < 3; i++) {
-            float left  = regionLeftPx[i]  * scaleBmpPxToCanvasPx;
-            float right = regionRightPx[i] * scaleBmpPxToCanvasPx;
-            canvas.drawRect(left, 0, right, onscreenHeight, paint);
+        float top    = boxTopPx    * scaleBmpPxToCanvasPx;
+        float bottom = boxBottomPx * scaleBmpPxToCanvasPx;
+
+        for (int z = 1; z <= 3; z++) {
+            float left  = zoneLeftPx(z)  * scaleBmpPxToCanvasPx;
+            float right = zoneRightPx(z) * scaleBmpPxToCanvasPx;
+            canvas.drawRect(left, top, right, bottom, paint);
+            canvas.drawText("z" + z, left + 8, top + 32 * scaleCanvasDensity, paint);
         }
     }
 }

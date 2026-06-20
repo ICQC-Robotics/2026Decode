@@ -7,7 +7,6 @@ import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelDeadlineGroup;
 import com.arcrobotics.ftclib.command.ParallelRaceGroup;
-import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.pedropathing.follower.Follower;
@@ -18,9 +17,11 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
+import org.firstinspires.ftc.teamcode.Robot.commands.ClampedPPTracking;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.StallTimeoutCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.WaitToShoot;
+import org.firstinspires.ftc.teamcode.Robot.commands.WaitUntilReadyToShoot;
 
 
 @Autonomous(name = ".Ts will also work trust")
@@ -30,12 +31,13 @@ public class ZayansFarAuto extends CommandOpMode {
     boolean isBlue   = true;
     boolean do3rdRow = true;
     private int zoneResult = 0;
-    static final double SHOOT_POS_X        = 45.0;
-    static final double SHOOT_POS_Y        = 9.0;
+    static final double SHOOT_POS_X        = 54.0;
+    static final double SHOOT_POS_Y        = 14.0;
     static final double SHOOT_HEADING_DEG  = 0.0;
     static final double SHOOT_VELOCITY     = 3950;
     static final double SHOOT_HOOD         = 0.7;
-    static final double SHOOT_TURRET_ANGLE = 23;
+    static final double SHOOT_TURRET_ANGLE = 22;
+    static final double TURRET_WINDOW      = 20;
 
     static final double INIT_X           = 48;
     static final double INIT_Y           = 24;
@@ -47,7 +49,11 @@ public class ZayansFarAuto extends CommandOpMode {
     static final double SWEEP_CP_Y  = 19.5;
     static final double SWEEP_EXIT_HEADING_DEG = 271.1;
 
-    static final long BURST_MS           = 400;
+    static final long BURST_MS           = 600;
+    // Max time to wait for the robot/turret to settle before shooting anyway (safety cap).
+    static final long SHOOT_PAUSE_MS     = 500;
+    static final double MAX_SETTLE_VELOCITY     = 2.0;  // in/sec, "stopped" threshold
+    static final double TURRET_ALIGN_TOLERANCE  = 2.0;  // deg, "aligned" threshold
     static final long INTAKE_WAIT_MS     = 0;
     static final long STALL_TIMEOUT_MS   = 200;
 
@@ -68,6 +74,7 @@ public class ZayansFarAuto extends CommandOpMode {
             if (gamepad1.b) isBlue   = false;
             if (gamepad1.y) do3rdRow = true;
             if (gamepad1.a) do3rdRow = false;
+            negabot.vision.setAlliance(isBlue);
 
             Robot.Alliance sel = isBlue ? Robot.Alliance.BLUE : Robot.Alliance.RED;
             if (sel != shown) {
@@ -94,7 +101,7 @@ public class ZayansFarAuto extends CommandOpMode {
 
         negabot.schedule(
                 new InstantCommand(() -> negabot.shooter.setHood(SHOOT_HOOD)),
-                new InstantCommand(() -> negabot.turret.setTargetDeg(SHOOT_TURRET_ANGLE)),
+                new InstantCommand(() -> negabot.turret.setTargetDeg(td(SHOOT_TURRET_ANGLE))),
                 new InstantCommand(() -> negabot.shooter.setVelocity(SHOOT_VELOCITY)),
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
                 new SequentialCommandGroup(
@@ -103,14 +110,16 @@ public class ZayansFarAuto extends CommandOpMode {
 
                         followGuarded(f, toHP, true),
                         new WaitCommand(INTAKE_WAIT_MS),
-                        shotPrep(f, toShootFromHP, SHOOT_TURRET_ANGLE),
+                        shotPrep(f, toShootFromHP, td(SHOOT_TURRET_ANGLE)),
+                        new WaitUntilReadyToShoot(f, negabot.turret, MAX_SETTLE_VELOCITY, TURRET_ALIGN_TOLERANCE, SHOOT_PAUSE_MS),
                         burst(),
 
                         new ConditionalCommand(
                                 new SequentialCommandGroup(
                                         new FollowPathCommand(f, to3rdRow, false),
                                         new WaitCommand(INTAKE_WAIT_MS),
-                                        shotPrep(f, toShootFrom3rdRow, SHOOT_TURRET_ANGLE),
+                                        shotPrep(f, toShootFrom3rdRow, td(SHOOT_TURRET_ANGLE)),
+                                        new WaitUntilReadyToShoot(f, negabot.turret, MAX_SETTLE_VELOCITY, TURRET_ALIGN_TOLERANCE, SHOOT_PAUSE_MS),
                                         burst()
                                 ),
                                 new InstantCommand(() -> {}),
@@ -134,24 +143,24 @@ public class ZayansFarAuto extends CommandOpMode {
                         new SequentialCommandGroup(
                                 followGuarded(f, toZone1, false),
                                 new WaitCommand(INTAKE_WAIT_MS),
-                                new FollowPathCommand(f, toShootFromZone1, true)
+                                shotPrep(f, toShootFromZone1, td(SHOOT_TURRET_ANGLE))
                         ),
                         new ConditionalCommand(
                                 new SequentialCommandGroup(
                                         followGuarded(f, toZone2, false),
                                         new WaitCommand(INTAKE_WAIT_MS),
-                                        new FollowPathCommand(f, toShootFromZone2, true)
+                                        shotPrep(f, toShootFromZone2, td(SHOOT_TURRET_ANGLE))
                                 ),
                                 new ConditionalCommand(
                                         new SequentialCommandGroup(
                                                 followGuarded(f, toZone3, false),
                                                 new WaitCommand(INTAKE_WAIT_MS),
-                                                new FollowPathCommand(f, toShootFromZone3, true)
+                                                shotPrep(f, toShootFromZone3, td(SHOOT_TURRET_ANGLE))
                                         ),
                                         new SequentialCommandGroup(
                                                 followGuarded(f, toSweep, false),
                                                 new WaitCommand(INTAKE_WAIT_MS),
-                                                new FollowPathCommand(f, toShootFromSweep, true)
+                                                shotPrep(f, toShootFromSweep, td(SHOOT_TURRET_ANGLE))
                                         ),
                                         () -> zoneResult == 3
                                 ),
@@ -159,6 +168,7 @@ public class ZayansFarAuto extends CommandOpMode {
                         ),
                         () -> zoneResult == 1
                 ),
+                new WaitUntilReadyToShoot(f, negabot.turret, MAX_SETTLE_VELOCITY, TURRET_ALIGN_TOLERANCE, SHOOT_PAUSE_MS),
                 burst()
         );
     }
@@ -170,10 +180,16 @@ public class ZayansFarAuto extends CommandOpMode {
         );
     }
 
-    Command shotPrep(Follower f, PathChain path, double d) {
+    Command shotPrep(Follower f, PathChain path, double centerDeg) {
         return new ParallelDeadlineGroup(
                 new FollowPathCommand(f, path, true),
-                new RunCommand(() -> negabot.turret.setTargetDeg(d), negabot.turret)
+                new ClampedPPTracking(
+                        negabot.turret,
+                        negabot.drive,
+                        Robot.ALLIANCE,
+                        centerDeg - TURRET_WINDOW,
+                        centerDeg + TURRET_WINDOW
+                )
         );
     }
 
@@ -226,13 +242,10 @@ public class ZayansFarAuto extends CommandOpMode {
                 .setLinearHeadingInterpolation(hr(-12.4), hr(0))
                 .build();
 
-        // Zone 1 — HP corner (y ≈ 8)
+        // Zone 1 — HP corner (y ≈ 8). Single leg straight to the wall, so the follower actually
+        // decelerates into it instead of blowing through at cruise speed mid-chain.
         toZone1 = f.pathBuilder()
                 .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(8.5, 8)))
-                .setLinearHeadingInterpolation(hr(0), hr(0))
-                .addPath(new BezierLine(sp(8.5, 8), sp(11.5, 8)))
-                .setLinearHeadingInterpolation(hr(0), hr(0))
-                .addPath(new BezierLine(sp(11.5, 8), sp(8.5, 8)))
                 .setLinearHeadingInterpolation(hr(0), hr(0))
                 .build();
         toShootFromZone1 = f.pathBuilder()
@@ -244,10 +257,6 @@ public class ZayansFarAuto extends CommandOpMode {
         toZone2 = f.pathBuilder()
                 .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(8.5, 20)))
                 .setLinearHeadingInterpolation(hr(0), hr(0))
-                .addPath(new BezierLine(sp(8.5, 20), sp(11.5, 20)))
-                .setLinearHeadingInterpolation(hr(0), hr(0))
-                .addPath(new BezierLine(sp(11.5, 20), sp(8.5, 20)))
-                .setLinearHeadingInterpolation(hr(0), hr(0))
                 .build();
         toShootFromZone2 = f.pathBuilder()
                 .addPath(new BezierLine(sp(8.5, 20), sp(SHOOT_POS_X, SHOOT_POS_Y)))
@@ -257,10 +266,6 @@ public class ZayansFarAuto extends CommandOpMode {
         // Zone 3 (y = 32)
         toZone3 = f.pathBuilder()
                 .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(8.5, 32)))
-                .setLinearHeadingInterpolation(hr(0), hr(0))
-                .addPath(new BezierLine(sp(8.5, 32), sp(11.5, 32)))
-                .setLinearHeadingInterpolation(hr(0), hr(0))
-                .addPath(new BezierLine(sp(11.5, 32), sp(8.5, 32)))
                 .setLinearHeadingInterpolation(hr(0), hr(0))
                 .build();
         toShootFromZone3 = f.pathBuilder()
@@ -303,6 +308,12 @@ public class ZayansFarAuto extends CommandOpMode {
         return isBlue ? Math.toRadians(deg) : Math.toRadians(mhd(deg));
     }
 
+    /** Mirrors a turret target angle for the current alliance (135=forward is the mirror axis). */
+    private double td(double deg) {
+        return isBlue ? deg : mtd(deg);
+    }
+
     private static double mx(double x)    { return 144.0 - x; }
     private static double mhd(double deg) { return ((180.0 - deg) % 360.0 + 360.0) % 360.0; }
+    private static double mtd(double deg) { return 270.0 - deg; }
 }

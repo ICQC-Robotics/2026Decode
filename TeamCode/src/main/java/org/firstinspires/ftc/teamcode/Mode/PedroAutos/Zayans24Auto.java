@@ -39,7 +39,7 @@ public class Zayans24Auto extends CommandOpMode {
     static final double SHOOT_HOOD         = 0.5;
     static final double DEFAULT_TURRET_DEG = 52;
     static final double GATE_TURRET_DEG    = 19;
-    static final double TURRET_WINDOW      = 5;
+    static final double TURRET_WINDOW      = 20;
 
     // ── RPM gate (preload only) ───────────────────────────────────────────
     static final double RPM_TOLERANCE       = 100;

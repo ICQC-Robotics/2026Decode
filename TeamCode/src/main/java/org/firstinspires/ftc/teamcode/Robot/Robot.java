@@ -62,10 +62,9 @@ public class Robot {
                 new PIDFCoefficients(25, 0, 0, 0)
         );
 
-        // zoneCam not wired up on the robot yet -- re-enable once it's added to the config.
-        // vision = new Vision(
-        //         h.get(WebcamName.class, "zoneCam")
-        // );
+        vision = new Vision(
+                h.get(WebcamName.class, "zoneCam")
+        );
 
         wait = new Wait();
     }

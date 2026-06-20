@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Robot.subsystems;
 
+import android.util.Size;
+
 import com.arcrobotics.ftclib.command.SubsystemBase;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -21,32 +23,35 @@ public class Vision extends SubsystemBase {
         zoneProcessor = new ArtifactZoneProcessor();
         visionPortal = new VisionPortal.Builder()
                 .setCamera(webcam)
+                // Density work doesn't need a big image -- a high default resolution can make
+                // processFrame() slower than the camera's frame interval, backing up frames
+                // (the "old frames" symptom). Keep this low; check getFps() to confirm it helps.
+                .setCameraResolution(new Size(320, 240))
                 .addProcessor(zoneProcessor)
                 .build();
     }
 
-    /**
-     * Per-zone artifact density (% box coverage), remapped from the processor's on-screen
-     * left/mid/right readout to zone 1/2/3. The field (and camera view) mirrors between
-     * alliances, so which on-screen box is zone 1 vs 3 flips with isBlue.
-     */
-    public double[] getLastDensity(boolean isBlue) {
-        double[] region = zoneProcessor.getRegionDensityPct();  // [left, mid, right]
-        double[] density = new double[4];
-        if (isBlue) {
-            density[3] = region[0];
-            density[2] = region[1];
-            density[1] = region[2];
-        } else {
-            density[1] = region[0];
-            density[2] = region[1];
-            density[3] = region[2];
-        }
-        return density;
+    /** Actual achieved vision-processing rate (frames/sec). For diagnosing lag/backlog. */
+    public float getFps() {
+        return visionPortal.getFps();
+    }
+
+    /** Flips the on-screen box layout to match. Call as soon as alliance is known/changes. */
+    public void setAlliance(boolean isBlue) {
+        zoneProcessor.setAlliance(isBlue);
     }
 
     /**
-     * @param isBlue current alliance (changes which on-screen box maps to which zone)
+     * Per-zone artifact density (% box coverage), index 1..3. The processor flips its box
+     * layout to match the given alliance, so this is already zone-correct either way.
+     */
+    public double[] getLastDensity(boolean isBlue) {
+        zoneProcessor.setAlliance(isBlue);
+        return zoneProcessor.getZoneDensityPct();
+    }
+
+    /**
+     * @param isBlue current alliance (flips the processor's box layout to match)
      * @return 1, 2, or 3 for the densest zone; 0 means "no good zone" -> caller runs sweep.
      */
     public int getScannedZone(boolean isBlue) {
