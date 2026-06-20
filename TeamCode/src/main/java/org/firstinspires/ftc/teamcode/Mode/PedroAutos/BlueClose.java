@@ -16,7 +16,6 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.PP.FieldConstants;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
@@ -26,27 +25,16 @@ import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.WaitUntilReadyToShoot;
 
 /**
- * Restructured variant of Zayans24Auto: preload, middle row, gate, gate, gate, bottom (3rd) row,
- * top row -- or, with bottom row disabled (toggleable at init, defaults ON), preload, middle row,
- * gate x4, top row. With bottom row on, the last gate visit and the bottom row both shoot from a
- * further-back station (BACK_POS) instead of the regular one -- it's a shorter hop from the gate
- * straight into the bottom row -- and top row sweeps in from BACK_POS. With bottom row off, the
- * robot never needs BACK_POS at all: every gate returns to the regular station, and top row
- * sweeps in from there instead. Either way the top row shot itself is from its own station
- * (TOP_POS). Hood/velocity for each station come from AutoAim's teleop-tuned distance LUT instead
- * of hand-picked numbers, and turret/hood/shooter all start moving toward the next shot's values
- * immediately after each burst (during the next leg), instead of waiting until the robot arrives
- * to start adjusting.
- *
- * Superseded by the BlueClose/RedClose split (fixed-alliance, no runtime mirroring). Disabled,
- * not deleted, in case of regressions -- re-enable by removing @Disabled.
+ * Blue-alliance-only split of ZayansFull24Auto -- fixed to BLUE, no alliance prompt, no
+ * mirroring helpers (every position/heading/turret-angle constant below is already
+ * blue-relative). Behavior is otherwise identical: preload, middle row, gate, gate, gate, bottom
+ * (3rd) row, top row -- or, with bottom row disabled (toggleable at init, defaults ON), preload,
+ * middle row, gate x4, top row. See RedClose for the mirrored counterpart.
  */
-@Disabled
-@Autonomous(name = "Close")
-public class ZayansFull24Auto extends CommandOpMode {
+@Autonomous(name = "BlueClose")
+public class BlueClose extends CommandOpMode {
 
     Robot negabot;
-    boolean isBlue = true;
     boolean doBottomRow = true;
 
     // ── Shooting-station tuning ─────────────────────────────────────────────
@@ -138,25 +126,15 @@ public class ZayansFull24Auto extends CommandOpMode {
 
     @Override
     public void initialize() {
-        // ── Alliance selection ────────────────────────────────────────────
         negabot = new Robot(hardwareMap, telemetry, initPose());
         negabot.shooter.setMagazineCover(COVER_CLOSE);
-        Robot.Alliance shown = Robot.Alliance.BLUE;
 
         while (!isStarted() && !isStopRequested()) {
-            if (gamepad1.x) isBlue = true;
-            if (gamepad1.b) isBlue = false;
             if (gamepad1.y) doBottomRow = true;
             if (gamepad1.a) doBottomRow = false;
-            Robot.Alliance sel = isBlue ? Robot.Alliance.BLUE : Robot.Alliance.RED;
-            if (sel != shown) {
-                negabot.drive.follower.setPose(initPose());
-                shown = sel;
-            }
             negabot.drive.follower.update();
             Pose live = negabot.drive.follower.getPose();
-            telemetry.addLine("=== SELECT ALLIANCE (X/B), THEN PUSH TO START ===");
-            telemetry.addData("Selected", isBlue ? ">>> BLUE <<<" : ">>>  RED <<<");
+            telemetry.addLine("=== BLUE CLOSE — PUSH TO START ===");
             telemetry.addData("Bottom Row", doBottomRow ? "ON  (A=disable)" : "OFF (Y=enable)");
             telemetry.addData("Live pose", String.format("x=%.1f y=%.1f h=%.0f",
                     live.getX(), live.getY(), Math.toDegrees(live.getHeading())));
@@ -166,7 +144,7 @@ public class ZayansFull24Auto extends CommandOpMode {
         if (isStopRequested()) return;
 
         // ── Initialization ────────────────────────────────────────────────
-        Robot.ALLIANCE = isBlue ? Robot.Alliance.BLUE : Robot.Alliance.RED;
+        Robot.ALLIANCE = Robot.Alliance.BLUE;
         negabot.turret.resetEncoder();
         computeShotParams();
 
@@ -176,13 +154,13 @@ public class ZayansFull24Auto extends CommandOpMode {
         // ── Command schedule ──────────────────────────────────────────────
         negabot.schedule(
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
-                new InstantCommand(() -> negabot.turret.setTargetDeg(td(turretCenterDeg(SHOOT_HEADING_DEG) - 4))),
+                new InstantCommand(() -> negabot.turret.setTargetDeg(turretCenterDeg(SHOOT_HEADING_DEG) - 4)),
                 new InstantCommand(() -> negabot.shooter.setVelocity(regularVelocity)),
                 new InstantCommand(() -> negabot.shooter.setHood(regularHood)),
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_CLOSE)),
                 new SequentialCommandGroup(
                         // ── Preload (cycle 1) — regular station ──
-                        shotPrep(f, toShoot0, td(turretCenterDeg(SHOOT_HEADING_DEG) - 4), TURRET_WINDOW),
+                        shotPrep(f, toShoot0, turretCenterDeg(SHOOT_HEADING_DEG) - 4, TURRET_WINDOW),
                         waitForRpm(),
                         readyToShoot(f),
                         burst(),
@@ -190,7 +168,7 @@ public class ZayansFull24Auto extends CommandOpMode {
                         // ── Middle row (cycle 2) — regular station ──
                         prepNextShot(regularHood, regularVelocity, turretCenterDeg(SHOOT_HEADING_DEG)),
                         new FollowPathCommand(f, toMiddle, false),
-                        shotPrep(f, toShoot1, td(turretCenterDeg(SHOOT_HEADING_DEG) - 2.5), TURRET_WINDOW),
+                        shotPrep(f, toShoot1, turretCenterDeg(SHOOT_HEADING_DEG) - 2.5, TURRET_WINDOW),
                         readyToShoot(f),
                         burst(),
 
@@ -198,7 +176,7 @@ public class ZayansFull24Auto extends CommandOpMode {
                         prepNextShot(regularHood, regularVelocity, turretCenterDeg(GATE_ARRIVAL_HEADING_DEG)),
                         new FollowPathCommand(f, toGate, true),
                         new WaitCommand(FAST_GATE_WAIT_MS - 150),
-                        shotPrep(f, toShootFromGate, td(turretCenterDeg(GATE_ARRIVAL_HEADING_DEG)), TURRET_WINDOW),
+                        shotPrep(f, toShootFromGate, turretCenterDeg(GATE_ARRIVAL_HEADING_DEG), TURRET_WINDOW),
                         readyToShoot(f),
                         burst(),
 
@@ -206,7 +184,7 @@ public class ZayansFull24Auto extends CommandOpMode {
                         prepNextShot(regularHood, regularVelocity, turretCenterDeg(GATE_ARRIVAL_HEADING_DEG)),
                         new FollowPathCommand(f, toGate, true),
                         new WaitCommand(FAST_GATE_WAIT_MS),
-                        shotPrep(f, toShootFromGate, td(turretCenterDeg(GATE_ARRIVAL_HEADING_DEG)), TURRET_WINDOW),
+                        shotPrep(f, toShootFromGate, turretCenterDeg(GATE_ARRIVAL_HEADING_DEG), TURRET_WINDOW),
                         readyToShoot(f),
                         burst(),
 
@@ -221,21 +199,21 @@ public class ZayansFull24Auto extends CommandOpMode {
                                         prepNextShot(backHood, backVelocity, turretCenterDeg(GATE_BACK_ARRIVAL_HEADING_DEG)),
                                         new FollowPathCommand(f, toGate, true),
                                         new WaitCommand(FAST_GATE_WAIT_MS),
-                                        shotPrep(f, toShootFromGateBack, td(turretCenterDeg(GATE_BACK_ARRIVAL_HEADING_DEG)), TURRET_WINDOW),
+                                        shotPrep(f, toShootFromGateBack, turretCenterDeg(GATE_BACK_ARRIVAL_HEADING_DEG), TURRET_WINDOW),
                                         readyToShoot(f),
                                         burst(),
 
                                         // ── Bottom / 3rd row (cycle 6) — BACK station both ways ──
                                         prepNextShot(backHood, backVelocity, turretCenterDeg(SHOOT_HEADING_DEG)),
                                         new FollowPathCommand(f, toBottom, false),
-                                        shotPrep(f, toShootFromBottom, td(turretCenterDeg(SHOOT_HEADING_DEG)), TURRET_WINDOW),
+                                        shotPrep(f, toShootFromBottom, turretCenterDeg(SHOOT_HEADING_DEG), TURRET_WINDOW),
                                         readyToShoot(f),
                                         burst(),
 
                                         // ── Top row (final shot) — TOP station, sweeping in from BACK ──
                                         prepNextShot(topHood, topVelocity, TOP_TURRET_DEG),
                                         new FollowPathCommand(f, toTopSweep, false),
-                                        shotPrep(f, toShootFromTop, td(TOP_TURRET_DEG), TURRET_WINDOW),
+                                        shotPrep(f, toShootFromTop, TOP_TURRET_DEG, TURRET_WINDOW),
                                         readyToShoot(f),
                                         finalBurst()
                                 ),
@@ -244,7 +222,7 @@ public class ZayansFull24Auto extends CommandOpMode {
                                         prepNextShot(regularHood, regularVelocity, turretCenterDeg(GATE_ARRIVAL_HEADING_DEG)),
                                         new FollowPathCommand(f, toGate, true),
                                         new WaitCommand(FAST_GATE_WAIT_MS),
-                                        shotPrep(f, toShootFromGate, td(turretCenterDeg(GATE_ARRIVAL_HEADING_DEG)), TURRET_WINDOW),
+                                        shotPrep(f, toShootFromGate, turretCenterDeg(GATE_ARRIVAL_HEADING_DEG), TURRET_WINDOW),
                                         readyToShoot(f),
                                         burst(),
 
@@ -252,14 +230,14 @@ public class ZayansFull24Auto extends CommandOpMode {
                                         prepNextShot(regularHood, regularVelocity, turretCenterDeg(GATE_ARRIVAL_HEADING_DEG)),
                                         new FollowPathCommand(f, toGate, true),
                                         new WaitCommand(FAST_GATE_WAIT_MS),
-                                        shotPrep(f, toShootFromGate, td(turretCenterDeg(GATE_ARRIVAL_HEADING_DEG)), TURRET_WINDOW),
+                                        shotPrep(f, toShootFromGate, turretCenterDeg(GATE_ARRIVAL_HEADING_DEG), TURRET_WINDOW),
                                         readyToShoot(f),
                                         burst(),
 
                                         // ── Top row (final shot) — TOP station, sweeping in from regular ──
                                         prepNextShot(topHood, topVelocity, TOP_TURRET_DEG),
                                         new FollowPathCommand(f, toTopSweepFromRegular, false),
-                                        shotPrep(f, toShootFromTop, td(TOP_TURRET_DEG), TURRET_WINDOW),
+                                        shotPrep(f, toShootFromTop, TOP_TURRET_DEG, TURRET_WINDOW),
                                         readyToShoot(f),
                                         finalBurst()
                                 ),
@@ -313,7 +291,7 @@ public class ZayansFull24Auto extends CommandOpMode {
         return new InstantCommand(() -> {
             negabot.shooter.setHood(hood);
             negabot.shooter.setVelocity(velocity);
-            negabot.turret.setTargetDeg(td(resolvedTurretCenterDeg));
+            negabot.turret.setTargetDeg(resolvedTurretCenterDeg);
         });
     }
 
@@ -332,8 +310,7 @@ public class ZayansFull24Auto extends CommandOpMode {
 
     /**
      * Looks up hood/velocity for each shooting station from AutoAim's teleop-tuned distance LUT
-     * instead of hand-picked constants. Distance-to-goal is alliance-symmetric (mirroring the
-     * field preserves distances), so this only needs to run once regardless of alliance.
+     * instead of hand-picked constants.
      */
     void computeShotParams() {
         double regularDist = distanceToGoalIn(SHOOT_POS_X, SHOOT_POS_Y, SHOOT_HEADING_DEG);
@@ -362,62 +339,62 @@ public class ZayansFull24Auto extends CommandOpMode {
         toShoot0 = f.pathBuilder()
                 .addPath(new BezierLine(
                         new Pose(pushedStart.getX(), pushedStart.getY()),
-                        sp(SHOOT_POS_X, SHOOT_POS_Y)))
-                .setLinearHeadingInterpolation(pushedStart.getHeading(), hr(SHOOT_HEADING_DEG))
+                        new Pose(SHOOT_POS_X, SHOOT_POS_Y)))
+                .setLinearHeadingInterpolation(pushedStart.getHeading(), Math.toRadians(SHOOT_HEADING_DEG))
                 .build();
 
         toGate = f.pathBuilder()
-                .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(GATE_POS_X, GATE_POS_Y)))
-                .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(GATE_HEADING_DEG))
+                .addPath(new BezierLine(new Pose(SHOOT_POS_X, SHOOT_POS_Y), new Pose(GATE_POS_X, GATE_POS_Y)))
+                .setLinearHeadingInterpolation(Math.toRadians(SHOOT_HEADING_DEG), Math.toRadians(GATE_HEADING_DEG))
                 .setGlobalDeceleration(INTAKE_BRAKING_START)
                 .build();
 
         toShootFromGate = f.pathBuilder()
-                .addPath(new BezierLine(sp(GATE_POS_X, GATE_POS_Y), sp(SHOOT_POS_X, SHOOT_POS_Y)))
-                .setLinearHeadingInterpolation(hr(GATE_HEADING_DEG), hr(SHOOT_HEADING_DEG), 0.3, 0.1)
+                .addPath(new BezierLine(new Pose(GATE_POS_X, GATE_POS_Y), new Pose(SHOOT_POS_X, SHOOT_POS_Y)))
+                .setLinearHeadingInterpolation(Math.toRadians(GATE_HEADING_DEG), Math.toRadians(SHOOT_HEADING_DEG), 0.3, 0.1)
                 .build();
 
         // Last gate visit returns to the BACK station instead -- a shorter hop into bottom row.
         toShootFromGateBack = f.pathBuilder()
-                .addPath(new BezierLine(sp(GATE_POS_X, GATE_POS_Y), sp(BACK_POS_X, BACK_POS_Y)))
-                .setLinearHeadingInterpolation(hr(GATE_HEADING_DEG), hr(SHOOT_HEADING_DEG), 0.3, 0.1)
+                .addPath(new BezierLine(new Pose(GATE_POS_X, GATE_POS_Y), new Pose(BACK_POS_X, BACK_POS_Y)))
+                .setLinearHeadingInterpolation(Math.toRadians(GATE_HEADING_DEG), Math.toRadians(SHOOT_HEADING_DEG), 0.3, 0.1)
                 .build();
 
         // ── Middle row (y ≈ 60) — curved sweep, mirrors CloseAuto18Leave's row-curve pattern ──
         toMiddle = f.pathBuilder()
                 .addPath(new BezierCurve(
-                        sp(SHOOT_POS_X, SHOOT_POS_Y),
-                        sp(45, 60),
-                        sp(22, 60)))
+                        new Pose(SHOOT_POS_X, SHOOT_POS_Y),
+                        new Pose(45, 60),
+                        new Pose(22, 60)))
                 .setTangentHeadingInterpolation().setReversed()
                 .setGlobalDeceleration(INTAKE_BRAKING_START)
                 .build();
 
         toShoot1 = f.pathBuilder()
                 .addPath(new BezierCurve(
-                        sp(22, 60),
-                        sp(45, 60),
-                        sp(SHOOT_POS_X, SHOOT_POS_Y)))
-                .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(SHOOT_HEADING_DEG))
+                        new Pose(22, 60),
+                        new Pose(45, 60),
+                        new Pose(SHOOT_POS_X, SHOOT_POS_Y)))
+                .setLinearHeadingInterpolation(Math.toRadians(SHOOT_HEADING_DEG), Math.toRadians(SHOOT_HEADING_DEG))
                 .build();
 
         // ── 3rd/bottom row (y ≈ 36) — starts AND ends at the BACK station, since gate 3 just
         // dropped the robot off there and top row picks up from there too ─────────────────────
         toBottom = f.pathBuilder()
                 .addPath(new BezierCurve(
-                        sp(BACK_POS_X, BACK_POS_Y),
-                        sp(45, 36.0),
-                        sp(spikeXintake, 36.0)))
+                        new Pose(BACK_POS_X, BACK_POS_Y),
+                        new Pose(45, 36.0),
+                        new Pose(spikeXintake, 36.0)))
                 .setTangentHeadingInterpolation().setReversed()
                 .setGlobalDeceleration(INTAKE_BRAKING_START)
                 .build();
 
         toShootFromBottom = f.pathBuilder()
                 .addPath(new BezierCurve(
-                        sp(spikeXintake, 36.0),
-                        sp(45, 36.0),
-                        sp(BACK_POS_X, BACK_POS_Y)))
-                .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(SHOOT_HEADING_DEG))
+                        new Pose(spikeXintake, 36.0),
+                        new Pose(45, 36.0),
+                        new Pose(BACK_POS_X, BACK_POS_Y)))
+                .setLinearHeadingInterpolation(Math.toRadians(SHOOT_HEADING_DEG), Math.toRadians(SHOOT_HEADING_DEG))
                 .build();
 
         // Single straight line from the BACK station to (22, 84). True tangent/reversed would
@@ -426,10 +403,10 @@ public class ZayansFull24Auto extends CommandOpMode {
         // follows that same line tangentially/reversed. -14.744...° is this specific line's
         // reversed tangent at the endpoint -- recompute it if BACK_POS or this endpoint changes.
         toTopSweep = f.pathBuilder()
-                .addPath(new BezierLine(sp(BACK_POS_X, BACK_POS_Y), sp(22, 84)))
+                .addPath(new BezierLine(new Pose(BACK_POS_X, BACK_POS_Y), new Pose(22, 84)))
                 .setHeadingInterpolation(HeadingInterpolator.piecewise(
                         new HeadingInterpolator.PiecewiseNode(0, 0.3,
-                                HeadingInterpolator.linear(hr(SHOOT_HEADING_DEG), hr(-14.7435628364706872), 0.3)),
+                                HeadingInterpolator.linear(Math.toRadians(SHOOT_HEADING_DEG), Math.toRadians(-14.7435628364706872), 0.3)),
                         new HeadingInterpolator.PiecewiseNode(0.3, 1,
                                 HeadingInterpolator.tangent.reverse())
                 ))
@@ -437,27 +414,25 @@ public class ZayansFull24Auto extends CommandOpMode {
                 .build();
 
         // Bottom-row-disabled variant: same top-row pickup point, but swept in from the regular
-        // station instead of BACK_POS (since with no bottom row, the robot never visits BACK_POS
-        // at all). Same ease pattern as toTopSweep; -12.300...° is THIS line's own reversed
-        // tangent -- recompute it if SHOOT_POS or the (22, 84) endpoint changes.
+        // station instead of BACK_POS. -12.300...° is THIS line's own reversed tangent --
+        // recompute it if SHOOT_POS or the (22, 84) endpoint changes.
         toTopSweepFromRegular = f.pathBuilder()
-                .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(22, 84)))
+                .addPath(new BezierLine(new Pose(SHOOT_POS_X, SHOOT_POS_Y), new Pose(22, 84)))
                 .setHeadingInterpolation(HeadingInterpolator.piecewise(
                         new HeadingInterpolator.PiecewiseNode(0, 0.3,
-                                HeadingInterpolator.linear(hr(SHOOT_HEADING_DEG), hr(-12.3000884507142132), 0.3)),
+                                HeadingInterpolator.linear(Math.toRadians(SHOOT_HEADING_DEG), Math.toRadians(-12.3000884507142132), 0.3)),
                         new HeadingInterpolator.PiecewiseNode(0.3, 1,
                                 HeadingInterpolator.tangent.reverse())
                 ))
                 .setGlobalDeceleration(INTAKE_BRAKING_START)
                 .build();
 
-        // Returns to the TOP station at a constant SHOOT_HEADING_DEG the whole way (no ramp from
-        // the sweep's exit heading) — same flat-heading pattern as toShootFromBottom. Shared by
+        // Returns to the TOP station at a constant SHOOT_HEADING_DEG the whole way. Shared by
         // both toTopSweep and toTopSweepFromRegular, since the pickup point and shoot station are
         // the same either way -- only how the robot gets to the pickup point differs.
         toShootFromTop = f.pathBuilder()
-                .addPath(new BezierLine(sp(22, 84), sp(TOP_POS_X, TOP_POS_Y)))
-                .setLinearHeadingInterpolation(hr(SHOOT_HEADING_DEG), hr(SHOOT_HEADING_DEG))
+                .addPath(new BezierLine(new Pose(22, 84), new Pose(TOP_POS_X, TOP_POS_Y)))
+                .setLinearHeadingInterpolation(Math.toRadians(SHOOT_HEADING_DEG), Math.toRadians(SHOOT_HEADING_DEG))
                 .build();
     }
 
@@ -469,24 +444,8 @@ public class ZayansFull24Auto extends CommandOpMode {
         Robot.LAST_TURRET_DEG = negabot.turret.getAngleDeg();
     }
 
-    // ── Alliance-aware pose/heading helpers ─────────────────────────────────
-
-    private Pose sp(double x, double y) {
-        return isBlue ? new Pose(x, y) : new Pose(mx(x), y);
-    }
-
     private Pose initPose() {
-        return isBlue ? new Pose(INIT_X, INIT_Y, hr(INIT_HEADING_DEG))
-                : new Pose(mx(INIT_X), INIT_Y, hr(INIT_HEADING_DEG));
-    }
-
-    private double hr(double deg) {
-        return isBlue ? Math.toRadians(deg) : Math.toRadians(mhd(deg));
-    }
-
-    /** Mirrors a turret target angle for the current alliance (135=forward is the mirror axis). */
-    private double td(double deg) {
-        return isBlue ? deg : mtd(deg);
+        return new Pose(INIT_X, INIT_Y, Math.toRadians(INIT_HEADING_DEG));
     }
 
     /**
@@ -499,8 +458,4 @@ public class ZayansFull24Auto extends CommandOpMode {
     private double turretCenterDeg(double headingDeg) {
         return DEFAULT_TURRET_DEG + (headingDeg - SHOOT_HEADING_DEG);
     }
-
-    private static double mx(double x)    { return 144.0 - x; }
-    private static double mhd(double deg) { return ((180.0 - deg) % 360.0 + 360.0) % 360.0; }
-    private static double mtd(double deg) { return 270.0 - deg; }
 }

@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Mode.PedroAutos;
 
 import com.arcrobotics.ftclib.command.Command;
-import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
@@ -16,7 +15,6 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.ClampedPPTracking;
@@ -27,37 +25,46 @@ import org.firstinspires.ftc.teamcode.Robot.commands.VisionGuidedZoneApproach;
 import org.firstinspires.ftc.teamcode.Robot.commands.WaitToShoot;
 import org.firstinspires.ftc.teamcode.Robot.commands.WaitUntilReadyToShoot;
 
-// Superseded by the BlueFar/RedFar split (fixed-alliance, no runtime mirroring). Disabled, not
-// deleted, in case of regressions -- re-enable by removing @Disabled.
-@Disabled
-@Autonomous(name = "Far")
-public class ZayansFarAuto extends CommandOpMode {
+/**
+ * Red-alliance mirror of BlueFar (itself split from ZayansFarAuto) -- fixed to RED, no alliance
+ * prompt, no mirroring helpers. Every position constant below is BlueFar's value run through
+ * x -> 144-x; every heading constant through deg -> 180-deg; SHOOT_TURRET_ANGLE through
+ * deg -> 270-deg (135=forward is that mirror axis). One subtlety: the "+1.5" tweak on top of
+ * SHOOT_TURRET_ANGLE at the initial pre-aim flips sign under that 270-deg transform
+ * (mtd(x+1.5) = mtd(x)-1.5), so it's "-1.5" here where BlueFar has "+1.5" -- intentional, not a
+ * typo. The per-shot turretOffsetDeg (-1) is a physical/mechanical correction, NOT mirrored, so
+ * it's identical in both files. Behavior is otherwise identical to BlueFar; see that file for the
+ * non-mirrored version.
+ */
+@Autonomous(name = "RedFar")
+public class RedFar extends CommandOpMode {
 
     Robot negabot;
-    boolean isBlue   = true;
     boolean do3rdRow = true;
     private int zoneResult = 0;
-    static final double SHOOT_POS_X        = 54.0;
+    static final double SHOOT_POS_X        = 90.0;
     static final double SHOOT_POS_Y        = 14.0;
-    static final double SHOOT_HEADING_DEG  = 0.0;
+    static final double SHOOT_HEADING_DEG  = 180.0;
     static final double SHOOT_VELOCITY     = 3900;
     static final double SHOOT_HOOD         = 0.7;
-    static final double SHOOT_TURRET_ANGLE = 20.25;
+    // Mirror of BlueFar's SHOOT_TURRET_ANGLE (20.25) via deg -> 270-deg.
+    static final double SHOOT_TURRET_ANGLE = 249.75;
     static final double TURRET_WINDOW      = 20;
 
-    static final double INIT_X           = 48;
+    static final double INIT_X           = 96;
     static final double INIT_Y           = 24;
-    static final double INIT_HEADING_DEG = 0;
+    static final double INIT_HEADING_DEG = 180;
 
-    static final double SWEEP_END_X = 8.5;
+    static final double SWEEP_END_X = 135.5;
     static final double SWEEP_END_Y = 45.0;
-    static final double SWEEP_CP_X  = 8.5;
+    static final double SWEEP_CP_X  = 135.5;
     static final double SWEEP_CP_Y  = 19.5;
-    static final double SWEEP_EXIT_HEADING_DEG = 271.1;
+    static final double SWEEP_EXIT_HEADING_DEG = 268.9;
 
-    // to3rdRow's actual exit heading (tangent of its curve at the endpoint, reversed). Recompute
-    // this any time to3rdRow's control point or endpoint changes -- it does NOT update itself.
-    static final double THIRD_ROW_EXIT_HEADING_DEG = 0.0;
+    // to3rdRow's actual exit heading (tangent of its curve at the endpoint, reversed). Mirror of
+    // BlueFar's THIRD_ROW_EXIT_HEADING_DEG (0.0) via deg -> 180-deg. Recompute this any time
+    // to3rdRow's control point or endpoint changes -- it does NOT update itself.
+    static final double THIRD_ROW_EXIT_HEADING_DEG = 180.0;
 
     // Fraction of a curve's t-range over which heading eases from the guaranteed incoming
     // heading into true reversed-tangent-tracking, instead of snapping straight to the tangent
@@ -72,7 +79,7 @@ public class ZayansFarAuto extends CommandOpMode {
     static final long INTAKE_WAIT_MS     = 0;
     static final long STALL_TIMEOUT_MS   = 100;
     // toHP's forward/backward bump needs to decelerate to ~0 and reverse direction mid-path,
-    // which a 200ms stall window mistakes for actually beifor ng stuck -- give it more slack.
+    // which a 200ms stall window mistakes for actually being stuck -- give it more slack.
     static final long HP_BUMP_STALL_TIMEOUT_MS = 600;
     // The sweep curve is long and slow relative to other paths, so its stall window needs more
     // slack than the default to not mistake a brief slowdown for actually being stuck.
@@ -96,7 +103,7 @@ public class ZayansFarAuto extends CommandOpMode {
     // Safety net: no matter what's happening or where the robot is, abandon it at this point in
     // the match and park at the init spot -- heading doesn't matter, only getting there does.
     static final long   PARK_AT_MS = 29500;
-    static final double PARK_X = 48;
+    static final double PARK_X = 96;
     static final double PARK_Y = 24;
 
     PathChain toHP, toShootFromHP, to3rdRow, toShootFrom3rdRow, toSweep, toShootFromSweep;
@@ -106,24 +113,15 @@ public class ZayansFarAuto extends CommandOpMode {
     public void initialize() {
         negabot = new Robot(hardwareMap, telemetry, initPose());
         negabot.shooter.setMagazineCover(COVER_CLOSE);
-        Robot.Alliance shown = Robot.Alliance.BLUE;
+        negabot.vision.setAlliance(false);
 
         while (!isStarted() && !isStopRequested()) {
-            if (gamepad1.x) isBlue   = true;
-            if (gamepad1.b) isBlue   = false;
             if (gamepad1.y) do3rdRow = true;
             if (gamepad1.a) do3rdRow = false;
-            negabot.vision.setAlliance(isBlue);
 
-            Robot.Alliance sel = isBlue ? Robot.Alliance.BLUE : Robot.Alliance.RED;
-            if (sel != shown) {
-                negabot.drive.follower.setPose(initPose());
-                shown = sel;
-            }
             negabot.drive.follower.update();
             Pose live = negabot.drive.follower.getPose();
-            telemetry.addLine("=== FAR AUTO — SELECT OPTIONS, THEN PUSH TO START ===");
-            telemetry.addData("Alliance", isBlue   ? ">>> BLUE <<<" : ">>>  RED <<<");
+            telemetry.addLine("=== RED FAR — PUSH TO START ===");
             telemetry.addData("3rd Row",  do3rdRow ? "ON  (A=disable)" : "OFF (Y=enable)");
             telemetry.addData("Live pose", String.format("x=%.1f y=%.1f h=%.0f",
                     live.getX(), live.getY(), Math.toDegrees(live.getHeading())));
@@ -132,7 +130,7 @@ public class ZayansFarAuto extends CommandOpMode {
         }
         if (isStopRequested()) return;
 
-        Robot.ALLIANCE = isBlue ? Robot.Alliance.BLUE : Robot.Alliance.RED;
+        Robot.ALLIANCE = Robot.Alliance.RED;
         negabot.turret.resetEncoder();
 
         Follower f = negabot.drive.follower;
@@ -144,7 +142,7 @@ public class ZayansFarAuto extends CommandOpMode {
 
                 followGuarded(f, toHP, false, HP_BUMP_STALL_TIMEOUT_MS),
                 new WaitCommand(INTAKE_WAIT_MS),
-                shotPrep(f, toShootFromHP, td(SHOOT_TURRET_ANGLE), -1),
+                shotPrep(f, toShootFromHP, SHOOT_TURRET_ANGLE, -1),
                 new WaitUntilReadyToShoot(f, negabot.turret, MAX_SETTLE_VELOCITY, TURRET_ALIGN_TOLERANCE, SHOOT_PAUSE_MS),
                 burst(),
 
@@ -152,7 +150,7 @@ public class ZayansFarAuto extends CommandOpMode {
                         new SequentialCommandGroup(
                                 new FollowPathCommand(f, to3rdRow, false),
                                 new WaitCommand(INTAKE_WAIT_MS),
-                                shotPrep(f, toShootFrom3rdRow, td(SHOOT_TURRET_ANGLE), -1),
+                                shotPrep(f, toShootFrom3rdRow, SHOOT_TURRET_ANGLE, -1),
                                 new WaitUntilReadyToShoot(f, negabot.turret, MAX_SETTLE_VELOCITY, TURRET_ALIGN_TOLERANCE, SHOOT_PAUSE_MS),
                                 burst()
                         ),
@@ -170,7 +168,7 @@ public class ZayansFarAuto extends CommandOpMode {
 
         negabot.schedule(
                 new InstantCommand(() -> negabot.shooter.setHood(SHOOT_HOOD)),
-                new InstantCommand(() -> negabot.turret.setTargetDeg(td(SHOOT_TURRET_ANGLE + 1.5))),
+                new InstantCommand(() -> negabot.turret.setTargetDeg(SHOOT_TURRET_ANGLE - 1.5)),
                 new InstantCommand(() -> negabot.shooter.setVelocity(SHOOT_VELOCITY)),
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
                 new SequentialCommandGroup(
@@ -178,7 +176,7 @@ public class ZayansFarAuto extends CommandOpMode {
                                 mainSequence,
                                 new WaitCommand(PARK_AT_MS)
                         ),
-                        new DriveToXYCommand(f, sp(PARK_X, PARK_Y).getX(), sp(PARK_X, PARK_Y).getY(), true)
+                        new DriveToXYCommand(f, PARK_X, PARK_Y, true)
                 )
         );
     }
@@ -188,14 +186,14 @@ public class ZayansFarAuto extends CommandOpMode {
                 new InstantCommand(() -> zoneResult = getZone()),
                 new ConditionalCommand(
                         shotPrep(f, new VisionGuidedZoneApproach(
-                                f, negabot.vision, isBlue, zoneEndpoints, hr(0),
+                                f, negabot.vision, false, zoneEndpoints, Math.toRadians(SHOOT_HEADING_DEG),
                                 () -> zoneResult, ZONE_RESAMPLE_MS, ZONE_COMMIT_DIST_IN,
-                                sp3(SHOOT_POS_X, SHOOT_POS_Y), SLOW_ZONE_X_IN, SLOW_ZONE_POWER),
-                                td(SHOOT_TURRET_ANGLE), -1),
+                                new Pose(SHOOT_POS_X, SHOOT_POS_Y, Math.toRadians(SHOOT_HEADING_DEG)), SLOW_ZONE_X_IN, SLOW_ZONE_POWER),
+                                SHOOT_TURRET_ANGLE, -1),
                         new SequentialCommandGroup(
                                 followGuarded(f, toSweep, false, SWEEP_STALL_TIMEOUT_MS),
                                 new WaitCommand(ZONE_ARRIVAL_WAIT_MS),
-                                shotPrep(f, toShootFromSweep, td(SHOOT_TURRET_ANGLE), -1)
+                                shotPrep(f, toShootFromSweep, SHOOT_TURRET_ANGLE, -1)
                         ),
                         () -> zoneResult != 0
                 ),
@@ -251,8 +249,8 @@ public class ZayansFarAuto extends CommandOpMode {
     }
 
     private int getZone() {
-        int z = negabot.vision.getScannedZone(isBlue);
-        double[] d = negabot.vision.getLastDensity(isBlue);
+        int z = negabot.vision.getScannedZone(false);
+        double[] d = negabot.vision.getLastDensity(false);
         telemetry.addData("density z1/z2/z3/z4/z5", "%.1f%% / %.1f%% / %.1f%% / %.1f%% / %.1f%%",
                 d[1], d[2], d[3], d[4], d[5]);
         telemetry.addData("-> zone", z == 0 ? "SWEEP" : z);
@@ -265,36 +263,34 @@ public class ZayansFarAuto extends CommandOpMode {
 
 
         toHP = f.pathBuilder()
-                .addPath(new BezierLine(new Pose(pushedStart.getX(), pushedStart.getY()), sp(8.5, 8)))
-                .setLinearHeadingInterpolation(pushedStart.getHeading(), hr(0))
-                .addPath(new BezierLine(sp(8.5, 8), sp(11.5, 8)))
-                .setLinearHeadingInterpolation(hr(0), hr(0))
-                .addPath(new BezierLine(sp(11.5, 8), sp(8.5, 8)))
-                .setLinearHeadingInterpolation(hr(0), hr(0))
+                .addPath(new BezierLine(new Pose(pushedStart.getX(), pushedStart.getY()), new Pose(135.5, 8)))
+                .setLinearHeadingInterpolation(pushedStart.getHeading(), Math.toRadians(SHOOT_HEADING_DEG))
+                .addPath(new BezierLine(new Pose(135.5, 8), new Pose(132.5, 8)))
+                .setLinearHeadingInterpolation(Math.toRadians(SHOOT_HEADING_DEG), Math.toRadians(SHOOT_HEADING_DEG))
+                .addPath(new BezierLine(new Pose(132.5, 8), new Pose(135.5, 8)))
+                .setLinearHeadingInterpolation(Math.toRadians(SHOOT_HEADING_DEG), Math.toRadians(SHOOT_HEADING_DEG))
                 .build();
 
         toShootFromHP = f.pathBuilder()
-                .addPath(new BezierLine(sp(8.5, 8), sp(SHOOT_POS_X, SHOOT_POS_Y)))
-                .setLinearHeadingInterpolation(hr(0), hr(0))
+                .addPath(new BezierLine(new Pose(135.5, 8), new Pose(SHOOT_POS_X, SHOOT_POS_Y)))
+                .setLinearHeadingInterpolation(Math.toRadians(SHOOT_HEADING_DEG), Math.toRadians(SHOOT_HEADING_DEG))
                 .build();
 
         // 3rd row sweep (BezierCurve). Tangent-tracks the curve (reversed) like before, but eases
         // into that tracking over the first CURVE_HEADING_EASE_T of the path instead of snapping
-        // straight to the tangent heading at t=0 -- avoids the large discontinuity from the
-        // guaranteed incoming heading (0, from toShootFromHP). Lands on THIRD_ROW_EXIT_HEADING_DEG
-        // at t=1 exactly as before, since the ease never touches the tail.
+        // straight to the tangent heading at t=0. Lands on THIRD_ROW_EXIT_HEADING_DEG at t=1.
         BezierCurve thirdRowCurve = new BezierCurve(
-                sp(SHOOT_POS_X, SHOOT_POS_Y),
-                sp(43.56,   36),
-                sp(20,  36));
+                new Pose(SHOOT_POS_X, SHOOT_POS_Y),
+                new Pose(100.44, 36),
+                new Pose(124,    36));
         to3rdRow = f.pathBuilder()
                 .addPath(thirdRowCurve)
-                .setHeadingInterpolation(easedReversedTangent(thirdRowCurve, hr(0), CURVE_HEADING_EASE_T))
+                .setHeadingInterpolation(easedReversedTangent(thirdRowCurve, Math.toRadians(SHOOT_HEADING_DEG), CURVE_HEADING_EASE_T))
                 .build();
 
         toShootFrom3rdRow = f.pathBuilder()
-                .addPath(new BezierLine(sp(20, 36), sp(SHOOT_POS_X, SHOOT_POS_Y)))
-                .setLinearHeadingInterpolation(hr(THIRD_ROW_EXIT_HEADING_DEG), hr(0))
+                .addPath(new BezierLine(new Pose(124, 36), new Pose(SHOOT_POS_X, SHOOT_POS_Y)))
+                .setLinearHeadingInterpolation(Math.toRadians(THIRD_ROW_EXIT_HEADING_DEG), Math.toRadians(SHOOT_HEADING_DEG))
                 .build();
 
         // Zones 1-5 (HP corner, mid, far, plus 2 new lanes between them -- y = 8/14/20/26/32).
@@ -302,24 +298,24 @@ public class ZayansFarAuto extends CommandOpMode {
         // (to zone 1) mid-flight, so only the endpoints are needed here; the approach/return
         // paths are built live at runtime.
         zoneEndpoints = new Pose[6];
-        zoneEndpoints[1] = sp(8.5, 8);
-        zoneEndpoints[2] = sp(8.5, 14);
-        zoneEndpoints[3] = sp(8.5, 20);
-        zoneEndpoints[4] = sp(8.5, 26);
-        zoneEndpoints[5] = sp(8.5, 32);
+        zoneEndpoints[1] = new Pose(135.5, 8);
+        zoneEndpoints[2] = new Pose(135.5, 14);
+        zoneEndpoints[3] = new Pose(135.5, 20);
+        zoneEndpoints[4] = new Pose(135.5, 26);
+        zoneEndpoints[5] = new Pose(135.5, 32);
 
         // Zone 0 — secret tunnel sweep (BezierCurve). Same eased-tangent fix as to3rdRow.
         BezierCurve sweepCurve = new BezierCurve(
-                sp(SHOOT_POS_X, SHOOT_POS_Y),
-                sp(SWEEP_CP_X,  SWEEP_CP_Y),
-                sp(SWEEP_END_X, SWEEP_END_Y));
+                new Pose(SHOOT_POS_X, SHOOT_POS_Y),
+                new Pose(SWEEP_CP_X,  SWEEP_CP_Y),
+                new Pose(SWEEP_END_X, SWEEP_END_Y));
         toSweep = f.pathBuilder()
                 .addPath(sweepCurve)
-                .setHeadingInterpolation(easedReversedTangent(sweepCurve, hr(0), CURVE_HEADING_EASE_T))
+                .setHeadingInterpolation(easedReversedTangent(sweepCurve, Math.toRadians(SHOOT_HEADING_DEG), CURVE_HEADING_EASE_T))
                 .build();
         toShootFromSweep = f.pathBuilder()
-                .addPath(new BezierLine(sp(SWEEP_END_X, SWEEP_END_Y), sp(SHOOT_POS_X, SHOOT_POS_Y)))
-                .setLinearHeadingInterpolation(hr(SWEEP_EXIT_HEADING_DEG), hr(0))
+                .addPath(new BezierLine(new Pose(SWEEP_END_X, SWEEP_END_Y), new Pose(SHOOT_POS_X, SHOOT_POS_Y)))
+                .setLinearHeadingInterpolation(Math.toRadians(SWEEP_EXIT_HEADING_DEG), Math.toRadians(SHOOT_HEADING_DEG))
                 .build();
     }
 
@@ -346,31 +342,7 @@ public class ZayansFarAuto extends CommandOpMode {
         Robot.LAST_TURRET_DEG = negabot.turret.getAngleDeg();
     }
 
-    private Pose sp(double x, double y) {
-        return isBlue ? new Pose(x, y) : new Pose(mx(x), y);
-    }
-
-    /** Same as {@link #sp(double, double)} but with heading 0 (alliance-mirrored) baked in. */
-    private Pose sp3(double x, double y) {
-        Pose p = sp(x, y);
-        return new Pose(p.getX(), p.getY(), hr(0));
-    }
-
     private Pose initPose() {
-        return isBlue ? new Pose(INIT_X, INIT_Y, hr(INIT_HEADING_DEG))
-                      : new Pose(mx(INIT_X), INIT_Y, hr(INIT_HEADING_DEG));
+        return new Pose(INIT_X, INIT_Y, Math.toRadians(INIT_HEADING_DEG));
     }
-
-    private double hr(double deg) {
-        return isBlue ? Math.toRadians(deg) : Math.toRadians(mhd(deg));
-    }
-
-    /** Mirrors a turret target angle for the current alliance (135=forward is the mirror axis). */
-    private double td(double deg) {
-        return isBlue ? deg : mtd(deg);
-    }
-
-    private static double mx(double x)    { return 144.0 - x; }
-    private static double mhd(double deg) { return ((180.0 - deg) % 360.0 + 360.0) % 360.0; }
-    private static double mtd(double deg) { return 270.0 - deg; }
 }
