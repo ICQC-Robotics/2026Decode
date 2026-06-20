@@ -31,7 +31,7 @@ public class AutoAim extends SequentialCommandGroup {
     }
 
     private static final double RPM_TOLERANCE = 20; // TODO: change if needed
-    private static final double FEED_TIME_S = .4;
+    private static final double FEED_TIME_S = .55;
     public static final double MIN_DIST = 20;
     public static final double MAX_DIST = 150;
 
