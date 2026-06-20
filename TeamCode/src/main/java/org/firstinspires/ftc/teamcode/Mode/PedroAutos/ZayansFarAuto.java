@@ -13,18 +13,21 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.ClampedPPTracking;
+import org.firstinspires.ftc.teamcode.Robot.commands.DriveToXYCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.StallTimeoutCommand;
+import org.firstinspires.ftc.teamcode.Robot.commands.VisionGuidedZoneApproach;
 import org.firstinspires.ftc.teamcode.Robot.commands.WaitToShoot;
 import org.firstinspires.ftc.teamcode.Robot.commands.WaitUntilReadyToShoot;
 
 
-@Autonomous(name = ".Ts will also work trust")
+@Autonomous(name = "Far")
 public class ZayansFarAuto extends CommandOpMode {
 
     Robot negabot;
@@ -34,9 +37,9 @@ public class ZayansFarAuto extends CommandOpMode {
     static final double SHOOT_POS_X        = 54.0;
     static final double SHOOT_POS_Y        = 14.0;
     static final double SHOOT_HEADING_DEG  = 0.0;
-    static final double SHOOT_VELOCITY     = 3950;
+    static final double SHOOT_VELOCITY     = 3900;
     static final double SHOOT_HOOD         = 0.7;
-    static final double SHOOT_TURRET_ANGLE = 22;
+    static final double SHOOT_TURRET_ANGLE = 20.25;
     static final double TURRET_WINDOW      = 20;
 
     static final double INIT_X           = 48;
@@ -49,19 +52,49 @@ public class ZayansFarAuto extends CommandOpMode {
     static final double SWEEP_CP_Y  = 19.5;
     static final double SWEEP_EXIT_HEADING_DEG = 271.1;
 
+    // to3rdRow's actual exit heading (tangent of its curve at the endpoint, reversed). Recompute
+    // this any time to3rdRow's control point or endpoint changes -- it does NOT update itself.
+    static final double THIRD_ROW_EXIT_HEADING_DEG = 0.0;
+
+    // Fraction of a curve's t-range over which heading eases from the guaranteed incoming
+    // heading into true reversed-tangent-tracking, instead of snapping straight to the tangent
+    // heading at t=0 (which can be far from the heading the robot is actually arriving with).
+    static final double CURVE_HEADING_EASE_T = 0.15;
+
     static final long BURST_MS           = 600;
     // Max time to wait for the robot/turret to settle before shooting anyway (safety cap).
     static final long SHOOT_PAUSE_MS     = 500;
-    static final double MAX_SETTLE_VELOCITY     = 2.0;  // in/sec, "stopped" threshold
+    static final double MAX_SETTLE_VELOCITY     = 1.0;  // in/sec, "stopped" threshold
     static final double TURRET_ALIGN_TOLERANCE  = 2.0;  // deg, "aligned" threshold
     static final long INTAKE_WAIT_MS     = 0;
-    static final long STALL_TIMEOUT_MS   = 200;
+    static final long STALL_TIMEOUT_MS   = 100;
+    // toHP's forward/backward bump needs to decelerate to ~0 and reverse direction mid-path,
+    // which a 200ms stall window mistakes for actually beifor ng stuck -- give it more slack.
+    static final long HP_BUMP_STALL_TIMEOUT_MS = 600;
 
     static final double COVER_OPEN  = 0.75;
     static final double COVER_CLOSE = 0.55;
     static final double INTAKE_ON   = -1.0;
 
-    PathChain toHP, toShootFromHP, to3rdRow, toShootFrom3rdRow, toZone1, toShootFromZone1, toZone2, toShootFromZone2, toZone3, toShootFromZone3, toSweep, toShootFromSweep;
+    // Mid-path zone correction: while driving toward a picked zone, keep re-checking vision. If
+    // the densest zone changes to something else, abandon the current path and snap to zone 1.
+    static final long   ZONE_RESAMPLE_MS    = 200;  // how often to re-check vision while en route
+    static final double ZONE_COMMIT_DIST_IN = 12.0; // stop retargeting once this close to the target
+    // Brief dwell once arrived at a zone/sweep endpoint, before driving back to shoot.
+    static final long   ZONE_ARRIVAL_WAIT_MS = 100;
+    // While still approaching a zone (not yet on the way back) and within this far of the wall,
+    // cap drive power for better control.
+    static final double SLOW_ZONE_X_IN  = 24.0;
+    static final double SLOW_ZONE_POWER = 1;
+
+    // Safety net: no matter what's happening or where the robot is, abandon it at this point in
+    // the match and park at the init spot -- heading doesn't matter, only getting there does.
+    static final long   PARK_AT_MS = 29500;
+    static final double PARK_X = 48;
+    static final double PARK_Y = 24;
+
+    PathChain toHP, toShootFromHP, to3rdRow, toShootFrom3rdRow, toSweep, toShootFromSweep;
+    Pose[] zoneEndpoints; // index 1..5, the 5 swappable pickup lanes (1/3/5 original, 2/4 new in-between)
 
     @Override
     public void initialize() {
@@ -99,39 +132,47 @@ public class ZayansFarAuto extends CommandOpMode {
         Follower f = negabot.drive.follower;
         buildPaths(f);
 
+        Command mainSequence = new SequentialCommandGroup(
+                new WaitToShoot(negabot.intake, negabot.shooter, 3000),
+                burst(),
+
+                followGuarded(f, toHP, false, HP_BUMP_STALL_TIMEOUT_MS),
+                new WaitCommand(INTAKE_WAIT_MS),
+                shotPrep(f, toShootFromHP, td(SHOOT_TURRET_ANGLE), -1),
+                new WaitUntilReadyToShoot(f, negabot.turret, MAX_SETTLE_VELOCITY, TURRET_ALIGN_TOLERANCE, SHOOT_PAUSE_MS),
+                burst(),
+
+                new ConditionalCommand(
+                        new SequentialCommandGroup(
+                                new FollowPathCommand(f, to3rdRow, false),
+                                new WaitCommand(INTAKE_WAIT_MS),
+                                shotPrep(f, toShootFrom3rdRow, td(SHOOT_TURRET_ANGLE), -1),
+                                new WaitUntilReadyToShoot(f, negabot.turret, MAX_SETTLE_VELOCITY, TURRET_ALIGN_TOLERANCE, SHOOT_PAUSE_MS),
+                                burst()
+                        ),
+                        new InstantCommand(() -> {}),
+                        () -> do3rdRow
+                ),
+
+                cycle(f),
+                cycle(f),
+                cycle(f),
+                cycle(f),
+                cycle(f),
+                cycle(f)
+        );
+
         negabot.schedule(
                 new InstantCommand(() -> negabot.shooter.setHood(SHOOT_HOOD)),
-                new InstantCommand(() -> negabot.turret.setTargetDeg(td(SHOOT_TURRET_ANGLE))),
+                new InstantCommand(() -> negabot.turret.setTargetDeg(td(SHOOT_TURRET_ANGLE + 1.5))),
                 new InstantCommand(() -> negabot.shooter.setVelocity(SHOOT_VELOCITY)),
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
                 new SequentialCommandGroup(
-                        new WaitToShoot(negabot.intake, negabot.shooter, 3000),
-                        burst(),
-
-                        followGuarded(f, toHP, true),
-                        new WaitCommand(INTAKE_WAIT_MS),
-                        shotPrep(f, toShootFromHP, td(SHOOT_TURRET_ANGLE)),
-                        new WaitUntilReadyToShoot(f, negabot.turret, MAX_SETTLE_VELOCITY, TURRET_ALIGN_TOLERANCE, SHOOT_PAUSE_MS),
-                        burst(),
-
-                        new ConditionalCommand(
-                                new SequentialCommandGroup(
-                                        new FollowPathCommand(f, to3rdRow, false),
-                                        new WaitCommand(INTAKE_WAIT_MS),
-                                        shotPrep(f, toShootFrom3rdRow, td(SHOOT_TURRET_ANGLE)),
-                                        new WaitUntilReadyToShoot(f, negabot.turret, MAX_SETTLE_VELOCITY, TURRET_ALIGN_TOLERANCE, SHOOT_PAUSE_MS),
-                                        burst()
-                                ),
-                                new InstantCommand(() -> {}),
-                                () -> do3rdRow
+                        new ParallelRaceGroup(
+                                mainSequence,
+                                new WaitCommand(PARK_AT_MS)
                         ),
-
-                        cycle(f),
-                        cycle(f),
-                        cycle(f),
-                        cycle(f),
-                        cycle(f),
-                        cycle(f)
+                        new DriveToXYCommand(f, sp(PARK_X, PARK_Y).getX(), sp(PARK_X, PARK_Y).getY(), true)
                 )
         );
     }
@@ -140,33 +181,17 @@ public class ZayansFarAuto extends CommandOpMode {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> zoneResult = getZone()),
                 new ConditionalCommand(
+                        shotPrep(f, new VisionGuidedZoneApproach(
+                                f, negabot.vision, isBlue, zoneEndpoints, hr(0),
+                                () -> zoneResult, ZONE_RESAMPLE_MS, ZONE_COMMIT_DIST_IN,
+                                sp3(SHOOT_POS_X, SHOOT_POS_Y), SLOW_ZONE_X_IN, SLOW_ZONE_POWER),
+                                td(SHOOT_TURRET_ANGLE), -1),
                         new SequentialCommandGroup(
-                                followGuarded(f, toZone1, false),
-                                new WaitCommand(INTAKE_WAIT_MS),
-                                shotPrep(f, toShootFromZone1, td(SHOOT_TURRET_ANGLE))
+                                followGuarded(f, toSweep, false),
+                                new WaitCommand(ZONE_ARRIVAL_WAIT_MS),
+                                shotPrep(f, toShootFromSweep, td(SHOOT_TURRET_ANGLE), -1)
                         ),
-                        new ConditionalCommand(
-                                new SequentialCommandGroup(
-                                        followGuarded(f, toZone2, false),
-                                        new WaitCommand(INTAKE_WAIT_MS),
-                                        shotPrep(f, toShootFromZone2, td(SHOOT_TURRET_ANGLE))
-                                ),
-                                new ConditionalCommand(
-                                        new SequentialCommandGroup(
-                                                followGuarded(f, toZone3, false),
-                                                new WaitCommand(INTAKE_WAIT_MS),
-                                                shotPrep(f, toShootFromZone3, td(SHOOT_TURRET_ANGLE))
-                                        ),
-                                        new SequentialCommandGroup(
-                                                followGuarded(f, toSweep, false),
-                                                new WaitCommand(INTAKE_WAIT_MS),
-                                                shotPrep(f, toShootFromSweep, td(SHOOT_TURRET_ANGLE))
-                                        ),
-                                        () -> zoneResult == 3
-                                ),
-                                () -> zoneResult == 2
-                        ),
-                        () -> zoneResult == 1
+                        () -> zoneResult != 0
                 ),
                 new WaitUntilReadyToShoot(f, negabot.turret, MAX_SETTLE_VELOCITY, TURRET_ALIGN_TOLERANCE, SHOOT_PAUSE_MS),
                 burst()
@@ -174,23 +199,41 @@ public class ZayansFarAuto extends CommandOpMode {
     }
 
     private Command followGuarded(Follower f, PathChain path, boolean holdEnd) {
+        return followGuarded(f, path, holdEnd, STALL_TIMEOUT_MS);
+    }
+
+    private Command followGuarded(Follower f, PathChain path, boolean holdEnd, long stallTimeoutMs) {
         return new ParallelRaceGroup(
                 new FollowPathCommand(f, path, holdEnd),
-                new StallTimeoutCommand(f, STALL_TIMEOUT_MS)
+                new StallTimeoutCommand(f, stallTimeoutMs)
         );
     }
 
     Command shotPrep(Follower f, PathChain path, double centerDeg) {
-        return new ParallelDeadlineGroup(
-                new FollowPathCommand(f, path, true),
-                new ClampedPPTracking(
-                        negabot.turret,
-                        negabot.drive,
-                        Robot.ALLIANCE,
-                        centerDeg - TURRET_WINDOW,
-                        centerDeg + TURRET_WINDOW
-                )
+        return shotPrep(f, path, centerDeg, 0);
+    }
+
+    Command shotPrep(Follower f, PathChain path, double centerDeg, double turretOffsetDeg) {
+        return shotPrep(f, new FollowPathCommand(f, path, true), centerDeg, turretOffsetDeg);
+    }
+
+    Command shotPrep(Follower f, Command driveCommand, double centerDeg) {
+        return shotPrep(f, driveCommand, centerDeg, 0);
+    }
+
+    // turretOffsetDeg is a plain (non-alliance-mirrored) correction added straight into
+    // ClampedPPTracking's angle formula before clamping -- centerDeg only sets the clamp window,
+    // so nudging it does nothing unless the live computed angle is already at that window's edge.
+    Command shotPrep(Follower f, Command driveCommand, double centerDeg, double turretOffsetDeg) {
+        ClampedPPTracking tracking = new ClampedPPTracking(
+                negabot.turret,
+                negabot.drive,
+                Robot.ALLIANCE,
+                centerDeg - TURRET_WINDOW,
+                centerDeg + TURRET_WINDOW
         );
+        tracking.offset = turretOffsetDeg;
+        return new ParallelDeadlineGroup(driveCommand, tracking);
     }
 
     Command burst() {
@@ -204,7 +247,8 @@ public class ZayansFarAuto extends CommandOpMode {
     private int getZone() {
         int z = negabot.vision.getScannedZone(isBlue);
         double[] d = negabot.vision.getLastDensity(isBlue);
-        telemetry.addData("density z1/z2/z3", "%.1f%% / %.1f%% / %.1f%%", d[1], d[2], d[3]);
+        telemetry.addData("density z1/z2/z3/z4/z5", "%.1f%% / %.1f%% / %.1f%% / %.1f%% / %.1f%%",
+                d[1], d[2], d[3], d[4], d[5]);
         telemetry.addData("-> zone", z == 0 ? "SWEEP" : z);
         telemetry.update();
         return z;
@@ -215,76 +259,77 @@ public class ZayansFarAuto extends CommandOpMode {
 
 
         toHP = f.pathBuilder()
-                .addPath(new BezierLine(new Pose(pushedStart.getX(), pushedStart.getY()), sp(8.5, 9)))
+                .addPath(new BezierLine(new Pose(pushedStart.getX(), pushedStart.getY()), sp(8.5, 8)))
                 .setLinearHeadingInterpolation(pushedStart.getHeading(), hr(0))
-                .addPath(new BezierLine(sp(8.5, 9), sp(11.5, 9)))
+                .addPath(new BezierLine(sp(8.5, 8), sp(11.5, 8)))
                 .setLinearHeadingInterpolation(hr(0), hr(0))
-                .addPath(new BezierLine(sp(11.5, 9), sp(8.5, 9)))
+                .addPath(new BezierLine(sp(11.5, 8), sp(8.5, 8)))
                 .setLinearHeadingInterpolation(hr(0), hr(0))
                 .build();
 
         toShootFromHP = f.pathBuilder()
-                .addPath(new BezierLine(sp(8.5, 9), sp(SHOOT_POS_X, SHOOT_POS_Y)))
-                .setLinearHeadingInterpolation(hr(0), hr(0))
-                .build();
-
-        // 3rd row sweep (BezierCurve)
-        to3rdRow = f.pathBuilder()
-                .addPath(new BezierCurve(
-                        sp(SHOOT_POS_X, SHOOT_POS_Y),
-                        sp(43.56,   30),
-                        sp(20,  38)))
-                .setTangentHeadingInterpolation().setReversed()
-                .build();
-
-        toShootFrom3rdRow = f.pathBuilder()
-                .addPath(new BezierLine(sp(20, 38), sp(SHOOT_POS_X, SHOOT_POS_Y)))
-                .setLinearHeadingInterpolation(hr(-12.4), hr(0))
-                .build();
-
-        // Zone 1 — HP corner (y ≈ 8). Single leg straight to the wall, so the follower actually
-        // decelerates into it instead of blowing through at cruise speed mid-chain.
-        toZone1 = f.pathBuilder()
-                .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(8.5, 8)))
-                .setLinearHeadingInterpolation(hr(0), hr(0))
-                .build();
-        toShootFromZone1 = f.pathBuilder()
                 .addPath(new BezierLine(sp(8.5, 8), sp(SHOOT_POS_X, SHOOT_POS_Y)))
                 .setLinearHeadingInterpolation(hr(0), hr(0))
                 .build();
 
-        // Zone 2 (y = 20)
-        toZone2 = f.pathBuilder()
-                .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(8.5, 20)))
-                .setLinearHeadingInterpolation(hr(0), hr(0))
-                .build();
-        toShootFromZone2 = f.pathBuilder()
-                .addPath(new BezierLine(sp(8.5, 20), sp(SHOOT_POS_X, SHOOT_POS_Y)))
-                .setLinearHeadingInterpolation(hr(0), hr(0))
-                .build();
-
-        // Zone 3 (y = 32)
-        toZone3 = f.pathBuilder()
-                .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(8.5, 32)))
-                .setLinearHeadingInterpolation(hr(0), hr(0))
-                .build();
-        toShootFromZone3 = f.pathBuilder()
-                .addPath(new BezierLine(sp(8.5, 32), sp(SHOOT_POS_X, SHOOT_POS_Y)))
-                .setLinearHeadingInterpolation(hr(0), hr(0))
+        // 3rd row sweep (BezierCurve). Tangent-tracks the curve (reversed) like before, but eases
+        // into that tracking over the first CURVE_HEADING_EASE_T of the path instead of snapping
+        // straight to the tangent heading at t=0 -- avoids the large discontinuity from the
+        // guaranteed incoming heading (0, from toShootFromHP). Lands on THIRD_ROW_EXIT_HEADING_DEG
+        // at t=1 exactly as before, since the ease never touches the tail.
+        BezierCurve thirdRowCurve = new BezierCurve(
+                sp(SHOOT_POS_X, SHOOT_POS_Y),
+                sp(43.56,   36),
+                sp(20,  36));
+        to3rdRow = f.pathBuilder()
+                .addPath(thirdRowCurve)
+                .setHeadingInterpolation(easedReversedTangent(thirdRowCurve, hr(0), CURVE_HEADING_EASE_T))
                 .build();
 
-        // Zone 0 — secret tunnel sweep (BezierCurve)
+        toShootFrom3rdRow = f.pathBuilder()
+                .addPath(new BezierLine(sp(20, 36), sp(SHOOT_POS_X, SHOOT_POS_Y)))
+                .setLinearHeadingInterpolation(hr(THIRD_ROW_EXIT_HEADING_DEG), hr(0))
+                .build();
+
+        // Zones 1-5 (HP corner, mid, far, plus 2 new lanes between them -- y = 8/14/20/26/32).
+        // VisionGuidedZoneApproach drives to whichever of these looks best and can re-target
+        // (to zone 1) mid-flight, so only the endpoints are needed here; the approach/return
+        // paths are built live at runtime.
+        zoneEndpoints = new Pose[6];
+        zoneEndpoints[1] = sp(8.5, 8);
+        zoneEndpoints[2] = sp(8.5, 14);
+        zoneEndpoints[3] = sp(8.5, 20);
+        zoneEndpoints[4] = sp(8.5, 26);
+        zoneEndpoints[5] = sp(8.5, 32);
+
+        // Zone 0 — secret tunnel sweep (BezierCurve). Same eased-tangent fix as to3rdRow.
+        BezierCurve sweepCurve = new BezierCurve(
+                sp(SHOOT_POS_X, SHOOT_POS_Y),
+                sp(SWEEP_CP_X,  SWEEP_CP_Y),
+                sp(SWEEP_END_X, SWEEP_END_Y));
         toSweep = f.pathBuilder()
-                .addPath(new BezierCurve(
-                        sp(SHOOT_POS_X, SHOOT_POS_Y),
-                        sp(SWEEP_CP_X,  SWEEP_CP_Y),
-                        sp(SWEEP_END_X, SWEEP_END_Y)))
-                .setTangentHeadingInterpolation().setReversed()
+                .addPath(sweepCurve)
+                .setHeadingInterpolation(easedReversedTangent(sweepCurve, hr(0), CURVE_HEADING_EASE_T))
                 .build();
         toShootFromSweep = f.pathBuilder()
                 .addPath(new BezierLine(sp(SWEEP_END_X, SWEEP_END_Y), sp(SHOOT_POS_X, SHOOT_POS_Y)))
                 .setLinearHeadingInterpolation(hr(SWEEP_EXIT_HEADING_DEG), hr(0))
                 .build();
+    }
+
+    /**
+     * Tangent-tracks {@code curve}, reversed (robot drives backward along it), except over the
+     * first {@code easeT} of the path: there, heading linearly eases from {@code entryHeadingRad}
+     * to wherever the reversed tangent actually is at {@code easeT}, so the curve doesn't demand
+     * an instant snap-rotation at t=0 to whatever its tangent happens to be there. From
+     * {@code easeT} to 1 this is identical to {@code setTangentHeadingInterpolation().setReversed()}.
+     */
+    private HeadingInterpolator easedReversedTangent(BezierCurve curve, double entryHeadingRad, double easeT) {
+        double reversedAtEaseT = curve.getDerivative(easeT).getTheta() + Math.PI;
+        return HeadingInterpolator.piecewise(
+                HeadingInterpolator.PiecewiseNode.linear(0, easeT, entryHeadingRad, reversedAtEaseT),
+                new HeadingInterpolator.PiecewiseNode(easeT, 1, HeadingInterpolator.tangent.reverse())
+        );
     }
 
     @Override
@@ -297,6 +342,12 @@ public class ZayansFarAuto extends CommandOpMode {
 
     private Pose sp(double x, double y) {
         return isBlue ? new Pose(x, y) : new Pose(mx(x), y);
+    }
+
+    /** Same as {@link #sp(double, double)} but with heading 0 (alliance-mirrored) baked in. */
+    private Pose sp3(double x, double y) {
+        Pose p = sp(x, y);
+        return new Pose(p.getX(), p.getY(), hr(0));
     }
 
     private Pose initPose() {

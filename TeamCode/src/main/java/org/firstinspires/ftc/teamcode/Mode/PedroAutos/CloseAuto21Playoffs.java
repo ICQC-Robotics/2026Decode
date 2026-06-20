@@ -14,6 +14,7 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
@@ -41,7 +42,7 @@ import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
  * shoots there without any extra transit.
  * Blue is the primary coordinate frame; red is mirrored across x = 72.
  */
-@Autonomous(name = "CloseAuto21Playoffs", group = "Close")
+@Disabled
 public class CloseAuto21Playoffs extends CommandOpMode {
 
     Robot negabot;

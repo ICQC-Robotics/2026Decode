@@ -13,26 +13,32 @@ import org.firstinspires.ftc.teamcode.Robot.subsystems.Wait;
 public class WaitToShoot extends CommandBase {
     private Intake intake;
     private Shooter shooter;
-    private double time;
+    private double timeoutMs;
     ElapsedTime t;
     double start;
 
-    public WaitToShoot(Intake intake, Shooter shooter, double time) {
+    public WaitToShoot(Intake intake, Shooter shooter, double timeoutMs) {
         this.intake = intake;
         this.shooter = shooter;
-        this.time = time;
+        this.timeoutMs = timeoutMs;
         t = new ElapsedTime();
         start = t.milliseconds();
         addRequirements(intake);
     }
+
+    private boolean isSpunUp() {
+        return shooter.getVelocity() > shooter.getTargetVelocity() - 100;
+    }
+
     @Override
     public void execute(){
-        if(shooter.getVelocity() > shooter.getTargetVelocity() - 100) intake.setSpeed(-1);
-        else intake.setSpeed(0);
+        intake.setSpeed(isSpunUp() ? -1 : 0);
     }
     @Override
     public boolean isFinished(){
-        return t.milliseconds() - start > time;
+        // Shoot as soon as the shooter's actually spun up, instead of a fixed wait -- timeoutMs
+        // is just a safety cap in case it never gets there.
+        return isSpunUp() || t.milliseconds() - start > timeoutMs;
     }
     @Override
     public void end(boolean interrupted){

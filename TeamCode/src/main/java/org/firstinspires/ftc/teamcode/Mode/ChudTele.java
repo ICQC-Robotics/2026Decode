@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.Robot.commands.AutoIntake;
 import org.firstinspires.ftc.teamcode.Robot.commands.DriveCommand;
 import org.firstinspires.ftc.teamcode.Robot.subsystems.Intake;
 
-@TeleOp(group=".")
+@TeleOp(name="Backup")
 public class ChudTele extends CommandOpMode {
     GamepadEx g;
     Robot negabot;

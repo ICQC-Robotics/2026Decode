@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.Robot.commands.PPTracking;
 import org.firstinspires.ftc.teamcode.Robot.commands.ShootOnMove;
 import org.firstinspires.ftc.teamcode.Robot.commands.ShooterStandBy;
 
-@TeleOp(group=".")
+@TeleOp(name="Blue")
 public class SoloBlue extends CommandOpMode {
     GamepadEx g;
     Robot negabot;

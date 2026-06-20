@@ -12,9 +12,11 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 /**
- * Splits the camera frame into 3 evenly-sized boxes, one per artifact pickup zone, and reports
- * how much green/purple artifact color is covering each. Boxes tile the full frame edge-to-edge
- * (no dead space) and, for RED alliance, zone1 is leftmost. For BLUE, the whole layout is
+ * Splits the camera frame into 5 overlapping, evenly-spaced boxes -- one per artifact pickup
+ * zone -- and reports how much green/purple artifact color is covering each. Zones 1/3/5 are the
+ * 3 original, edge-to-edge lanes; zones 2 and 4 sit between them, each spanning from the
+ * horizontal center of one neighbor's box to the center of the other's, so every box overlaps
+ * half of each adjacent box. For RED alliance, zone1 is leftmost. For BLUE, the whole layout is
  * mirrored horizontally (the field -- and therefore which physical zone the camera sees on which
  * side -- mirrors between alliances), so call {@link #setAlliance(boolean)} whenever the
  * alliance is known/changes.
@@ -22,18 +24,22 @@ import org.opencv.imgproc.Imgproc;
 public class ArtifactZoneProcessor implements VisionProcessor {
 
     // Layout, as fractions of frame width/height, for RED alliance. Mirrored for BLUE.
-    // Boxes tile the FULL frame edge-to-edge in both width and height -- no dead space.
-    private static final double BOX_START_FRAC  = 0.0;
+    // Each box is still 1/3 of the frame wide (BOX_WIDTH_FRAC unchanged); zones start half a
+    // box-width apart so boxes 1/3/5 tile the frame edge-to-edge while 2/4 overlap their
+    // neighbors by half a box on each side.
     private static final double BOX_WIDTH_FRAC  = 1.0 / 3.0;
     private static final double BOX_HEIGHT_FRAC = 1.0;
+    private static final double ZONE_STEP_FRAC  = BOX_WIDTH_FRAC / 2.0;
 
-    // Left-edge fraction of each zone's box in the RED layout (index 1..3); zone1 is leftmost
+    // Left-edge fraction of each zone's box in the RED layout (index 1..5); zone1 is leftmost
     // (camera is mounted flipped, so the left/right sense is reversed from a plain mirror).
     private static final double[] ZONE_START_FRAC_RED = {
             0,
-            BOX_START_FRAC,                          // zone1: leftmost box
-            BOX_START_FRAC + BOX_WIDTH_FRAC,         // zone2: middle box
-            BOX_START_FRAC + 2 * BOX_WIDTH_FRAC      // zone3: rightmost box
+            0 * ZONE_STEP_FRAC,  // zone1: leftmost box
+            1 * ZONE_STEP_FRAC,  // zone2: between zone1 & zone3
+            2 * ZONE_STEP_FRAC,  // zone3: middle box
+            3 * ZONE_STEP_FRAC,  // zone4: between zone3 & zone5
+            4 * ZONE_STEP_FRAC,  // zone5: rightmost box
     };
 
     // HSV thresholds for the two artifact colors (starting point carried over from
@@ -55,7 +61,7 @@ public class ArtifactZoneProcessor implements VisionProcessor {
 
     // Published as a whole new array each frame so readers on another thread never see a
     // half-updated snapshot (safe publication via a volatile reference, no locking needed).
-    private volatile double[] zoneDensityPct = {0, 0, 0, 0};  // index 1..3
+    private volatile double[] zoneDensityPct = {0, 0, 0, 0, 0, 0};  // index 1..5
 
     @Override
     public void init(int width, int height, CameraCalibration calibration) {
@@ -92,9 +98,9 @@ public class ArtifactZoneProcessor implements VisionProcessor {
         Core.inRange(hsv, PURPLE_LOW, PURPLE_HIGH, maskPurple);
         Core.bitwise_or(maskGreen, maskPurple, combinedMask);
 
-        double[] pct = new double[4];
+        double[] pct = new double[6];
         double area = (frameWidth * BOX_WIDTH_FRAC) * (frameHeight * BOX_HEIGHT_FRAC);
-        for (int z = 1; z <= 3; z++) {
+        for (int z = 1; z <= 5; z++) {
             int left = zoneLeftPx(z), right = zoneRightPx(z);
             if (right <= left) continue;
 
@@ -109,7 +115,7 @@ public class ArtifactZoneProcessor implements VisionProcessor {
         return null;
     }
 
-    /** % of each zone's box covered by artifact color, index 1..3. Already alliance-correct. */
+    /** % of each zone's box covered by artifact color, index 1..5. Already alliance-correct. */
     public double[] getZoneDensityPct() {
         return zoneDensityPct;
     }
@@ -126,7 +132,7 @@ public class ArtifactZoneProcessor implements VisionProcessor {
         float top    = boxTopPx    * scaleBmpPxToCanvasPx;
         float bottom = boxBottomPx * scaleBmpPxToCanvasPx;
 
-        for (int z = 1; z <= 3; z++) {
+        for (int z = 1; z <= 5; z++) {
             float left  = zoneLeftPx(z)  * scaleBmpPxToCanvasPx;
             float right = zoneRightPx(z) * scaleBmpPxToCanvasPx;
             canvas.drawRect(left, top, right, bottom, paint);

@@ -17,7 +17,8 @@ public class Vision extends SubsystemBase {
     // CALIBRATE on robot alongside ArtifactZoneProcessor.HORIZONTAL_FOV_DEG / HSV thresholds.
     private static final double MIN_DENSITY_PCT = 1.0;
     // Shoot-position -> zone endpoint distances (inches), used only to break ties. Alliance-symmetric.
-    private static final double[] ZONE_DIST = {0, 36.5, 38.1, 43.1};
+    // Zones 1/3/5 are the original lanes (y=8/20/32); 2/4 are the new in-between lanes (y=14/26).
+    private static final double[] ZONE_DIST = {0, 45.89, 45.50, 45.89, 47.06, 48.93};
 
     public Vision(WebcamName webcam) {
         zoneProcessor = new ArtifactZoneProcessor();
@@ -42,7 +43,7 @@ public class Vision extends SubsystemBase {
     }
 
     /**
-     * Per-zone artifact density (% box coverage), index 1..3. The processor flips its box
+     * Per-zone artifact density (% box coverage), index 1..5. The processor flips its box
      * layout to match the given alliance, so this is already zone-correct either way.
      */
     public double[] getLastDensity(boolean isBlue) {
@@ -52,13 +53,13 @@ public class Vision extends SubsystemBase {
 
     /**
      * @param isBlue current alliance (flips the processor's box layout to match)
-     * @return 1, 2, or 3 for the densest zone; 0 means "no good zone" -> caller runs sweep.
+     * @return 1-5 for the densest zone; 0 means "no good zone" -> caller runs sweep.
      */
     public int getScannedZone(boolean isBlue) {
         double[] density = getLastDensity(isBlue);
 
         int best = 0;
-        for (int z = 1; z <= 3; z++) {
+        for (int z = 1; z <= 5; z++) {
             if (density[z] < MIN_DENSITY_PCT) continue;
             if (best == 0
                     || density[z] > density[best]

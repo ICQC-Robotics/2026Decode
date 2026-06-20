@@ -16,13 +16,14 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.ClampedPPTracking;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
 
 
-@Autonomous(name = "..Ts gonna work trust")
+@Disabled
 public class Zayans24Auto extends CommandOpMode {
 
     Robot negabot;
@@ -67,9 +68,9 @@ public class Zayans24Auto extends CommandOpMode {
     static final double INTAKE_ON = -1.0;
 
     // ── Timing ──────────────────────────────────────────────────────────────
-    static final long BURST_MS     = 425;
-    static final long GATE_WAIT_MS = 950;
-    static final long FAST_GATE_WAIT_MS = 450;
+    static final long BURST_MS     = 400;
+    static final long GATE_WAIT_MS = 900;
+    static final long FAST_GATE_WAIT_MS = 400;
 
     // Low brakingStart -> the chain keeps cruising at full speed and only decelerates right at the
     // very end, instead of slowing down early -- used on paths that drive into an intake/row/gate.
@@ -121,55 +122,55 @@ public class Zayans24Auto extends CommandOpMode {
         // ── Command schedule ──────────────────────────────────────────────
         negabot.schedule(
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
-                new InstantCommand(() -> negabot.turret.setTargetDeg(DEFAULT_TURRET_DEG)),
+                new InstantCommand(() -> negabot.turret.setTargetDeg(td(DEFAULT_TURRET_DEG))),
                 new InstantCommand(() -> negabot.shooter.setVelocity(SHOOT_VELOCITY)),
                 new InstantCommand(() -> negabot.shooter.setHood(SHOOT_HOOD)),
                 new InstantCommand(() -> negabot.shooter.setMagazineCover(COVER_CLOSE)),
                 new SequentialCommandGroup(
                         // ── Preload (cycle 1) ──
-                        shotPrep(f, toShoot0, DEFAULT_TURRET_DEG - 1, TURRET_WINDOW),
+                        shotPrep(f, toShoot0, td(DEFAULT_TURRET_DEG - 1), TURRET_WINDOW),
                         waitForRpm(),
                         burst(),
 
                         // ── Middle row (cycle 2) ──
                         new FollowPathCommand(f, toMiddle, false),
-                        shotPrep(f, toShoot1, DEFAULT_TURRET_DEG, TURRET_WINDOW),
+                        shotPrep(f, toShoot1, td(DEFAULT_TURRET_DEG), TURRET_WINDOW),
                         burst(),
 
                         // ── Gate 1 (cycle 3) ──
                         new FollowPathCommand(f, toGate, true),
                         new WaitCommand(FAST_GATE_WAIT_MS - 150),
-                        shotPrep(f, toShootFromGate, GATE_TURRET_DEG, TURRET_WINDOW),
+                        shotPrep(f, toShootFromGate, td(GATE_TURRET_DEG), TURRET_WINDOW),
                         burst(),
 
                         // ── Gate 2 (cycle 4) ──
                         new FollowPathCommand(f, toGate, true),
                         new WaitCommand(GATE_WAIT_MS),
-                        shotPrep(f, toShootFromGate, GATE_TURRET_DEG, TURRET_WINDOW),
+                        shotPrep(f, toShootFromGate, td(GATE_TURRET_DEG), TURRET_WINDOW),
                         burst(),
 
                         // ── Top row (cycle 5) — returns to the regular shoot spot ──
                         new FollowPathCommand(f, toTopSweep, false),
-                        shotPrep(f, toShootFromTop, DEFAULT_TURRET_DEG, TURRET_WINDOW),
+                        shotPrep(f, toShootFromTop, td(DEFAULT_TURRET_DEG), TURRET_WINDOW),
                         burst(),
 
                         // ── Gate 3 (cycle 6) ──
                         new FollowPathCommand(f, toGate, true),
                         new WaitCommand(FAST_GATE_WAIT_MS),
-                        shotPrep(f, toShootFromGate, GATE_TURRET_DEG, TURRET_WINDOW),
+                        shotPrep(f, toShootFromGate, td(GATE_TURRET_DEG), TURRET_WINDOW),
                         burst(),
 
                         // ── Gate 3 (cycle 6) ──
                         new FollowPathCommand(f, toGate, true),
                         new WaitCommand(GATE_WAIT_MS),
-                        shotPrep(f, toShootFromGate, GATE_TURRET_DEG, TURRET_WINDOW),
+                        shotPrep(f, toShootFromGate, td(GATE_TURRET_DEG), TURRET_WINDOW),
                         burst(),
 
                         // ── 3rd row (cycle 7, toggleable, defaults ON) ──
                         new ConditionalCommand(
                                 new SequentialCommandGroup(
                                         new FollowPathCommand(f, toBottom, false),
-                                        shotPrep(f, toShootFromBottom, DEFAULT_TURRET_DEG, TURRET_WINDOW),
+                                        shotPrep(f, toShootFromBottom, td(DEFAULT_TURRET_DEG), TURRET_WINDOW),
                                         burst()
                                 ),
                                 new InstantCommand(() -> {}),
@@ -179,7 +180,7 @@ public class Zayans24Auto extends CommandOpMode {
                         // ── Gate 4 (cycle 8) ──
                         new FollowPathCommand(f, toGate, true),
                         new WaitCommand(FAST_GATE_WAIT_MS),
-                        shotPrep(f, toShootFromGate, GATE_TURRET_DEG, TURRET_WINDOW),
+                        shotPrep(f, toShootFromGate, td(GATE_TURRET_DEG), TURRET_WINDOW),
                         burst()
                 )
         );
@@ -245,8 +246,8 @@ public class Zayans24Auto extends CommandOpMode {
         toMiddle = f.pathBuilder()
                 .addPath(new BezierCurve(
                         sp(SHOOT_POS_X, SHOOT_POS_Y),
-                        sp(45, 58.801756299208385),
-                        sp(20.570777450847295, 58.801756299208385)))
+                        sp(45, 60),
+                        sp(22, 60)))
                 .setTangentHeadingInterpolation().setReversed()
                 .setGlobalDeceleration(INTAKE_BRAKING_START)
                 .build();
@@ -264,7 +265,7 @@ public class Zayans24Auto extends CommandOpMode {
         // heading linearly to the path's back-leading angle; the remaining 70% follows that same
         // line tangentially/reversed.
         toTopSweep = f.pathBuilder()
-                .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(18.7, 82.3)))
+                .addPath(new BezierLine(sp(SHOOT_POS_X, SHOOT_POS_Y), sp(22, 84)))
                 .setHeadingInterpolation(HeadingInterpolator.piecewise(
                         new HeadingInterpolator.PiecewiseNode(0, 0.3,
                                 HeadingInterpolator.linear(hr(SHOOT_HEADING_DEG), hr(-8.7148699854665779), 0.3)),
@@ -324,7 +325,12 @@ public class Zayans24Auto extends CommandOpMode {
         return isBlue ? Math.toRadians(deg) : Math.toRadians(mhd(deg));
     }
 
+    /** Mirrors a turret target angle for the current alliance (135=forward is the mirror axis). */
+    private double td(double deg) {
+        return isBlue ? deg : mtd(deg);
+    }
 
     private static double mx(double x)    { return 144.0 - x; }
     private static double mhd(double deg) { return ((180.0 - deg) % 360.0 + 360.0) % 360.0; }
+    private static double mtd(double deg) { return 270.0 - deg; }
 }
