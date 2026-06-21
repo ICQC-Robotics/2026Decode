@@ -37,7 +37,7 @@ public class AutoAim extends SequentialCommandGroup {
     private static final long AIM_TIMEOUT_MS = 500;
     private static final double FEED_TIME_S = .55;
     public static final double MIN_DIST = 20;
-    public static final double MAX_DIST = 150;
+    public static final double MAX_DIST = 160;
 
     public static final double MIN_V = 2820;
     public static final double MAX_V = 4300 - 100;
@@ -65,19 +65,20 @@ public class AutoAim extends SequentialCommandGroup {
                     {50.0, 2800.0}
             }),
             new Profile("HOOD_0_40", 0.4, 50.0, 70.0, new double[][] {
-                    {54.5, 2700.0},
-                    {56.0, 2700.0},
-                    {58.0, 2900.0},
+                    {54, 2900.0},
                     {62.5, 2800.0},
                     {67.0, 2850.0}
             }),
-            new Profile("HOOD_0_70", 0.7, 70.0, 155.0, new double[][] {
-                    {80.0, 3230.0},
-                    {97.5, 3400.0},
+            new Profile("HOOD_0_70", 0.7, 70.0, 165.0, new double[][] {
+
+                    {71, 3140},
+                    {73, 3150},
+                    {98, 3500.0},
                     {118.0, 3675.0},
-                    {135.0, 3950.0},
-                    {144.0, 3925.0},
-                    {154.0, 4000.0}
+                    {133.0, 3900.0},
+                    {140.0, 3990.0},
+                    {152.0, 4070.0},
+                    {160.0, 4200.0}
             })
     };
 
