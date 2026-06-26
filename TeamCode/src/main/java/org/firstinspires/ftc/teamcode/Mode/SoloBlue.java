@@ -133,21 +133,21 @@ public class SoloBlue extends CommandOpMode {
                 null
         );
 
-        // subtracts 1 degree
-        negabot.Action(
-                g,
-                GamepadKeys.Button.DPAD_UP,
-                new InstantCommand(AutoAim::incVelo),
-                null
-        );
-
-        // subtracts 1 degree
-        negabot.Action(
-                g,
-                GamepadKeys.Button.DPAD_DOWN,
-                new InstantCommand(AutoAim::decVelo),
-                null
-        );
+//        // subtracts 1 degree
+//        negabot.Action(
+//                g,
+//                GamepadKeys.Button.DPAD_UP,
+//                new InstantCommand(AutoAim::incVelo),
+//                null
+//        );
+//
+//        // subtracts 1 degree
+//        negabot.Action(
+//                g,
+//                GamepadKeys.Button.DPAD_DOWN,
+//                new InstantCommand(AutoAim::decVelo),
+//                null
+//        );
 
 
     }

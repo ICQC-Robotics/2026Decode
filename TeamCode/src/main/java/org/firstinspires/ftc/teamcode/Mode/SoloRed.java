@@ -91,7 +91,7 @@ public class SoloRed extends CommandOpMode {
                 null
         );
 
-        // create PPTracking ONCE (do not set as default)
+        // create PPTracking ONCE; it's set as the turret default command in run()
         ppTracking = new PPTracking(negabot.turret, negabot.drive, alliance);
         ppTracking.resetDegOffset();
 
@@ -106,6 +106,7 @@ public class SoloRed extends CommandOpMode {
                 ),
                 null
         );
+
         // Keep your DPAD offset buttons here exactly like before
         negabot.Action(
                 g,
@@ -136,8 +137,7 @@ public class SoloRed extends CommandOpMode {
         if (!shooterStandby && opModeIsActive() && !turretTracking) {
             negabot.shooter.setDefaultCommand(new ShooterStandBy(negabot.shooter, negabot.drive));
 
-            // IMPORTANT: do NOT set PPTracking as default anymore
-            // negabot.turret.setDefaultCommand(ppTracking);
+            negabot.turret.setDefaultCommand(ppTracking);
 
             turretTracking = true;
             shooterStandby = true;
