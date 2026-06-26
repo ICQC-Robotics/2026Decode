@@ -45,7 +45,7 @@ public class RedFar extends CommandOpMode {
     static final double SHOOT_POS_X        = 90.0;
     static final double SHOOT_POS_Y        = 14.0;
     static final double SHOOT_HEADING_DEG  = 180.0;
-    static final double SHOOT_VELOCITY     = 3900;
+    static final double SHOOT_VELOCITY     = 4000;
     static final double SHOOT_HOOD         = 0.7;
     // Mirror of BlueFar's SHOOT_TURRET_ANGLE (20.25) via deg -> 270-deg.
     static final double SHOOT_TURRET_ANGLE = 249.75;
@@ -74,8 +74,8 @@ public class RedFar extends CommandOpMode {
     static final long BURST_MS           = 600;
     // Max time to wait for the robot/turret to settle before shooting anyway (safety cap).
     static final long SHOOT_PAUSE_MS     = 500;
-    static final double MAX_SETTLE_VELOCITY     = 1.0;  // in/sec, "stopped" threshold
-    static final double TURRET_ALIGN_TOLERANCE  = 2.0;  // deg, "aligned" threshold
+    static final double MAX_SETTLE_VELOCITY     = 0.25;  // in/sec, "stopped" threshold
+    static final double TURRET_ALIGN_TOLERANCE  = 1;  // deg, "aligned" threshold
     static final long INTAKE_WAIT_MS     = 0;
     static final long STALL_TIMEOUT_MS   = 100;
     // toHP's forward/backward bump needs to decelerate to ~0 and reverse direction mid-path,
@@ -142,7 +142,7 @@ public class RedFar extends CommandOpMode {
 
                 followGuarded(f, toHP, false, HP_BUMP_STALL_TIMEOUT_MS),
                 new WaitCommand(INTAKE_WAIT_MS),
-                shotPrep(f, toShootFromHP, SHOOT_TURRET_ANGLE, -1),
+                shotPrep(f, toShootFromHP, SHOOT_TURRET_ANGLE, -2),
                 new WaitUntilReadyToShoot(f, negabot.turret, MAX_SETTLE_VELOCITY, TURRET_ALIGN_TOLERANCE, SHOOT_PAUSE_MS),
                 burst(),
 
@@ -150,7 +150,7 @@ public class RedFar extends CommandOpMode {
                         new SequentialCommandGroup(
                                 new FollowPathCommand(f, to3rdRow, false),
                                 new WaitCommand(INTAKE_WAIT_MS),
-                                shotPrep(f, toShootFrom3rdRow, SHOOT_TURRET_ANGLE, -1),
+                                shotPrep(f, toShootFrom3rdRow, SHOOT_TURRET_ANGLE, -2),
                                 new WaitUntilReadyToShoot(f, negabot.turret, MAX_SETTLE_VELOCITY, TURRET_ALIGN_TOLERANCE, SHOOT_PAUSE_MS),
                                 burst()
                         ),
@@ -168,7 +168,7 @@ public class RedFar extends CommandOpMode {
 
         negabot.schedule(
                 new InstantCommand(() -> negabot.shooter.setHood(SHOOT_HOOD)),
-                new InstantCommand(() -> negabot.turret.setTargetDeg(SHOOT_TURRET_ANGLE - 1.5)),
+                new InstantCommand(() -> negabot.turret.setTargetDeg(SHOOT_TURRET_ANGLE - 2)),
                 new InstantCommand(() -> negabot.shooter.setVelocity(SHOOT_VELOCITY)),
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
                 new SequentialCommandGroup(
@@ -189,11 +189,11 @@ public class RedFar extends CommandOpMode {
                                 f, negabot.vision, false, zoneEndpoints, Math.toRadians(SHOOT_HEADING_DEG),
                                 () -> zoneResult, ZONE_RESAMPLE_MS, ZONE_COMMIT_DIST_IN,
                                 new Pose(SHOOT_POS_X, SHOOT_POS_Y, Math.toRadians(SHOOT_HEADING_DEG)), SLOW_ZONE_X_IN, SLOW_ZONE_POWER),
-                                SHOOT_TURRET_ANGLE, -1),
+                                SHOOT_TURRET_ANGLE, -2),
                         new SequentialCommandGroup(
                                 followGuarded(f, toSweep, false, SWEEP_STALL_TIMEOUT_MS),
                                 new WaitCommand(ZONE_ARRIVAL_WAIT_MS),
-                                shotPrep(f, toShootFromSweep, SHOOT_TURRET_ANGLE, -1)
+                                shotPrep(f, toShootFromSweep, SHOOT_TURRET_ANGLE, -2)
                         ),
                         () -> zoneResult != 0
                 ),

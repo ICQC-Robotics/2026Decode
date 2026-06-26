@@ -92,11 +92,11 @@ public class BlueClose extends CommandOpMode {
 
     // ── Gate-intake-station tuning ──────────────────────────────────────────
     static final double GATE_POS_X       = 9.5;
-    static final double GATE_POS_Y       = 59;
-    static final double GATE_HEADING_DEG = 340;
+    static final double GATE_POS_Y       = 58.5;
+    static final double GATE_HEADING_DEG = 345;
 
     // ── Spike-row intake reach ──────────────────────────────────────────────
-    static final double spikeXintake = 10;
+    static final double spikeXintake = 20;
 
     // ── Magazine cover positions ─────────────────────────────────────────────
     static final double COVER_OPEN  = .75;
@@ -106,7 +106,7 @@ public class BlueClose extends CommandOpMode {
     static final double INTAKE_ON = -1.0;
 
     // ── Timing ──────────────────────────────────────────────────────────────
-    static final long BURST_MS     = 450;
+    static final long BURST_MS     = 525;
     static final long FAST_GATE_WAIT_MS = 625;
 
     // Low brakingStart -> the chain keeps cruising at full speed and only decelerates right at the

@@ -97,12 +97,12 @@ public class RedClose extends CommandOpMode {
     static final double INIT_HEADING_DEG = 0;
 
     // ── Gate-intake-station tuning (mirrored) ───────────────────────────────
-    static final double GATE_POS_X       = 134.5;
-    static final double GATE_POS_Y       = 60;
-    static final double GATE_HEADING_DEG = 195;
+    static final double GATE_POS_X       = 129;
+    static final double GATE_POS_Y       = 61.5;
+    static final double GATE_HEADING_DEG = 192;
 
     // ── Spike-row intake reach (mirrored) ────────────────────────────────────
-    static final double spikeXintake = 134;
+    static final double spikeXintake = 124;
 
     // ── Magazine cover positions ─────────────────────────────────────────────
     static final double COVER_OPEN  = .75;
@@ -385,16 +385,16 @@ public class RedClose extends CommandOpMode {
         toBottom = f.pathBuilder()
                 .addPath(new BezierCurve(
                         new Pose(BACK_POS_X, BACK_POS_Y),
-                        new Pose(99, 36.0),
-                        new Pose(spikeXintake, 36.0)))
+                        new Pose(99, 35.5),
+                        new Pose(spikeXintake, 35.5)))
                 .setTangentHeadingInterpolation().setReversed()
                 .setGlobalDeceleration(INTAKE_BRAKING_START)
                 .build();
 
         toShootFromBottom = f.pathBuilder()
                 .addPath(new BezierCurve(
-                        new Pose(spikeXintake, 36.0),
-                        new Pose(99, 36.0),
+                        new Pose(spikeXintake, 35.5),
+                        new Pose(99, 35.5),
                         new Pose(BACK_POS_X, BACK_POS_Y)))
                 .setLinearHeadingInterpolation(Math.toRadians(SHOOT_HEADING_DEG), Math.toRadians(SHOOT_HEADING_DEG))
                 .build();
