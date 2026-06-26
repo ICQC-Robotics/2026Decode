@@ -22,8 +22,7 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.ClampedPPTracking;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
 
-
-@Disabled
+@Autonomous
 public class Zayans24Auto extends CommandOpMode {
 
     Robot negabot;

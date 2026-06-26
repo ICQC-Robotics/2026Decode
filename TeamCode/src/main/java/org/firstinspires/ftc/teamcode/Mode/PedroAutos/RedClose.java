@@ -43,6 +43,9 @@ public class RedClose extends CommandOpMode {
     // ── Shooting-station tuning (mirrored) ──────────────────────────────────
     static final double SHOOT_POS_X        = 87.9327292;
     static final double SHOOT_POS_Y        = 76.57207864719906;
+    // Preload fires from 2 in above the shared regular station (RedClose-only tweak, not mirrored
+    // to BlueClose) -- every other regular-station shot still uses SHOOT_POS_Y.
+    static final double PRELOAD_SHOOT_POS_Y = SHOOT_POS_Y + 3;
     static final double SHOOT_HEADING_DEG  = 134;
     // The single base turret center, tuned for a robot heading of SHOOT_HEADING_DEG. Every other
     // shot's center is this same number shifted by however far ITS heading differs from that --
@@ -95,8 +98,8 @@ public class RedClose extends CommandOpMode {
 
     // ── Gate-intake-station tuning (mirrored) ───────────────────────────────
     static final double GATE_POS_X       = 134.5;
-    static final double GATE_POS_Y       = 59;
-    static final double GATE_HEADING_DEG = 200;
+    static final double GATE_POS_Y       = 60;
+    static final double GATE_HEADING_DEG = 195;
 
     // ── Spike-row intake reach (mirrored) ────────────────────────────────────
     static final double spikeXintake = 134;
@@ -338,7 +341,7 @@ public class RedClose extends CommandOpMode {
         toShoot0 = f.pathBuilder()
                 .addPath(new BezierLine(
                         new Pose(pushedStart.getX(), pushedStart.getY()),
-                        new Pose(SHOOT_POS_X, SHOOT_POS_Y)))
+                        new Pose(SHOOT_POS_X, PRELOAD_SHOOT_POS_Y)))
                 .setLinearHeadingInterpolation(pushedStart.getHeading(), Math.toRadians(SHOOT_HEADING_DEG))
                 .build();
 
