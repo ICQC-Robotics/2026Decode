@@ -33,6 +33,7 @@ public class AutoAim extends SequentialCommandGroup {
 
     private static final double RPM_TOLERANCE = 20; // TODO: change if needed
     private static final double TURRET_TOLERANCE_DEG = 2.0;
+    public static int veloOffset = 0;
     // Safety cap so a noisy pose or an unreachable turret target can't hang the feed step forever.
     private static final long AIM_TIMEOUT_MS = 500;
     private static final double FEED_TIME_S = .55;
@@ -41,6 +42,9 @@ public class AutoAim extends SequentialCommandGroup {
 
     public static final double MIN_V = 2820;
     public static final double MAX_V = 4300 - 100;
+    public static void incVelo() {veloOffset += 25;}
+
+    public static void decVelo() {veloOffset -= 25;}
 
     private static class Profile {
         final String name;
@@ -213,7 +217,7 @@ public class AutoAim extends SequentialCommandGroup {
      */
     public static double getRpmForDistance(double distanceIn) {
         Profile profile = getProfileForDistance(distanceIn);
-        return lookupInterpolated(clamp(distanceIn, profile.minDistanceIn, profile.maxDistanceIn), profile.rpmLut);
+        return lookupInterpolated(clamp(distanceIn, profile.minDistanceIn, profile.maxDistanceIn), profile.rpmLut) + veloOffset;
     }
 
     /**

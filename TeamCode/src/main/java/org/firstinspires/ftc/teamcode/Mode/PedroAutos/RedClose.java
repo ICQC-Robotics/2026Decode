@@ -317,11 +317,11 @@ public class RedClose extends CommandOpMode {
         double topDist     = distanceToGoalIn(TOP_POS_X, TOP_POS_Y, SHOOT_HEADING_DEG);
 
         regularHood     = AutoAim.getHoodForDistance(regularDist);
-        regularVelocity = AutoAim.getRpmForDistance(regularDist);
+        regularVelocity = AutoAim.getRpmForDistance(regularDist) - 25;
         backHood        = AutoAim.getHoodForDistance(backDist);
-        backVelocity    = AutoAim.getRpmForDistance(backDist);
+        backVelocity    = AutoAim.getRpmForDistance(backDist) - 25;
         topHood         = AutoAim.getHoodForDistance(topDist);
-        topVelocity     = AutoAim.getRpmForDistance(topDist);
+        topVelocity     = AutoAim.getRpmForDistance(topDist) - 25;
     }
 
     private double distanceToGoalIn(double x, double y, double headingDeg) {
