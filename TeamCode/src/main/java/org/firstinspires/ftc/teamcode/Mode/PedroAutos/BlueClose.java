@@ -91,8 +91,8 @@ public class BlueClose extends CommandOpMode {
     static final double INIT_HEADING_DEG = 180;
 
     // ── Gate-intake-station tuning ──────────────────────────────────────────
-    static final double GATE_POS_X       = 9.5;
-    static final double GATE_POS_Y       = 58.5;
+    static final double GATE_POS_X       = 10.5; //Even: 10.5 Odd: Unknown
+    static final double GATE_POS_Y       = 60.5; //Even: 60.5 Odd: Unknown
     static final double GATE_HEADING_DEG = 345;
 
     // ── Spike-row intake reach ──────────────────────────────────────────────

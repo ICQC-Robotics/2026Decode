@@ -4,6 +4,7 @@ import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.pedropathing.geometry.Pose;
@@ -95,17 +96,16 @@ public class SoloRed extends CommandOpMode {
         ppTracking = new PPTracking(negabot.turret, negabot.drive, alliance);
         ppTracking.resetDegOffset();
 
-        // A: start tracking -> autoaim -> stop tracking
-        negabot.Action(
-                g,
-                GamepadKeys.Button.A,
-                new SequentialCommandGroup(
-                        new InstantCommand(() -> CommandScheduler.getInstance().schedule(ppTracking)),
-                        new AutoAim(negabot.drive, negabot.shooter, negabot.intake, negabot.wait, negabot.turret),
-                        new InstantCommand(() -> CommandScheduler.getInstance().cancel(ppTracking))
-                ),
-                null
-        );
+        new Trigger(() -> g.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
+                .whenActive(
+                        new AutoAim(
+                                negabot.drive,
+                                negabot.shooter,
+                                negabot.intake,
+                                negabot.wait,
+                                negabot.turret
+                        )
+                );
 
         // Keep your DPAD offset buttons here exactly like before
         negabot.Action(
