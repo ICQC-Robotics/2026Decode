@@ -15,7 +15,10 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.ClampedPPTracking;
 import org.firstinspires.ftc.teamcode.Robot.commands.DriveToXYCommand;
@@ -42,6 +45,19 @@ public class RedFar extends CommandOpMode {
     Robot negabot;
     boolean do3rdRow = true;
     private int zoneResult = 0;
+
+    // ── intake anti-jam (far-auto only) ──────────────────────────────────────
+    // Two artifacts entering at once can jam the intake, spiking motor current.
+    // When the current exceeds the threshold, run the intake in reverse for a
+    // set time to clear it, then resume what it was doing.
+    public static boolean INTAKE_ANTI_JAM_ENABLED      = true;
+    public static double  INTAKE_JAM_CURRENT_THRESHOLD = 7.0; // amps
+    public static double  INTAKE_REVERSE_TIME          = 0.5; // seconds
+    private DcMotorEx intakeMotor;
+    private boolean intakeReversing = false;
+    private double  intakeSavedPower = 0;
+    private final ElapsedTime intakeReverseTimer = new ElapsedTime();
+
     static final double SHOOT_POS_X        = 90.0;
     static final double SHOOT_POS_Y        = 14.0;
     static final double SHOOT_HEADING_DEG  = 180.0;
@@ -111,7 +127,8 @@ public class RedFar extends CommandOpMode {
 
     @Override
     public void initialize() {
-        negabot = new Robot(hardwareMap, telemetry, initPose());
+        negabot = new Robot(hardwareMap, telemetry, initPose(), true);
+        intakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
         negabot.shooter.setMagazineCover(COVER_CLOSE);
         negabot.vision.setAlliance(false);
 
@@ -338,8 +355,30 @@ public class RedFar extends CommandOpMode {
     public void run() {
         if (negabot == null) return;
         super.run();
+        intakeAntiJam();
         Robot.LAST_POSE       = negabot.drive.follower.getPose().copy();
         Robot.LAST_TURRET_DEG = negabot.turret.getAngleDeg();
+    }
+
+    /** Reverse the intake briefly when its current spikes from a jam. */
+    private void intakeAntiJam() {
+        if (intakeMotor == null || !INTAKE_ANTI_JAM_ENABLED) return;
+        if (intakeReversing) {
+            if (intakeReverseTimer.seconds() >= INTAKE_REVERSE_TIME) {
+                intakeReversing = false;
+                intakeMotor.setPower(intakeSavedPower);   // resume what we interrupted
+            } else {
+                intakeMotor.setPower(-intakeSavedPower);  // hold reverse vs. command writes
+            }
+        } else {
+            double power = intakeMotor.getPower();
+            if (power != 0 && intakeMotor.getCurrent(CurrentUnit.AMPS) > INTAKE_JAM_CURRENT_THRESHOLD) {
+                intakeSavedPower = power;
+                intakeReversing = true;
+                intakeReverseTimer.reset();
+                intakeMotor.setPower(-power);
+            }
+        }
     }
 
     private Pose initPose() {

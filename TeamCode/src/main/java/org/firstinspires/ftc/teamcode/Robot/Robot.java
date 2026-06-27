@@ -33,6 +33,10 @@ public class Robot {
     public static Alliance ALLIANCE;
 
     public Robot(HardwareMap h, Telemetry t, Pose startPose) {
+        this(h, t, startPose, false);
+    }
+
+    public Robot(HardwareMap h, Telemetry t, Pose startPose, boolean useVision) {
         this.t = t;
         drive = new Drive(
                 h, t, startPose,
@@ -62,9 +66,11 @@ public class Robot {
                 new PIDFCoefficients(25, 0, 0, 0)
         );
 
-        vision = new Vision(
-                h.get(WebcamName.class, "zoneCam")
-        );
+        if (useVision) {
+            vision = new Vision(
+                    h.get(WebcamName.class, "zoneCam")
+            );
+        }
 
         wait = new Wait();
     }
