@@ -12,7 +12,7 @@ public class AutoShootCommand extends CommandBase {
     private final Intake intake;
     private final Shooter shooter;
     private final double COVER_OPEN = 0.1;
-    private final double COVER_CLOSE = 0.9;
+    private final double COVER_CLOSE = 0.486;
     private final Wait wait;
 
     public AutoShootCommand(Intake intake, Shooter shooter, Wait wait) {

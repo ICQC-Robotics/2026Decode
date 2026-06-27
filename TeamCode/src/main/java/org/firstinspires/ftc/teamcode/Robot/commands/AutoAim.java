@@ -18,7 +18,7 @@ public class AutoAim extends SequentialCommandGroup {
 
     public enum Positions {
         OPEN_COVER(.75),
-        CLOSED_COVER(.5);
+        CLOSED_COVER(.486);
 
         private final double pos;
 
@@ -70,15 +70,14 @@ public class AutoAim extends SequentialCommandGroup {
                     {67.0, 2850.0-50}
             }),
             new Profile("HOOD_0_70", 0.7, 70.0, 165.0, new double[][] {
-
                     {71, 3140-50},
                     {73, 3150-50},
                     {98, 3500.0-50},
-                    {118.0, 3675.0+100},
-                    {133.0, 3900.0+150},
-                    {140.0, 3990.0+250},
-                    {152.0, 4070.0+250},
-                    {160.0, 4200.0+250}
+                    {118.0, 3675.0-150},
+                    {133.0, 3900.0-140},
+                    {140.0, 3990.0-50},
+                    {152.0, 4070.0-60},
+                    {160.0, 4200.0-30}
             })
     };
 

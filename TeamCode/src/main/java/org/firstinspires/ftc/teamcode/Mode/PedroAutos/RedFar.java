@@ -102,7 +102,7 @@ public class RedFar extends CommandOpMode {
     static final long SWEEP_STALL_TIMEOUT_MS = 400;
 
     static final double COVER_OPEN  = 0.75;
-    static final double COVER_CLOSE = 0.55;
+    static final double COVER_CLOSE = 0.486;
     static final double INTAKE_ON   = -1.0;
 
     // Mid-path zone correction: while driving toward a picked zone, keep re-checking vision. If

@@ -106,7 +106,7 @@ public class RedClose extends CommandOpMode {
 
     // ── Magazine cover positions ─────────────────────────────────────────────
     static final double COVER_OPEN  = .75;
-    static final double COVER_CLOSE = .55;
+    static final double COVER_CLOSE = .486;
 
     // ── Intake direction ─────────────────────────────────────────────────────
     static final double INTAKE_ON = -1.0;
