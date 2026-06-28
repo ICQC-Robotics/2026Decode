@@ -21,8 +21,10 @@ import org.firstinspires.ftc.teamcode.PP.FieldConstants;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.ClampedPPTracking;
-import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
+import org.firstinspires.ftc.teamcode.Robot.commands.GatedFollowPathCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.WaitUntilReadyToShoot;
+
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
  * Red-alliance mirror of BlueClose (itself split from ZayansFull24Auto) -- fixed to RED, no
@@ -39,6 +41,12 @@ public class RedClose extends CommandOpMode {
 
     Robot negabot;
     boolean doBottomRow = true;
+
+    // Don't BEGIN a new drivetrain path once the auto is this far in (auto is 30 s) -- a path
+    // already running is allowed to finish; only the start of a new one is suppressed.
+    static final double NO_NEW_PATH_AFTER_S = 28.5;
+    private final ElapsedTime autoTimer = new ElapsedTime();
+    private boolean autoStarted = false;
 
     // ── Shooting-station tuning (mirrored) ──────────────────────────────────
     static final double SHOOT_POS_X        = 87.9327292;
@@ -113,7 +121,7 @@ public class RedClose extends CommandOpMode {
 
     // ── Timing ──────────────────────────────────────────────────────────────
     static final long BURST_MS     = 450;
-    static final long FAST_GATE_WAIT_MS = 625;
+    static final long FAST_GATE_WAIT_MS = 700;
 
     // Low brakingStart -> the chain keeps cruising at full speed and only decelerates right at the
     // very end, instead of slowing down early -- used on paths that drive into an intake/row/gate.
@@ -173,22 +181,22 @@ public class RedClose extends CommandOpMode {
 
                         // ── Middle row (cycle 2) — regular station ──
                         prepNextShot(regularHood, regularVelocity, turretCenterDeg(SHOOT_HEADING_DEG)),
-                        new FollowPathCommand(f, toMiddle, false),
+                        follow(f, toMiddle, false),
                         shotPrep(f, toShoot1, turretCenterDeg(SHOOT_HEADING_DEG) + 2.5, TURRET_WINDOW),
                         readyToShoot(f),
                         burst(),
 
                         // ── Gate 1 (cycle 3) — regular station ──
                         prepNextShot(regularHood, regularVelocity, turretCenterDeg(GATE_ARRIVAL_HEADING_DEG)),
-                        new FollowPathCommand(f, toGate, true),
-                        new WaitCommand(FAST_GATE_WAIT_MS - 150),
+                        follow(f, toGate, true),
+                        new WaitCommand(FAST_GATE_WAIT_MS),
                         shotPrep(f, toShootFromGate, turretCenterDeg(GATE_ARRIVAL_HEADING_DEG), TURRET_WINDOW),
                         readyToShoot(f),
                         burst(),
 
                         // ── Gate 2 (cycle 4) — regular station ──
                         prepNextShot(regularHood, regularVelocity, turretCenterDeg(GATE_ARRIVAL_HEADING_DEG)),
-                        new FollowPathCommand(f, toGate, true),
+                        follow(f, toGate, true),
                         new WaitCommand(FAST_GATE_WAIT_MS),
                         shotPrep(f, toShootFromGate, turretCenterDeg(GATE_ARRIVAL_HEADING_DEG), TURRET_WINDOW),
                         readyToShoot(f),
@@ -199,7 +207,7 @@ public class RedClose extends CommandOpMode {
                                 new SequentialCommandGroup(
                                         // ── Gate 3 (cycle 5) — returns to the BACK station ──
                                         prepNextShot(backHood, backVelocity, turretCenterDeg(GATE_BACK_ARRIVAL_HEADING_DEG)),
-                                        new FollowPathCommand(f, toGate, true),
+                                        follow(f, toGate, true),
                                         new WaitCommand(FAST_GATE_WAIT_MS),
                                         shotPrep(f, toShootFromGateBack, turretCenterDeg(GATE_BACK_ARRIVAL_HEADING_DEG), TURRET_WINDOW),
                                         readyToShoot(f),
@@ -207,14 +215,14 @@ public class RedClose extends CommandOpMode {
 
                                         // ── Bottom / 3rd row (cycle 6) — BACK station both ways ──
                                         prepNextShot(backHood, backVelocity, turretCenterDeg(SHOOT_HEADING_DEG)),
-                                        new FollowPathCommand(f, toBottom, false),
+                                        follow(f, toBottom, false),
                                         shotPrep(f, toShootFromBottom, turretCenterDeg(SHOOT_HEADING_DEG), TURRET_WINDOW),
                                         readyToShoot(f),
                                         burst(),
 
                                         // ── Top row (final shot) — TOP station, sweeping in from BACK ──
                                         prepNextShot(topHood, topVelocity, TOP_TURRET_DEG),
-                                        new FollowPathCommand(f, toTopSweep, false),
+                                        follow(f, toTopSweep, false),
                                         shotPrep(f, toShootFromTop, TOP_TURRET_DEG, TURRET_WINDOW),
                                         readyToShoot(f),
                                         finalBurst()
@@ -222,7 +230,7 @@ public class RedClose extends CommandOpMode {
                                 new SequentialCommandGroup(
                                         // ── Gate 3 (cycle 5) — regular station ──
                                         prepNextShot(regularHood, regularVelocity, turretCenterDeg(GATE_ARRIVAL_HEADING_DEG)),
-                                        new FollowPathCommand(f, toGate, true),
+                                        follow(f, toGate, true),
                                         new WaitCommand(FAST_GATE_WAIT_MS),
                                         shotPrep(f, toShootFromGate, turretCenterDeg(GATE_ARRIVAL_HEADING_DEG), TURRET_WINDOW),
                                         readyToShoot(f),
@@ -230,7 +238,7 @@ public class RedClose extends CommandOpMode {
 
                                         // ── Gate 4 (cycle 6) — regular station, replaces bottom row ──
                                         prepNextShot(regularHood, regularVelocity, turretCenterDeg(GATE_ARRIVAL_HEADING_DEG)),
-                                        new FollowPathCommand(f, toGate, true),
+                                        follow(f, toGate, true),
                                         new WaitCommand(FAST_GATE_WAIT_MS),
                                         shotPrep(f, toShootFromGate, turretCenterDeg(GATE_ARRIVAL_HEADING_DEG), TURRET_WINDOW),
                                         readyToShoot(f),
@@ -238,7 +246,7 @@ public class RedClose extends CommandOpMode {
 
                                         // ── Top row (final shot) — TOP station, sweeping in from regular ──
                                         prepNextShot(topHood, topVelocity, TOP_TURRET_DEG),
-                                        new FollowPathCommand(f, toTopSweepFromRegular, false),
+                                        follow(f, toTopSweepFromRegular, false),
                                         shotPrep(f, toShootFromTop, TOP_TURRET_DEG, TURRET_WINDOW),
                                         readyToShoot(f),
                                         finalBurst()
@@ -297,9 +305,18 @@ public class RedClose extends CommandOpMode {
         });
     }
 
+    // Every drivetrain path-follow in this auto goes through here so the 28.5 s cutoff is enforced
+    // uniformly -- if a new path would start past the cutoff, this ends the whole OpMode instead of
+    // driving, so the auto simply stops rather than skipping a leg and carrying on.
+    Command follow(Follower f, PathChain path, boolean holdEnd) {
+        return new GatedFollowPathCommand(f, path, holdEnd,
+                () -> autoTimer.seconds() < NO_NEW_PATH_AFTER_S,
+                this::requestOpModeStop);
+    }
+
     public Command shotPrep(Follower f, PathChain path, double centerDeg, double windowDeg) {
         return new ParallelDeadlineGroup(
-                new FollowPathCommand(f, path, true),
+                follow(f, path, true),
                 new ClampedPPTracking(
                         negabot.turret,
                         negabot.drive,
@@ -439,6 +456,7 @@ public class RedClose extends CommandOpMode {
     @Override
     public void run() {
         if (negabot == null) return;
+        if (!autoStarted) { autoTimer.reset(); autoStarted = true; }   // start the cutoff clock at first loop after START
         super.run();
         Robot.LAST_POSE = negabot.drive.follower.getPose().copy();
         Robot.LAST_TURRET_DEG = negabot.turret.getAngleDeg();

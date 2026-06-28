@@ -19,7 +19,9 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.teamcode.PP.FieldConstants;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
+import org.firstinspires.ftc.teamcode.Robot.commands.AutoAim;
 import org.firstinspires.ftc.teamcode.Robot.commands.ClampedPPTracking;
 import org.firstinspires.ftc.teamcode.Robot.commands.DriveToXYCommand;
 import org.firstinspires.ftc.teamcode.Robot.commands.FollowPathCommand;
@@ -55,10 +57,16 @@ public class BlueFar extends CommandOpMode {
     static final double SHOOT_POS_X        = 54.0;
     static final double SHOOT_POS_Y        = 14.0;
     static final double SHOOT_HEADING_DEG  = 0.0;
-    static final double SHOOT_VELOCITY     = 3900;
     static final double SHOOT_HOOD         = 0.7;
     static final double SHOOT_TURRET_ANGLE = 20.25;
     static final double TURRET_WINDOW      = 20;
+
+    // Same turret-forward offset PPTracking/ClampedPPTracking use, duplicated here to estimate the
+    // shoot station's distance-to-goal for the AutoAim LUT.
+    static final double TURRET_FORWARD_OFFSET_IN = 3;
+    // Flywheel velocity, looked up from AutoAim's teleop-tuned distance LUT for the fixed shoot
+    // station instead of a hand-picked constant. Computed once in initialize().
+    double shootVelocity;
 
     static final double INIT_X           = 48;
     static final double INIT_Y           = 24;
@@ -141,6 +149,7 @@ public class BlueFar extends CommandOpMode {
 
         Robot.ALLIANCE = Robot.Alliance.BLUE;
         negabot.turret.resetEncoder();
+        shootVelocity = AutoAim.getRpmForDistance(shootDistanceIn());
 
         Follower f = negabot.drive.follower;
         buildPaths(f);
@@ -178,7 +187,7 @@ public class BlueFar extends CommandOpMode {
         negabot.schedule(
                 new InstantCommand(() -> negabot.shooter.setHood(SHOOT_HOOD)),
                 new InstantCommand(() -> negabot.turret.setTargetDeg(SHOOT_TURRET_ANGLE + 1.5)),
-                new InstantCommand(() -> negabot.shooter.setVelocity(SHOOT_VELOCITY)),
+                new InstantCommand(() -> negabot.shooter.setVelocity(shootVelocity)),
                 new InstantCommand(() -> negabot.intake.setSpeed(INTAKE_ON)),
                 new SequentialCommandGroup(
                         new ParallelRaceGroup(
@@ -375,5 +384,15 @@ public class BlueFar extends CommandOpMode {
 
     private Pose initPose() {
         return new Pose(INIT_X, INIT_Y, Math.toRadians(INIT_HEADING_DEG));
+    }
+
+    /** Turret-pivot distance from the fixed shoot station to the alliance goal, for the AutoAim LUT. */
+    private double shootDistanceIn() {
+        double headingRad = Math.toRadians(SHOOT_HEADING_DEG);
+        double turretX = SHOOT_POS_X + TURRET_FORWARD_OFFSET_IN * Math.cos(headingRad);
+        double turretY = SHOOT_POS_Y + TURRET_FORWARD_OFFSET_IN * Math.sin(headingRad);
+        double goalX = Robot.ALLIANCE == Robot.Alliance.BLUE ? FieldConstants.BLUE_GOAL_X : FieldConstants.RED_GOAL_X;
+        double goalY = Robot.ALLIANCE == Robot.Alliance.BLUE ? FieldConstants.BLUE_GOAL_Y : FieldConstants.RED_GOAL_Y;
+        return Math.hypot(goalX - turretX, goalY - turretY);
     }
 }
