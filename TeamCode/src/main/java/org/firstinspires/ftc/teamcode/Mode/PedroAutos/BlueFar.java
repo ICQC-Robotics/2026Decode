@@ -47,8 +47,8 @@ public class BlueFar extends CommandOpMode {
     // When the current exceeds the threshold, run the intake in reverse for a
     // set time to clear it, then resume what it was doing.
     public static boolean INTAKE_ANTI_JAM_ENABLED      = true;
-    public static double  INTAKE_JAM_CURRENT_THRESHOLD = 7.0; // amps
-    public static double  INTAKE_REVERSE_TIME          = 0.5; // seconds
+    public static double  INTAKE_JAM_CURRENT_THRESHOLD = 9.0; // amps
+    public static double  INTAKE_REVERSE_TIME          = 0.3; // seconds
     private DcMotorEx intakeMotor;
     private boolean intakeReversing = false;
     private double  intakeSavedPower = 0;

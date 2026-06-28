@@ -28,7 +28,7 @@ public class SoloRed extends CommandOpMode {
 
     private boolean poseLocked = false;
 
-    private Pose redReset = new Pose(117.759, 133.326, Math.toRadians(126));
+    private Pose redReset = new Pose(144-32.848346636259976, (134.4310148232611), Math.toRadians(90));
 
     private Robot.Alliance alliance = Robot.Alliance.RED;
 

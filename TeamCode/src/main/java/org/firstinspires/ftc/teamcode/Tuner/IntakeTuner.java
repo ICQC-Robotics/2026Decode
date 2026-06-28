@@ -24,8 +24,8 @@ import org.firstinspires.ftc.teamcode.Robot.Robot;
 public class IntakeTuner extends OpMode {
     // Same anti-jam knobs as the far autos.
     public static boolean INTAKE_ANTI_JAM_ENABLED      = true;
-    public static double  INTAKE_JAM_CURRENT_THRESHOLD = 7.0; // amps
-    public static double  INTAKE_REVERSE_TIME          = 0.5; // seconds
+    public static double  INTAKE_JAM_CURRENT_THRESHOLD = 9.0; // amps
+    public static double  INTAKE_REVERSE_TIME          = 0.3; // seconds
 
     // Power to run the intake at while tuning (negative = intaking, matches accept()).
     public static double INTAKE_POWER = -1.0;
